@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPostById } from "@/lib/data";
-import { MODE_LABEL } from "@/components/reel-card";
+import { notFound } from "next/navigation";
+import { VerifiedIcon } from "@/components/icons";
 import { PostDetailClient } from "@/components/post-detail-client";
-import { compact } from "@/lib/utils";
+import { getPostById } from "@/lib/data";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const post = getPostById(id);
-  if (!post) return { title: "Tool Not Found" };
+  if (!post) return { title: "Build Not Found" };
   const canonical = `https://arrakis.dev/p/${post.id}`;
   return {
     title: post.title,
@@ -53,71 +52,67 @@ export default async function PostPage({ params }: Props) {
   };
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="mx-auto max-w-[820px] px-4 sm:px-6 py-6 lg:py-9">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <article className="mx-auto flex max-w-2xl flex-col gap-4 px-4 pt-5 pb-12">
+
+      <article className="space-y-5">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-ink-muted font-mono text-xs font-semibold underline">
-            ← Back to Utility Feed
+          <Link
+            href="/"
+            className="text-xs font-semibold text-muted hover:text-ink transition-colors"
+          >
+            ← Back to Feed
           </Link>
-          <span className="bg-paper-sunken text-ink rounded-full px-3 py-1 font-mono text-xs font-semibold">
-            {MODE_LABEL[post.demo.mode]} · {post.demo.target}
+          <span className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink">
+            {post.category}
           </span>
         </div>
 
-        <header className="border-line bg-paper-raised space-y-3 rounded-[var(--radius-card)] border p-5">
-          <div className="flex items-center justify-between">
-            <Link href={`/u/${post.author.handle}`} className="flex items-center gap-2.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+        <header className="rounded-2xl border border-border bg-surface p-5 sm:p-7 shadow-sm space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <Link href={`/u/${post.author.handle}`} className="flex items-center gap-3 group">
               <img
                 src={post.author.avatarUrl}
-                alt=""
-                width={36}
-                height={36}
-                className="bg-paper-sunken size-9 rounded-full"
+                alt={post.author.displayName}
+                className="size-10 rounded-full border border-border bg-dune object-cover"
               />
               <div>
-                <p className="text-sm font-bold">{post.author.displayName}</p>
-                <p className="text-ink-muted font-mono text-xs">@{post.author.handle}</p>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm font-bold text-ink group-hover:text-accent transition-colors">
+                    {post.author.displayName}
+                  </span>
+                  {post.author.verifiedUtility && (
+                    <VerifiedIcon className="size-4 text-sage shrink-0" />
+                  )}
+                </div>
+                <p className="text-xs text-muted">@{post.author.handle}</p>
               </div>
             </Link>
-            <span className="text-sage font-mono text-xs font-bold">
-              ● {post.health.uptimePct}% Live Uptime
-            </span>
+
+            {post.health.verifiedUtility && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-sage-soft px-3 py-1 text-xs font-semibold text-sage">
+                <span className="size-1.5 rounded-full bg-sage" />
+                Verified Demo
+              </span>
+            )}
           </div>
 
-          <h1 className="font-display text-2xl leading-7 font-bold text-balance">{post.title}</h1>
-          <p className="text-ink-muted text-sm leading-relaxed text-pretty">
-            <strong className="text-ink">Problem solved: </strong>
-            {post.problemStatement}
-          </p>
-
-          {/* Auto Scalability Health Card */}
-          <dl className="border-line bg-paper grid grid-cols-2 gap-2 rounded-2xl border p-3 text-center font-mono text-xs tabular-nums sm:grid-cols-5">
-            <div>
-              <dt className="text-ink-muted text-[10px] uppercase">Sandbox Tries</dt>
-              <dd className="mt-0.5 text-sm font-bold">{compact(post.stats.tries)}</dd>
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink text-balance">
+              {post.title}
+            </h1>
+            <div className="rounded-xl border border-border bg-dune/70 p-4">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-accent mb-1">
+                Problem Solved
+              </span>
+              <p className="text-sm sm:text-[15px] font-medium text-ink leading-relaxed">
+                {post.problemStatement}
+              </p>
             </div>
-            <div>
-              <dt className="text-ink-muted text-[10px] uppercase">3× Trial Votes</dt>
-              <dd className="text-sage mt-0.5 text-sm font-bold">{post.stats.trialUpvotes}</dd>
-            </div>
-            <div>
-              <dt className="text-ink-muted text-[10px] uppercase">p50 Latency</dt>
-              <dd className="mt-0.5 text-sm font-bold">{post.health.p50LatencyMs}ms</dd>
-            </div>
-            <div>
-              <dt className="text-ink-muted text-[10px] uppercase">p95 Latency</dt>
-              <dd className="mt-0.5 text-sm font-bold">{post.health.p95LatencyMs}ms</dd>
-            </div>
-            <div>
-              <dt className="text-ink-muted text-[10px] uppercase">Trial Score</dt>
-              <dd className="mt-0.5 text-sm font-bold">{post.postScore}</dd>
-            </div>
-          </dl>
+          </div>
 
           <PostDetailClient post={post} />
         </header>

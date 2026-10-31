@@ -108,3 +108,58 @@ export const IconPlay = (p: P) => (
     <path d="M8 5v14l11-7z" />
   </Base>
 );
+
+export const VerifiedIcon = (p: P) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+  </Base>
+);
+
+export const TerminalIcon = (p: P) => (
+  <Base {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="3" />
+    <path d="m8 9 3 3-3 3M13 15h3" />
+  </Base>
+);
+
+export const CopyIcon = (p: P) => (
+  <Base {...p}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </Base>
+);
+
+export const ExternalLinkIcon = (p: P) => (
+  <Base {...p}>
+    <path d="M14 4h6v6M20 4l-9 9" />
+    <path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" />
+  </Base>
+);
+
+export const TrashIcon = (p: P) => (
+  <Base {...p}>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+  </Base>
+);
+
+export const UploadCloudIcon = (p: P) => (
+  <Base {...p}>
+    <path d="M16 16l-4-4-4 4M12 12v9" />
+    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+  </Base>
+);
+
+export const HomeIcon = IconDune;
+export const CompassIcon = IconCompass;
+export const PlusSquareIcon = IconPlus;
+export const TrophyIcon = IconTrophy;
+export const UserIcon = IconUser;
+export const SparklesIcon = IconSpark;
+export const ArrowUpIcon = IconArrowUp;
+export const BookmarkIcon = IconBookmark;
+export const MessageIcon = IconChat;
+export const PlayIcon = IconPlay;
+export const ShareIcon = IconShare;
+export const CheckCircleIcon = IconCheck;
+export const CloseIcon = IconClose;

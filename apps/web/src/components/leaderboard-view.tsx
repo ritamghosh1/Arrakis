@@ -1,74 +1,69 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import type {
   LeaderboardPeriod,
   LeaderboardResponse,
   LeaderboardRow,
   LeaderboardType,
 } from "@arrakis/contracts";
-import { cn, compact, VIEWER_ID } from "@/lib/utils";
-import { IconArrowUp, IconCheck, IconClose, IconSpark, IconTrophy } from "./icons";
+import Link from "next/link";
+import { useEffect, useId, useRef, useState } from "react";
+import {
+  CheckCircleIcon,
+  CloseIcon,
+  SparklesIcon,
+  TrophyIcon,
+  VerifiedIcon,
+} from "./icons";
+import { cn, compact } from "@/lib/utils";
 
-function DeltaPill({ delta }: { delta: number }) {
-  if (delta > 0) {
-    return (
-      <span
-        className="bg-sage/15 text-sage inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tabular-nums"
-        title={`Moved up ${delta} positions`}
-      >
-        ▲ +{delta}
-      </span>
-    );
-  }
-  if (delta < 0) {
-    return (
-      <span
-        className="bg-alert/15 text-alert inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold tabular-nums"
-        title={`Moved down ${Math.abs(delta)} positions`}
-      >
-        ▼ {delta}
-      </span>
-    );
-  }
-  return (
-    <span className="bg-paper-sunken text-ink-muted inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold">
-      — 0
-    </span>
-  );
+interface LeaderboardViewProps {
+  initialData: LeaderboardResponse;
 }
 
-export function LeaderboardView({ initial }: { initial: LeaderboardResponse }) {
-  const [boardType, setBoardType] = useState<LeaderboardType>(initial.type);
-  const [period, setPeriod] = useState<LeaderboardPeriod>(initial.period);
-  const [data, setData] = useState<LeaderboardResponse>(initial);
+const TABS: { id: LeaderboardType; label: string; subtitle: string }[] = [
+  { id: "builders", label: "Top Builders", subtitle: "Makers shipping reliable tools" },
+  { id: "testers", label: "Top Scouts", subtitle: "Members testing & reviewing builds" },
+  { id: "trending", label: "Trending Builds", subtitle: "Most tested projects this week" },
+];
+
+const PERIODS: { id: LeaderboardPeriod; label: string }[] = [
+  { id: "24h", label: "Today" },
+  { id: "7d", label: "This Week" },
+  { id: "all", label: "All Time" },
+];
+
+export function LeaderboardView({ initialData }: LeaderboardViewProps) {
+  const [type, setType] = useState<LeaderboardType>(initialData.type);
+  const [period, setPeriod] = useState<LeaderboardPeriod>(initialData.period);
+  const [data, setData] = useState<LeaderboardResponse>(initialData);
   const [loading, setLoading] = useState(false);
   const [selectedRow, setSelectedRow] = useState<LeaderboardRow | null>(null);
 
-  const breakdownDialogRef = useRef<HTMLDialogElement>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const dialogTitleId = useId();
 
   useEffect(() => {
-    const d = breakdownDialogRef.current;
-    if (!d) return;
-    if (selectedRow && !d.open) d.showModal();
-    if (!selectedRow && d.open) d.close();
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (selectedRow) {
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) {
+      dialog.close();
+    }
   }, [selectedRow]);
 
-  async function changeBoard(nextType: LeaderboardType, nextPeriod: LeaderboardPeriod) {
-    setBoardType(nextType);
+  async function loadBoard(nextType: LeaderboardType, nextPeriod: LeaderboardPeriod) {
+    setType(nextType);
     setPeriod(nextPeriod);
     setLoading(true);
     try {
-      const qs = new URLSearchParams({
-        type: nextType,
-        period: nextPeriod,
-        userId: VIEWER_ID,
-      });
-      const res = await fetch(`/api/leaderboard?${qs}`);
+      const res = await fetch(
+        `/api/leaderboard?type=${encodeURIComponent(nextType)}&period=${encodeURIComponent(nextPeriod)}`
+      );
       if (res.ok) {
-        const json = (await res.json()) as LeaderboardResponse;
-        setData(json);
+        const nextData = (await res.json()) as LeaderboardResponse;
+        setData(nextData);
       }
     } finally {
       setLoading(false);
@@ -76,393 +71,318 @@ export function LeaderboardView({ initial }: { initial: LeaderboardResponse }) {
   }
 
   const podium = data.rows.slice(0, 3);
-  const scoreUnit =
-    boardType === "testers" ? "Scout XP" : boardType === "trending" ? "Trial Score" : "Builder Score";
 
   return (
-    <div className="relative h-full overflow-y-auto">
-      <div className="mx-auto flex max-w-4xl flex-col gap-5 px-4 pt-5 pb-24">
-        {/* Header & Anti-Clout Formula Banner */}
-        <header className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p className="text-ink-muted font-mono text-xs font-semibold uppercase">
-                Proof-of-Trial Ranking Engine · Anti-Clout Formula
-              </p>
-              <h1 className="font-display text-2xl font-bold sm:text-3xl">Leaderboard</h1>
-            </div>
-            <span
-              aria-live="polite"
-              className="border-line bg-paper-raised rounded-full border px-3 py-1 font-mono text-xs font-semibold"
-            >
-              {loading ? "Recomputing ZSET…" : "● Live Redis ZSET Rollup"}
-            </span>
+    <div className="mx-auto max-w-[1040px] px-4 sm:px-6 py-6 lg:py-9 pb-28 space-y-7">
+      {/* Editorial Header */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 rounded-lg bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent">
+            <TrophyIcon className="size-3.5" />
+            <span>Community Standings</span>
           </div>
-
-          <div className="border-line bg-paper-raised flex flex-col gap-2 rounded-2xl border p-3.5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs leading-relaxed text-pretty">
-              <strong className="font-bold">How Proof-of-Trial works:</strong> Upvotes from users
-              who actually ran the sandbox count <strong className="text-primary font-mono">3×</strong>{" "}
-              more than passive viewers (<span className="font-mono">1×</span>), multiplied by live
-              container uptime (<span className="text-sage font-mono">≥85%</span>) and trial
-              conversion rate.
-            </p>
-            <code className="bg-paper-sunken text-ink shrink-0 rounded-xl px-3 py-1.5 font-mono text-[11px] font-semibold">
-              Score = ln(1 + 3·V_trial + V_pass) · Q_uptime
-            </code>
-          </div>
-        </header>
-
-        {/* Controls: Board Type + Time Period */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div
-            role="tablist"
-            aria-label="Leaderboard category"
-            className="border-line bg-paper-sunken flex rounded-2xl border p-1"
-          >
-            {(
-              [
-                ["builders", "Top Builders"],
-                ["testers", "Top Scouts (Testers)"],
-                ["trending", "Trending Tools"],
-              ] as const
-            ).map(([t, label]) => (
-              <button
-                key={t}
-                role="tab"
-                type="button"
-                aria-selected={boardType === t}
-                onClick={() => void changeBoard(t, period)}
-                className={cn(
-                  "rounded-xl px-3.5 py-2 text-xs font-bold transition-colors",
-                  boardType === t ? "bg-ink text-paper shadow-xs" : "text-ink-muted hover:text-ink",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <div
-            role="group"
-            aria-label="Leaderboard time window"
-            className="border-line bg-paper-raised flex rounded-full border p-0.5 font-mono text-xs font-semibold"
-          >
-            {(
-              [
-                ["24h", "24h"],
-                ["7d", "7d"],
-                ["all", "All-Time"],
-              ] as const
-            ).map(([p, label]) => (
-              <button
-                key={p}
-                type="button"
-                aria-pressed={period === p}
-                onClick={() => void changeBoard(boardType, p)}
-                className={cn(
-                  "rounded-full px-3 py-1 transition-colors",
-                  period === p ? "bg-primary text-primary-ink" : "text-ink-muted",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">
+            Builders, Scouts & Trending Projects
+          </h1>
+          <p className="text-sm text-muted max-w-2xl">
+            Ranked by hands-on community testing, live demo reliability, and constructive reviews.
+          </p>
         </div>
 
-        {/* Top 3 Podium */}
-        <section aria-label="Top 3 podium" className="grid gap-3 sm:grid-cols-3">
-          {podium.map((row) => {
-            const title =
-              row.entityType === "post"
-                ? row.post?.title ?? "Tool"
-                : row.user?.displayName ?? "Builder";
-            const handle =
-              row.entityType === "post" ? row.post?.author.handle : row.user?.handle;
-            const avatar =
-              row.entityType === "post" ? row.post?.author.avatarUrl : row.user?.avatarUrl;
-            const href =
-              row.entityType === "post"
-                ? `/p/${row.post?.id}`
-                : `/u/${row.user?.handle ?? "ritam"}`;
+        {/* Time Period Selector */}
+        <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-surface p-1 self-start">
+          {PERIODS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => loadBoard(type, p.id)}
+              aria-pressed={period === p.id}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                period === p.id ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </header>
 
-            return (
-              <article
-                key={row.rank}
+      {/* Category Tabs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {TABS.map((tab) => {
+          const active = type === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => loadBoard(tab.id, period)}
+              aria-pressed={active}
+              className={cn(
+                "rounded-2xl border p-4 text-left transition-all",
+                active
+                  ? "border-ink bg-ink text-dune shadow-sm"
+                  : "border-border bg-surface text-ink hover:border-ink/40"
+              )}
+            >
+              <span className="block font-display text-base font-bold">{tab.label}</span>
+              <span
                 className={cn(
-                  "border-line bg-paper-raised flex flex-col justify-between gap-3 rounded-[var(--radius-card)] border p-4",
-                  row.rank === 1 && "border-primary border-2 shadow-sm",
+                  "block text-xs mt-0.5",
+                  active ? "text-dune/75" : "text-muted"
                 )}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-xs font-bold",
-                      row.rank === 1
-                        ? "bg-primary text-primary-ink"
-                        : "bg-paper-sunken text-ink",
+                {tab.subtitle}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Top 3 Podium */}
+      {podium.length > 0 && (
+        <section aria-label="Top 3 Podium" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {podium.map((row) => {
+            const isPost = row.entityType === "post";
+            const name = isPost ? row.post?.title : row.user?.displayName;
+            const sub = isPost ? `@${row.post?.author.handle}` : `@${row.user?.handle}`;
+            const href = isPost ? `/p/${row.post?.id}` : `/u/${row.user?.handle}`;
+            const avatar = isPost ? row.post?.thumbUrl : row.user?.avatarUrl;
+            const verified = isPost
+              ? row.post?.health.verifiedUtility
+              : row.user?.verifiedUtility;
+
+            return (
+              <div
+                key={`${row.rank}-${name}`}
+                className={cn(
+                  "rounded-2xl border p-5 flex flex-col justify-between gap-4 bg-surface shadow-sm",
+                  row.rank === 1 ? "border-accent ring-1 ring-accent/30" : "border-border"
+                )}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={cn(
+                        "inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-xs font-bold",
+                        row.rank === 1
+                          ? "bg-accent text-white"
+                          : row.rank === 2
+                          ? "bg-ink text-dune"
+                          : "bg-dune text-ink border border-border"
+                      )}
+                    >
+                      Rank #{row.rank}
+                    </span>
+
+                    {verified && (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-sage-soft px-2 py-0.5 text-[11px] font-semibold text-sage">
+                        <VerifiedIcon className="size-3.5" />
+                        Verified
+                      </span>
                     )}
-                  >
-                    <IconTrophy className="size-3.5" />#{row.rank}
-                  </span>
-                  <DeltaPill delta={row.delta} />
+                  </div>
+
+                  <Link href={href} className="flex items-center gap-3 group">
+                    {avatar && (
+                      <img
+                        src={avatar}
+                        alt={name ?? ""}
+                        className={cn(
+                          "size-12 border border-border bg-dune object-cover shrink-0",
+                          isPost ? "rounded-xl" : "rounded-full"
+                        )}
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <h2 className="font-display text-base font-bold text-ink group-hover:text-accent transition-colors truncate">
+                        {name}
+                      </h2>
+                      <p className="text-xs text-muted truncate">{sub}</p>
+                    </div>
+                  </Link>
+
+                  <p className="text-xs text-muted line-clamp-2">
+                    {isPost ? row.post?.problemStatement : row.user?.bio}
+                  </p>
                 </div>
 
-                <Link href={href} className="flex items-center gap-3">
-                  {avatar && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={avatar}
-                      alt=""
-                      width={44}
-                      height={44}
-                      className="border-sage bg-paper-sunken size-11 shrink-0 rounded-full border-2"
-                    />
-                  )}
-                  <div className="min-w-0">
-                    <h2 className="font-display truncate text-base font-bold hover:underline">
-                      {title}
-                    </h2>
-                    <p className="text-ink-muted truncate font-mono text-xs">
-                      @{handle} · {row.breakdown.uptimePct}% uptime
-                    </p>
-                  </div>
-                </Link>
-
-                <div className="border-line flex items-end justify-between border-t pt-2.5">
-                  <div>
-                    <span className="text-ink-muted block font-mono text-[10px] uppercase">
-                      {scoreUnit}
-                    </span>
-                    <span className="font-display text-2xl font-bold tabular-nums">
-                      {row.score.toLocaleString()}
-                    </span>
-                  </div>
+                <div className="pt-3 border-t border-border flex items-center justify-between">
+                  <span className="text-xs text-muted">{row.breakdown.formulaSummary}</span>
                   <button
                     type="button"
                     onClick={() => setSelectedRow(row)}
-                    className="border-line bg-paper hover:bg-paper-sunken rounded-full border px-3 py-1 font-mono text-[11px] font-semibold"
+                    className="text-xs font-semibold text-accent hover:underline shrink-0 ml-2"
                   >
-                    Why #{row.rank}?
+                    Highlights
                   </button>
                 </div>
-              </article>
+              </div>
             );
           })}
         </section>
+      )}
 
-        {/* Ranked List */}
-        <section
-          aria-label="Ranked leaderboard standings"
-          className="border-line bg-paper-raised overflow-hidden rounded-[var(--radius-card)] border"
-        >
-          <ul className="divide-line divide-y">
-            {data.rows.map((row) => {
-              const isMe = row.user?.id === VIEWER_ID;
-              const title =
-                row.entityType === "post"
-                  ? row.post?.title ?? "Tool"
-                  : row.user?.displayName ?? "Builder";
-              const handle =
-                row.entityType === "post" ? row.post?.author.handle : row.user?.handle;
-              const avatar =
-                row.entityType === "post" ? row.post?.author.avatarUrl : row.user?.avatarUrl;
-              const href =
-                row.entityType === "post"
-                  ? `/p/${row.post?.id}`
-                  : `/u/${row.user?.handle ?? "ritam"}`;
+      {/* Full Standings List */}
+      <section
+        aria-label="Full standings"
+        aria-busy={loading}
+        className="rounded-2xl border border-border bg-surface overflow-hidden shadow-sm"
+      >
+        <div className="divide-y divide-border">
+          {data.rows.map((row) => {
+            const isPost = row.entityType === "post";
+            const name = isPost ? row.post?.title : row.user?.displayName;
+            const sub = isPost
+              ? `by @${row.post?.author.handle} · ${row.post?.category}`
+              : `@${row.user?.handle}`;
+            const href = isPost ? `/p/${row.post?.id}` : `/u/${row.user?.handle}`;
+            const avatar = isPost ? row.post?.thumbUrl : row.user?.avatarUrl;
+            const verified = isPost
+              ? row.post?.health.verifiedUtility
+              : row.user?.verifiedUtility;
 
-              return (
-                <li
-                  key={`${row.rank}-${handle}-${title}`}
-                  className={cn(
-                    "cv-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3.5",
-                    isMe && "bg-paper",
-                  )}
-                >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <span className="w-7 text-center font-mono text-sm font-bold tabular-nums">
-                      #{row.rank}
-                    </span>
-                    <DeltaPill delta={row.delta} />
+            return (
+              <div
+                key={`${row.rank}-${name}`}
+                className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 px-4 sm:px-6 py-4 hover:bg-dune/40 transition-colors"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <span className="w-7 text-center font-display text-sm font-bold text-muted shrink-0">
+                    #{row.rank}
+                  </span>
+
+                  <Link href={href} className="flex items-center gap-3 min-w-0 flex-1 group">
                     {avatar && (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={avatar}
-                        alt=""
-                        width={36}
-                        height={36}
-                        className="bg-paper-sunken size-9 shrink-0 rounded-full"
+                        alt={name ?? ""}
+                        className={cn(
+                          "size-10 border border-border bg-dune object-cover shrink-0",
+                          isPost ? "rounded-xl" : "rounded-full"
+                        )}
                       />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <Link
-                          href={href}
-                          className="font-display truncate text-sm font-bold hover:underline"
-                        >
-                          {title}
-                        </Link>
-                        {row.user?.verifiedUtility && (
-                          <span
-                            className="bg-sage text-primary-ink grid size-4 shrink-0 place-items-center rounded-full"
-                            title="Verified Utility"
-                          >
-                            <IconCheck className="size-2.5" strokeWidth={3} />
-                          </span>
-                        )}
-                        {isMe && (
-                          <span className="bg-ink text-paper rounded-full px-2 py-0.5 font-mono text-[10px] font-bold">
-                            You
-                          </span>
-                        )}
+                        <span className="font-display text-sm sm:text-base font-bold text-ink group-hover:text-accent transition-colors truncate">
+                          {name}
+                        </span>
+                        {verified && <VerifiedIcon className="size-4 text-sage shrink-0" />}
                       </div>
-                      <p className="text-ink-muted truncate font-mono text-[11px]">
-                        @{handle} · {row.breakdown.formulaSummary}
-                      </p>
+                      <p className="text-xs text-muted truncate">{sub}</p>
                     </div>
-                  </div>
+                  </Link>
+                </div>
 
-                  <div className="flex items-center gap-3">
-                    <div className="text-right font-mono tabular-nums">
-                      <span className="block text-sm font-bold">
-                        {row.score.toLocaleString()}
-                      </span>
-                      <span className="text-ink-muted block text-[10px]">{scoreUnit}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedRow(row)}
-                      aria-label={`View score breakdown for rank ${row.rank}`}
-                      className="border-line bg-paper hover:bg-paper-sunken rounded-xl border px-3 py-1.5 font-mono text-xs font-semibold"
-                    >
-                      Breakdown
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="hidden md:inline-block text-xs text-muted">
+                    {row.breakdown.formulaSummary}
+                  </span>
 
-      {/* Pinned "Your Standing" Bar */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRow(row)}
+                    className="rounded-xl border border-border bg-dune px-3 py-1.5 text-xs font-semibold text-ink hover:bg-border/50 transition-colors"
+                  >
+                    Why #{row.rank}?
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Pinned Your Standing Bar */}
       {data.me && (
-        <aside
-          aria-label="Your current rank"
-          className="border-line bg-ink text-paper fixed inset-x-0 bottom-14 z-nav border-t px-4 py-2.5 lg:bottom-0 lg:left-[16.5rem]"
-        >
-          <div className="mx-auto flex max-w-4xl items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="bg-primary text-primary-ink rounded-full px-2.5 py-0.5 font-mono text-xs font-bold">
-                Your Rank: #{data.me.rank}
-              </span>
-              <span className="font-display text-sm font-bold">
-                {data.me.user?.displayName} (@{data.me.user?.handle})
-              </span>
-              <DeltaPill delta={data.me.delta} />
-            </div>
-            <div className="flex items-center gap-3 font-mono text-xs tabular-nums">
-              <span>
-                Score: <strong>{data.me.score.toLocaleString()}</strong>
-              </span>
-              <Link
-                href="/u/ritam"
-                className="bg-paper text-ink rounded-full px-3 py-1 font-sans text-xs font-bold"
-              >
-                Open Studio
-              </Link>
+        <div className="fixed bottom-16 lg:bottom-4 inset-x-4 lg:left-[288px] lg:right-8 z-nav mx-auto max-w-[1000px] rounded-2xl border border-ink bg-ink text-dune px-5 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="rounded-lg bg-accent px-2.5 py-1 text-xs font-bold text-white">
+              Your Rank #{data.me.rank}
+            </span>
+            <div>
+              <p className="text-sm font-bold text-dune">
+                {data.me.user?.displayName ?? "Ritam Ghosh"} (@
+                {data.me.user?.handle ?? "ritam"})
+              </p>
+              <p className="text-xs text-dune/75">{data.me.breakdown.formulaSummary}</p>
             </div>
           </div>
-        </aside>
+
+          <Link
+            href="/u/ritam"
+            className="rounded-xl bg-dune px-3.5 py-1.5 text-xs font-semibold text-ink hover:bg-surface transition-colors"
+          >
+            Open My Profile →
+          </Link>
+        </div>
       )}
 
-      {/* Proof-of-Trial Breakdown Modal */}
+      {/* Clean Human-Readable "Why This Rank?" Modal */}
       <dialog
-        ref={breakdownDialogRef}
-        className="sheet"
-        aria-labelledby="breakdown-title"
-        {...({ closedby: "any" } as Record<string, string>)}
+        ref={dialogRef}
+        aria-labelledby={dialogTitleId}
         onClose={() => setSelectedRow(null)}
+        onClick={(e) => {
+          if (e.target === dialogRef.current) setSelectedRow(null);
+        }}
+        className="fixed inset-x-4 top-1/2 -translate-y-1/2 sm:inset-auto sm:left-1/2 sm:-translate-x-1/2 z-sheet m-0 w-auto sm:w-full sm:max-w-[480px] rounded-2xl border border-border bg-surface text-ink p-6 shadow-2xl"
       >
         {selectedRow && (
-          <div className="flex flex-col">
-            <header className="border-line flex items-start justify-between gap-3 border-b p-4">
+          <div className="space-y-5">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-ink-muted font-mono text-[11px] font-semibold uppercase">
-                  Proof-of-Trial Anti-Clout Audit · Rank #{selectedRow.rank}
-                </p>
-                <h2 id="breakdown-title" className="font-display text-lg font-bold">
+                <span className="text-xs font-bold uppercase tracking-wider text-accent">
+                  Standing Highlights · Rank #{selectedRow.rank}
+                </span>
+                <h3 id={dialogTitleId} className="font-display text-lg font-bold text-ink mt-0.5">
                   {selectedRow.entityType === "post"
                     ? selectedRow.post?.title
                     : selectedRow.user?.displayName}
-                </h2>
+                </h3>
               </div>
-              <form method="dialog">
-                <button
-                  aria-label="Close breakdown"
-                  className="bg-paper-sunken grid size-9 place-items-center rounded-full"
-                  autoFocus
-                >
-                  <IconClose className="size-5" />
-                </button>
-              </form>
-            </header>
+              <button
+                type="button"
+                onClick={() => setSelectedRow(null)}
+                aria-label="Close standing highlights"
+                className="rounded-lg p-1.5 text-muted hover:bg-dune hover:text-ink"
+              >
+                <CloseIcon className="size-5" />
+              </button>
+            </div>
 
-            <div className="space-y-4 p-4">
-              <p className="text-ink-muted text-xs leading-relaxed">
-                {selectedRow.breakdown.formulaSummary}
-              </p>
-
-              <dl className="grid grid-cols-2 gap-2.5 font-mono text-xs tabular-nums sm:grid-cols-3">
-                <div className="border-line bg-paper rounded-xl border p-3">
-                  <dt className="text-ink-muted text-[10px] uppercase">3× Trial Upvotes</dt>
-                  <dd className="text-sage mt-0.5 text-lg font-bold">
-                    {selectedRow.breakdown.trialUpvotes3x} (×3)
-                  </dd>
+            <div className="space-y-2.5">
+              <div className="rounded-xl border border-border bg-dune/60 p-3.5 flex items-start gap-3">
+                <CheckCircleIcon className="size-5 text-sage shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-ink">Verified Hands-On Testing</p>
+                  <p className="text-xs text-muted mt-0.5">
+                    Endorsed by {compact(selectedRow.breakdown.trialUpvotes3x)} builders who ran the
+                    live demo before voting.
+                  </p>
                 </div>
-                <div className="border-line bg-paper rounded-xl border p-3">
-                  <dt className="text-ink-muted text-[10px] uppercase">1× Passive Upvotes</dt>
-                  <dd className="mt-0.5 text-lg font-bold">
-                    {selectedRow.breakdown.passiveUpvotes} (×1)
-                  </dd>
-                </div>
-                <div className="border-line bg-paper rounded-xl border p-3">
-                  <dt className="text-ink-muted text-[10px] uppercase">Weighted Votes</dt>
-                  <dd className="mt-0.5 text-lg font-bold">
-                    {selectedRow.breakdown.weightedVotes}
-                  </dd>
-                </div>
-                <div className="border-line bg-paper rounded-xl border p-3">
-                  <dt className="text-ink-muted text-[10px] uppercase">Trial Conversion</dt>
-                  <dd className="mt-0.5 text-lg font-bold">
-                    {Math.round(selectedRow.breakdown.trialConversionRate * 100)}%
-                  </dd>
-                </div>
-                <div className="border-line bg-paper rounded-xl border p-3">
-                  <dt className="text-ink-muted text-[10px] uppercase">Worked Rate</dt>
-                  <dd className="text-sage mt-0.5 text-lg font-bold">
-                    {Math.round(selectedRow.breakdown.workedRate * 100)}%
-                  </dd>
-                </div>
-                <div className="border-line bg-paper rounded-xl border p-3">
-                  <dt className="text-ink-muted text-[10px] uppercase">Live Uptime</dt>
-                  <dd className="text-sage mt-0.5 text-lg font-bold">
-                    {selectedRow.breakdown.uptimePct}%
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="border-line bg-paper-sunken/70 flex items-center justify-between rounded-xl border p-3 font-mono text-xs">
-                <span className="flex items-center gap-1.5 font-semibold">
-                  <IconSpark className="size-4" />
-                  Final Proof-of-Trial Score
-                </span>
-                <span className="text-base font-bold">
-                  {selectedRow.score.toLocaleString()} {scoreUnit}
-                </span>
               </div>
+
+              <div className="rounded-xl border border-border bg-dune/60 p-3.5 flex items-start gap-3">
+                <SparklesIcon className="size-5 text-accent shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-ink">Consistent Demo Reliability</p>
+                  <p className="text-xs text-muted mt-0.5">
+                    Live demo runs cleanly in the browser with positive community feedback.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedRow(null)}
+                className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-dune"
+              >
+                Close
+              </button>
             </div>
           </div>
         )}

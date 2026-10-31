@@ -5,16 +5,28 @@
   --color-paper: #faf4ea;
   --color-paper-raised: #ffffff;
   --color-paper-sunken: #efe6d6;
+  --color-dune: #faf4ea;
+  --color-surface: #ffffff;
   --color-ink: #1b1612;
   --color-ink-muted: #5c5247;
+  --color-muted: #5c5247;
   --color-line: #ddd0bb;
+  --color-border: #ddd0bb;
   --color-primary: #c2410c;
   --color-primary-ink: #ffffff;
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-accent-soft: #ffedd5;
   --color-sage: #2f7d4f;
+  --color-sage-soft: #dcfce7;
+  --color-amber: #b45309;
+  --color-amber-soft: #fef3c7;
   --color-alert: #b42318;
+  --color-crimson: #b42318;
 
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --radius-card: 1rem;

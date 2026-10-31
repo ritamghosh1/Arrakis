@@ -1,114 +1,131 @@
 "use client";
 
-import { useState } from "react";
 import type { Post } from "@arrakis/contracts";
+import { useState } from "react";
+import { ShareIcon, TerminalIcon } from "./icons";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
-import { IconBolt, IconShare } from "./icons";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 
 export function PostDetailClient({ post }: { post: Post }) {
   const [tryOpen, setTryOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [comments, setComments] = useState([
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState<
+    { id: string; handle: string; text: string; time: string }[]
+  >([
     {
       id: "c1",
-      author: "devika",
-      badge: "First-25 Scout",
-      text: "Tested in container sandbox — parsed a 3-page two-column LaTeX resume in 138ms with zero schema errors.",
-      ts: "2h ago",
+      handle: "srinjoy",
+      text: "Tested the live demo — super clean output and zero setup needed.",
+      time: "2h ago",
     },
     {
       id: "c2",
-      author: "srinjoy",
-      badge: "Verified Builder",
-      text: "Great cold-start latency. Suggest adding an optional flag for ISO-8601 date normalization.",
-      ts: "5h ago",
+      handle: "devika",
+      text: "Worked right away on my sample payload. Great job on the schema defaults!",
+      time: "5h ago",
     },
   ]);
-  const [draft, setDraft] = useState("");
 
-  function submitComment(e: React.FormEvent) {
+  const ytEmbedUrl = getYouTubeEmbedUrl(post.videoUrl);
+
+  function handleAddComment(e: React.FormEvent) {
     e.preventDefault();
-    if (!draft.trim()) return;
+    if (!commentText.trim()) return;
     setComments((prev) => [
       {
         id: `c_${Date.now()}`,
-        author: "ritam",
-        badge: "Scout · 3× Voter",
-        text: draft.trim(),
-        ts: "Just now",
+        handle: "ritam",
+        text: commentText.trim(),
+        time: "Just now",
       },
       ...prev,
     ]);
-    setDraft("");
+    setCommentText("");
   }
 
   return (
-    <>
-      <div className="flex flex-wrap items-center gap-2.5">
+    <div className="space-y-6">
+      {/* Video or YouTube Stage */}
+      <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-ink border border-border">
+        {ytEmbedUrl ? (
+          <iframe
+            title={post.title}
+            src={ytEmbedUrl}
+            className="h-full w-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <video
+            src={post.videoUrl}
+            poster={post.thumbUrl}
+            controls
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        )}
+      </div>
+
+      {/* Primary Action Bar */}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => setTryOpen(true)}
-          className="bg-primary text-primary-ink flex h-11 flex-1 items-center justify-center gap-2 rounded-full px-6 text-sm font-bold shadow-xs"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-hover transition-colors shadow-sm"
         >
-          <IconBolt className="size-4" />
-          Launch 1-Tap Sandbox
+          <TerminalIcon className="size-4" />
+          <span>Try Live Demo</span>
         </button>
+
         <button
           type="button"
           onClick={() => setShareOpen(true)}
-          className="border-line bg-paper-raised hover:bg-paper-sunken flex h-11 items-center gap-2 rounded-full border px-5 text-xs font-bold"
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-dune px-4 py-3 text-sm font-semibold text-ink hover:bg-border/50 transition-colors"
         >
-          <IconShare className="size-4" />
-          Share & QR
+          <ShareIcon className="size-4" />
+          <span>Share</span>
         </button>
       </div>
 
-      <section id="comments" aria-label="Direct feedback loop" className="space-y-3 pt-2">
-        <h2 className="font-display text-lg font-bold">
-          Direct Builder Feedback Loop ({comments.length})
+      {/* Discussion / Builder Feedback */}
+      <section className="pt-4 border-t border-border space-y-4">
+        <h2 className="font-display text-base font-bold text-ink">
+          Builder Discussion ({comments.length})
         </h2>
 
-        <form onSubmit={submitComment} className="flex gap-2">
-          <label htmlFor="new-comment" className="sr-only">
-            Add structured feedback or feature request
-          </label>
+        <form onSubmit={handleAddComment} className="flex gap-2.5">
           <input
-            id="new-comment"
             type="text"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Suggest a feature or report an edge case directly to the builder…"
-            className="border-line bg-paper-raised flex-1 rounded-xl border px-3.5 py-2 text-xs"
+            placeholder="Share feedback or ask a question..."
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            className="flex-1 rounded-xl border border-border bg-dune/50 px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none"
           />
           <button
             type="submit"
-            className="bg-ink text-paper shrink-0 rounded-xl px-4 py-2 text-xs font-bold"
+            className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-dune hover:bg-ink/90 transition-colors shrink-0"
           >
-            Post Feedback
+            Post Note
           </button>
         </form>
 
-        <ul className="space-y-2.5">
+        <div className="space-y-2.5">
           {comments.map((c) => (
-            <li key={c.id} className="border-line bg-paper-raised rounded-2xl border p-3.5">
+            <div key={c.id} className="rounded-xl border border-border bg-dune/40 p-3.5 space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold">@{c.author}</span>
-                  <span className="bg-paper-sunken rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold">
-                    {c.badge}
-                  </span>
-                </div>
-                <span className="text-ink-muted font-mono text-[11px]">{c.ts}</span>
+                <span className="font-bold text-ink">@{c.handle}</span>
+                <span className="text-muted">{c.time}</span>
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed">{c.text}</p>
-            </li>
+              <p className="text-xs sm:text-sm text-ink">{c.text}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
       <TrySheet post={tryOpen ? post : null} onClose={() => setTryOpen(false)} />
       <ShareSheet post={shareOpen ? post : null} onClose={() => setShareOpen(false)} />
-    </>
+    </div>
   );
 }
