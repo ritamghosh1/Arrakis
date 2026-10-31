@@ -104,9 +104,9 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 ## 👤 DEV B (Srinjoy) — Recommendation Engine (FastAPI) + Containerization
 
 ### B1. Data & infra (M0–M1)
-- [ ] Postgres schema for `follows`, `events`, `post_embeddings` (pgvector + HNSW/IVFFlat index), `taste_vectors`
-- [ ] Event ingest `POST /events` (batch, validation, dedupe, async write)
-- [ ] Mock server serving seed JSON per contract (unblocks Dev A — **do first**)
+- [x] Postgres schema for `follows`, `events`, `post_embeddings` (pgvector + HNSW/IVFFlat index), `taste_vectors`, `user_impressions` + telemetry RPCs (`0001_telemetry_dual_scoring.sql`)
+- [x] Event & telemetry ingest `POST /events` + `POST /api/telemetry` (run tier classification, EMA taste vector update)
+- [x] Mock server serving seed JSON per contract (unblocks Dev A — **do first**)
 - [ ] Embedding utility with fallback (OpenAI → local model → seeded vectors)
 
 ### B2. Follow system

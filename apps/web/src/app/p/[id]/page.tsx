@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPostById } from "@/lib/data";
+import { getLivePost } from "@/lib/data";
 import { MODE_LABEL } from "@/components/reel-card";
 import { PostDetailClient } from "@/components/post-detail-client";
 import { compact } from "@/lib/utils";
@@ -10,7 +10,7 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const post = getPostById(id);
+  const post = await getLivePost(id);
   if (!post) return { title: "Tool Not Found" };
   const canonical = `https://arrakis.dev/p/${post.id}`;
   return {
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { id } = await params;
-  const post = getPostById(id);
+  const post = await getLivePost(id);
   if (!post) notFound();
 
   const jsonLd = {

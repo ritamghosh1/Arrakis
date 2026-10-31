@@ -9,7 +9,12 @@ export async function GET(req: NextRequest) {
   const typeParam = sp.get("type");
   const periodParam = sp.get("period");
   const type: LeaderboardType =
-    typeParam === "testers" || typeParam === "trending" ? typeParam : "builders";
+    typeParam === "testers" ||
+    typeParam === "trending" ||
+    typeParam === "useful" ||
+    typeParam === "popular"
+      ? typeParam
+      : "builders";
   const period: LeaderboardPeriod =
     periodParam === "24h" || periodParam === "all" ? periodParam : "7d";
   const viewerId = sp.get("userId") ?? process.env.NEXT_PUBLIC_DEFAULT_USER_ID ?? "usr_ritam";

@@ -42,6 +42,27 @@ export interface User extends UserRef {
 }
 
 export type DemoMode = "api" | "web" | "container" | "handoff";
+export type SandboxProjectType = "BROWSER" | "CONTAINER";
+export type RunTier = "BOUNCE" | "SINGLE" | "MULTI";
+export type QuickFeedbackTag = "WORKS_GREAT" | "BUGGY" | null;
+
+export interface TelemetryPayload {
+  project_id: string;
+  user_id: string;
+  project_type: SandboxProjectType;
+  health_ok: boolean;
+  boot_time_ms: number;
+  switched_to_landscape: boolean;
+  active_dwell_seconds: number;
+  interaction_bursts: number;
+  quick_feedback_tag: QuickFeedbackTag;
+}
+
+export interface PreflightResponse {
+  health_ok: boolean;
+  can_iframe: boolean;
+  latency_ms: number;
+}
 
 export interface FormFieldSchema {
   name: string;
@@ -99,6 +120,21 @@ export interface Post {
   stats: PostStats;
   health: PostHealthTelemetry;
   postScore: number;
+  /** Dual-Scoring & Outer-Shell Telemetry fields */
+  projectType?: SandboxProjectType;
+  impressions?: number;
+  videoCompletions?: number;
+  sandboxBounces?: number;
+  sandboxSingleRuns?: number;
+  sandboxMultiRuns?: number;
+  desktopHandoffs?: number;
+  proxySuccessRate?: number;
+  weightedUpvotes?: number;
+  weightedUsabilityTags?: number;
+  sharesCount?: number;
+  popularityScore?: number;
+  usabilityScore?: number;
+  dailyLeaderboardScore?: number;
   createdAt: string;
 }
 
@@ -194,7 +230,7 @@ export interface Review {
   createdAt: string;
 }
 
-export type LeaderboardType = "builders" | "testers" | "trending";
+export type LeaderboardType = "builders" | "testers" | "trending" | "useful" | "popular";
 export type LeaderboardPeriod = "24h" | "7d" | "all";
 
 export interface ScoreBreakdown {
@@ -206,6 +242,9 @@ export interface ScoreBreakdown {
   uptimePct: number;
   freshnessDecay: number;
   formulaSummary: string;
+  popularityScore?: number;
+  usabilityScore?: number;
+  dailyLeaderboardScore?: number;
 }
 
 export interface LeaderboardRow {

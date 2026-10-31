@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { DemoMode, FormFieldSchema, Post } from "@arrakis/contracts";
 import { cn, VIEWER_ID } from "@/lib/utils";
-import { CATEGORIES } from "@/lib/data";
+import { CATEGORIES } from "@/lib/categories";
 import { MODE_LABEL } from "./reel-card";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";

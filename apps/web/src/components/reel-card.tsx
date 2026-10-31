@@ -172,6 +172,14 @@ export function ReelCard({
               <span className="bg-sage size-1.5 rounded-full" />
               {post.health.uptimePct}% · {post.health.p50LatencyMs}ms
             </span>
+            <span
+              className="border-paper/20 bg-ink/85 text-paper flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums"
+              title="Bayesian Usability Score (S_use) and Popularity Score (S_pop)"
+            >
+              <span className="text-sage">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
+              <span className="text-paper/45">·</span>
+              <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
+            </span>
           </div>
         </div>
 

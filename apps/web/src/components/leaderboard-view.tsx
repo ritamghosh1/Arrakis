@@ -77,7 +77,15 @@ export function LeaderboardView({ initial }: { initial: LeaderboardResponse }) {
 
   const podium = data.rows.slice(0, 3);
   const scoreUnit =
-    boardType === "testers" ? "Scout XP" : boardType === "trending" ? "Trial Score" : "Builder Score";
+    boardType === "testers"
+      ? "Scout XP"
+      : boardType === "useful"
+        ? "Usability S_use"
+        : boardType === "popular"
+          ? "Popularity S_pop"
+          : boardType === "trending"
+            ? "Trial Score"
+            : "Builder Score";
 
   return (
     <div className="relative h-full overflow-y-auto">
@@ -123,8 +131,10 @@ export function LeaderboardView({ initial }: { initial: LeaderboardResponse }) {
             {(
               [
                 ["builders", "Top Builders"],
-                ["testers", "Top Scouts (Testers)"],
-                ["trending", "Trending Tools"],
+                ["testers", "Top Scouts"],
+                ["trending", "Trending"],
+                ["useful", "Most Useful"],
+                ["popular", "Most Popular"],
               ] as const
             ).map(([t, label]) => (
               <button

@@ -70,6 +70,20 @@ class Post(BaseModel):
     stats: PostStats
     health: PostHealthTelemetry
     postScore: float
+    projectType: Optional[Literal["BROWSER", "CONTAINER"]] = None
+    impressions: Optional[int] = None
+    videoCompletions: Optional[int] = None
+    sandboxBounces: Optional[int] = None
+    sandboxSingleRuns: Optional[int] = None
+    sandboxMultiRuns: Optional[int] = None
+    desktopHandoffs: Optional[int] = None
+    proxySuccessRate: Optional[float] = None
+    weightedUpvotes: Optional[float] = None
+    weightedUsabilityTags: Optional[float] = None
+    sharesCount: Optional[int] = None
+    popularityScore: Optional[float] = None
+    usabilityScore: Optional[float] = None
+    dailyLeaderboardScore: Optional[float] = None
     createdAt: str
 
 
