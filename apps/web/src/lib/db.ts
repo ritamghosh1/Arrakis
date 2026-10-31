@@ -26,11 +26,14 @@ const globalForPg = globalThis as unknown as { __arrakisPool?: pg.Pool };
 
 export function pool(): pg.Pool {
   if (!globalForPg.__arrakisPool) {
+    const connStr =
+      process.env.DATABASE_URL ?? "postgresql://arrakis:arrakis_dev@localhost:5432/arrakis";
+    const isCloud = connStr.includes("neon.tech") || connStr.includes("sslmode=require");
     globalForPg.__arrakisPool = new pg.Pool({
-      connectionString:
-        process.env.DATABASE_URL ?? "postgresql://arrakis:arrakis_dev@localhost:5432/arrakis",
-      max: 5,
-      connectionTimeoutMillis: 800,
+      connectionString: connStr,
+      max: isCloud ? 10 : 5,
+      connectionTimeoutMillis: isCloud ? 5000 : 1500,
+      ssl: isCloud ? { rejectUnauthorized: false } : undefined,
     });
   }
   return globalForPg.__arrakisPool;
