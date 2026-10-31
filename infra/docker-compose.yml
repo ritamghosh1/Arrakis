@@ -3,6 +3,7 @@ services:
     image: pgvector/pgvector:pg16
     container_name: arrakis-postgres
     restart: unless-stopped
+    command: ["postgres", "-c", "log_statement=all"]
     environment:
       POSTGRES_USER: arrakis
       POSTGRES_PASSWORD: arrakis_dev
@@ -13,6 +14,7 @@ services:
       - arrakis_pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/00_extensions.sql:ro
       - ./migrations/0000_init.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./migrations/0001_telemetry_dual_scoring.sql:/docker-entrypoint-initdb.d/02_telemetry.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U arrakis -d arrakis"]
       interval: 5s

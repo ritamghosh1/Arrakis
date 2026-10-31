@@ -15,21 +15,13 @@ import {
 } from "./icons";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
+import { CATEGORIES } from "@/lib/categories";
 import {
   cn,
   extractYouTubeId,
   getYouTubeEmbedUrl,
   getYouTubeThumbnailUrl,
 } from "@/lib/utils";
-
-const CATEGORIES = [
-  "Developer Tools",
-  "AI & Agents",
-  "Data & Analytics",
-  "Design & Media",
-  "Productivity",
-  "Security & Infra",
-] as const;
 
 const SAMPLE_VIDEOS = [
   {

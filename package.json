@@ -20,7 +20,8 @@
     "lint": "npm run lint --workspaces --if-present",
     "db:generate": "npm --workspace @arrakis/contracts run db:generate",
     "db:migrate": "npm --workspace @arrakis/contracts run db:migrate",
-    "seed": "node --experimental-strip-types packages/contracts/src/seed.ts"
+    "seed": "node --experimental-strip-types packages/contracts/src/seed.ts",
+    "seed:db": "node --experimental-strip-types packages/contracts/src/seed-db.ts"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

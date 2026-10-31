@@ -58,7 +58,21 @@
       "verifiedUtility": true
     },
     "postScore": 89.2,
-    "createdAt": "2026-10-31T06:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 740,
+    "videoCompletions": 481,
+    "sandboxBounces": 28,
+    "sandboxSingleRuns": 115,
+    "sandboxMultiRuns": 64,
+    "desktopHandoffs": 16,
+    "proxySuccessRate": 0.994,
+    "weightedUpvotes": 443,
+    "weightedUsabilityTags": 179.2,
+    "sharesCount": 24,
+    "popularityScore": 829.5,
+    "usabilityScore": 1.46,
+    "dailyLeaderboardScore": 1.2602,
+    "createdAt": "2026-10-31T08:58:59.877Z"
   },
   {
     "id": "post_csv_surgeon",
@@ -124,7 +138,21 @@
       "verifiedUtility": true
     },
     "postScore": 90.91,
-    "createdAt": "2026-10-31T03:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 693,
+    "videoCompletions": 450,
+    "sandboxBounces": 30,
+    "sandboxSingleRuns": 123,
+    "sandboxMultiRuns": 68,
+    "desktopHandoffs": 17,
+    "proxySuccessRate": 0.989,
+    "weightedUpvotes": 466,
+    "weightedUsabilityTags": 191.8,
+    "sharesCount": 26,
+    "popularityScore": 847,
+    "usabilityScore": 1.65,
+    "dailyLeaderboardScore": 0.3297,
+    "createdAt": "2026-10-31T05:58:59.877Z"
   },
   {
     "id": "post_env_doctor",
@@ -178,7 +206,21 @@
       "verifiedUtility": true
     },
     "postScore": 92.36,
-    "createdAt": "2026-10-31T00:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 646,
+    "videoCompletions": 419,
+    "sandboxBounces": 32,
+    "sandboxSingleRuns": 129,
+    "sandboxMultiRuns": 71,
+    "desktopHandoffs": 18,
+    "proxySuccessRate": 0.998,
+    "weightedUpvotes": 480,
+    "weightedUsabilityTags": 200.2,
+    "sharesCount": 27,
+    "popularityScore": 852.5,
+    "usabilityScore": 1.85,
+    "dailyLeaderboardScore": 0.1683,
+    "createdAt": "2026-10-31T02:58:59.877Z"
   },
   {
     "id": "post_cron_human",
@@ -231,7 +273,21 @@
       "verifiedUtility": true
     },
     "postScore": 93.7,
-    "createdAt": "2026-10-30T21:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 599,
+    "videoCompletions": 389,
+    "sandboxBounces": 33,
+    "sandboxSingleRuns": 133,
+    "sandboxMultiRuns": 73,
+    "desktopHandoffs": 19,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 491,
+    "weightedUsabilityTags": 207.2,
+    "sharesCount": 28,
+    "popularityScore": 855.5,
+    "usabilityScore": 1.98,
+    "dailyLeaderboardScore": 0.1066,
+    "createdAt": "2026-10-30T23:58:59.877Z"
   },
   {
     "id": "post_svg_Minify_canvas",
@@ -276,7 +332,21 @@
       "verifiedUtility": true
     },
     "postScore": 94.78,
-    "createdAt": "2026-10-30T18:13:29.029Z"
+    "projectType": "BROWSER",
+    "impressions": 552,
+    "videoCompletions": 358,
+    "sandboxBounces": 33,
+    "sandboxSingleRuns": 135,
+    "sandboxMultiRuns": 74,
+    "desktopHandoffs": 19,
+    "proxySuccessRate": 0.996,
+    "weightedUpvotes": 494,
+    "weightedUsabilityTags": 210,
+    "sharesCount": 29,
+    "popularityScore": 846,
+    "usabilityScore": 2.23,
+    "dailyLeaderboardScore": 0.077,
+    "createdAt": "2026-10-30T20:58:59.877Z"
   },
   {
     "id": "post_invoice_chaser",
@@ -330,7 +400,21 @@
       "verifiedUtility": true
     },
     "postScore": 83.55,
-    "createdAt": "2026-10-30T15:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 505,
+    "videoCompletions": 328,
+    "sandboxBounces": 19,
+    "sandboxSingleRuns": 78,
+    "sandboxMultiRuns": 44,
+    "desktopHandoffs": 11,
+    "proxySuccessRate": 0.978,
+    "weightedUpvotes": 301,
+    "weightedUsabilityTags": 121.8,
+    "sharesCount": 16,
+    "popularityScore": 563,
+    "usabilityScore": 1.44,
+    "dailyLeaderboardScore": 0.0485,
+    "createdAt": "2026-10-30T17:58:59.877Z"
   },
   {
     "id": "post_7",
@@ -383,7 +467,21 @@
       "verifiedUtility": true
     },
     "postScore": 84.71,
-    "createdAt": "2026-10-30T12:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 458,
+    "videoCompletions": 297,
+    "sandboxBounces": 20,
+    "sandboxSingleRuns": 81,
+    "sandboxMultiRuns": 45,
+    "desktopHandoffs": 11,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 306,
+    "weightedUsabilityTags": 126,
+    "sharesCount": 17,
+    "popularityScore": 557.5,
+    "usabilityScore": 1.6,
+    "dailyLeaderboardScore": 0.039,
+    "createdAt": "2026-10-30T14:58:59.877Z"
   },
   {
     "id": "post_8",
@@ -437,7 +535,21 @@
       "verifiedUtility": true
     },
     "postScore": 85.56,
-    "createdAt": "2026-10-30T09:13:29.029Z"
+    "projectType": "CONTAINER",
+    "impressions": 411,
+    "videoCompletions": 267,
+    "sandboxBounces": 20,
+    "sandboxSingleRuns": 82,
+    "sandboxMultiRuns": 45,
+    "desktopHandoffs": 11,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 305,
+    "weightedUsabilityTags": 127.4,
+    "sharesCount": 17,
+    "popularityScore": 541.5,
+    "usabilityScore": 1.79,
+    "dailyLeaderboardScore": 0.0326,
+    "createdAt": "2026-10-30T11:58:59.877Z"
   },
   {
     "id": "post_9",
@@ -481,7 +593,21 @@
       "verifiedUtility": true
     },
     "postScore": 86.05,
-    "createdAt": "2026-10-30T06:13:29.029Z"
+    "projectType": "BROWSER",
+    "impressions": 364,
+    "videoCompletions": 236,
+    "sandboxBounces": 20,
+    "sandboxSingleRuns": 81,
+    "sandboxMultiRuns": 44,
+    "desktopHandoffs": 11,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 296,
+    "weightedUsabilityTags": 124.6,
+    "sharesCount": 17,
+    "popularityScore": 517,
+    "usabilityScore": 1.83,
+    "dailyLeaderboardScore": 0.0271,
+    "createdAt": "2026-10-30T08:58:59.877Z"
   },
   {
     "id": "post_10",
@@ -534,7 +660,21 @@
       "verifiedUtility": true
     },
     "postScore": 119.18,
-    "createdAt": "2026-10-30T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2717,
+    "videoCompletions": 1766,
+    "sandboxBounces": 167,
+    "sandboxSingleRuns": 669,
+    "sandboxMultiRuns": 359,
+    "desktopHandoffs": 95,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 2437,
+    "weightedUsabilityTags": 1036,
+    "sharesCount": 143,
+    "popularityScore": 4179,
+    "usabilityScore": 2.15,
+    "dailyLeaderboardScore": 0.0296,
+    "createdAt": "2026-10-30T05:58:59.878Z"
   },
   {
     "id": "post_11",
@@ -579,7 +719,21 @@
       "verifiedUtility": true
     },
     "postScore": 107.99,
-    "createdAt": "2026-10-30T00:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 2670,
+    "videoCompletions": 1735,
+    "sandboxBounces": 104,
+    "sandboxSingleRuns": 418,
+    "sandboxMultiRuns": 225,
+    "desktopHandoffs": 59,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 1602,
+    "weightedUsabilityTags": 648.2,
+    "sharesCount": 89,
+    "popularityScore": 3004.5,
+    "usabilityScore": 1.39,
+    "dailyLeaderboardScore": 0.0223,
+    "createdAt": "2026-10-30T02:58:59.878Z"
   },
   {
     "id": "post_12",
@@ -632,7 +786,21 @@
       "verifiedUtility": true
     },
     "postScore": 110.65,
-    "createdAt": "2026-10-29T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2623,
+    "videoCompletions": 1704,
+    "sandboxBounces": 117,
+    "sandboxSingleRuns": 469,
+    "sandboxMultiRuns": 253,
+    "desktopHandoffs": 67,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 1769,
+    "weightedUsabilityTags": 728,
+    "sharesCount": 100,
+    "popularityScore": 3223,
+    "usabilityScore": 1.6,
+    "dailyLeaderboardScore": 0.0202,
+    "createdAt": "2026-10-29T23:58:59.878Z"
   },
   {
     "id": "post_13",
@@ -685,7 +853,21 @@
       "verifiedUtility": true
     },
     "postScore": 113.15,
-    "createdAt": "2026-10-29T18:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2576,
+    "videoCompletions": 1674,
+    "sandboxBounces": 129,
+    "sandboxSingleRuns": 519,
+    "sandboxMultiRuns": 279,
+    "desktopHandoffs": 74,
+    "proxySuccessRate": 0.956,
+    "weightedUpvotes": 1928,
+    "weightedUsabilityTags": 803.6,
+    "sharesCount": 111,
+    "popularityScore": 3430,
+    "usabilityScore": 1.81,
+    "dailyLeaderboardScore": 0.0185,
+    "createdAt": "2026-10-29T20:58:59.878Z"
   },
   {
     "id": "post_14",
@@ -739,7 +921,21 @@
       "verifiedUtility": true
     },
     "postScore": 115.52,
-    "createdAt": "2026-10-29T15:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2529,
+    "videoCompletions": 1643,
+    "sandboxBounces": 141,
+    "sandboxSingleRuns": 566,
+    "sandboxMultiRuns": 304,
+    "desktopHandoffs": 80,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 2080,
+    "weightedUsabilityTags": 876.4,
+    "sharesCount": 121,
+    "popularityScore": 3626.5,
+    "usabilityScore": 2.03,
+    "dailyLeaderboardScore": 0.0171,
+    "createdAt": "2026-10-29T17:58:59.878Z"
   },
   {
     "id": "post_15",
@@ -783,7 +979,21 @@
       "verifiedUtility": true
     },
     "postScore": 117.82,
-    "createdAt": "2026-10-29T12:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 2482,
+    "videoCompletions": 1613,
+    "sandboxBounces": 152,
+    "sandboxSingleRuns": 611,
+    "sandboxMultiRuns": 329,
+    "desktopHandoffs": 87,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 2229,
+    "weightedUsabilityTags": 947.8,
+    "sharesCount": 131,
+    "popularityScore": 3820.5,
+    "usabilityScore": 2.25,
+    "dailyLeaderboardScore": 0.0159,
+    "createdAt": "2026-10-29T14:58:59.878Z"
   },
   {
     "id": "post_16",
@@ -836,7 +1046,21 @@
       "verifiedUtility": true
     },
     "postScore": 106.63,
-    "createdAt": "2026-10-29T09:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2435,
+    "videoCompletions": 1582,
+    "sandboxBounces": 95,
+    "sandboxSingleRuns": 381,
+    "sandboxMultiRuns": 205,
+    "desktopHandoffs": 54,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 1460,
+    "weightedUsabilityTags": 590.8,
+    "sharesCount": 81,
+    "popularityScore": 2738,
+    "usabilityScore": 1.45,
+    "dailyLeaderboardScore": 0.0125,
+    "createdAt": "2026-10-29T11:58:59.878Z"
   },
   {
     "id": "post_17",
@@ -881,7 +1105,21 @@
       "verifiedUtility": true
     },
     "postScore": 109.26,
-    "createdAt": "2026-10-29T06:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 2388,
+    "videoCompletions": 1552,
+    "sandboxBounces": 106,
+    "sandboxSingleRuns": 427,
+    "sandboxMultiRuns": 231,
+    "desktopHandoffs": 61,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 1610,
+    "weightedUsabilityTags": 662.2,
+    "sharesCount": 91,
+    "popularityScore": 2933,
+    "usabilityScore": 1.56,
+    "dailyLeaderboardScore": 0.0117,
+    "createdAt": "2026-10-29T08:58:59.878Z"
   },
   {
     "id": "post_18",
@@ -934,7 +1172,21 @@
       "verifiedUtility": true
     },
     "postScore": 111.72,
-    "createdAt": "2026-10-29T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2341,
+    "videoCompletions": 1521,
+    "sandboxBounces": 117,
+    "sandboxSingleRuns": 471,
+    "sandboxMultiRuns": 254,
+    "desktopHandoffs": 67,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 1753,
+    "weightedUsabilityTags": 730.8,
+    "sharesCount": 101,
+    "popularityScore": 3118.5,
+    "usabilityScore": 1.76,
+    "dailyLeaderboardScore": 0.0111,
+    "createdAt": "2026-10-29T05:58:59.878Z"
   },
   {
     "id": "post_19",
@@ -987,7 +1239,21 @@
       "verifiedUtility": true
     },
     "postScore": 114.05,
-    "createdAt": "2026-10-29T00:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2294,
+    "videoCompletions": 1491,
+    "sandboxBounces": 128,
+    "sandboxSingleRuns": 513,
+    "sandboxMultiRuns": 276,
+    "desktopHandoffs": 73,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 1887,
+    "weightedUsabilityTags": 795.2,
+    "sharesCount": 110,
+    "popularityScore": 3292.5,
+    "usabilityScore": 1.97,
+    "dailyLeaderboardScore": 0.0106,
+    "createdAt": "2026-10-29T02:58:59.878Z"
   },
   {
     "id": "post_20",
@@ -1041,7 +1307,21 @@
       "verifiedUtility": true
     },
     "postScore": 116.27,
-    "createdAt": "2026-10-28T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2247,
+    "videoCompletions": 1460,
+    "sandboxBounces": 138,
+    "sandboxSingleRuns": 553,
+    "sandboxMultiRuns": 297,
+    "desktopHandoffs": 79,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 2015,
+    "weightedUsabilityTags": 856.8,
+    "sharesCount": 118,
+    "popularityScore": 3453,
+    "usabilityScore": 2.19,
+    "dailyLeaderboardScore": 0.0101,
+    "createdAt": "2026-10-28T23:58:59.878Z"
   },
   {
     "id": "post_21",
@@ -1085,7 +1365,21 @@
       "verifiedUtility": true
     },
     "postScore": 105.15,
-    "createdAt": "2026-10-28T18:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 2200,
+    "videoCompletions": 1430,
+    "sandboxBounces": 86,
+    "sandboxSingleRuns": 344,
+    "sandboxMultiRuns": 186,
+    "desktopHandoffs": 49,
+    "proxySuccessRate": 0.956,
+    "weightedUpvotes": 1319,
+    "weightedUsabilityTags": 533.4,
+    "sharesCount": 73,
+    "popularityScore": 2473,
+    "usabilityScore": 1.42,
+    "dailyLeaderboardScore": 0.0081,
+    "createdAt": "2026-10-28T20:58:59.878Z"
   },
   {
     "id": "post_22",
@@ -1138,7 +1432,21 @@
       "verifiedUtility": true
     },
     "postScore": 107.7,
-    "createdAt": "2026-10-28T15:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2153,
+    "videoCompletions": 1399,
+    "sandboxBounces": 96,
+    "sandboxSingleRuns": 385,
+    "sandboxMultiRuns": 207,
+    "desktopHandoffs": 55,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 1450,
+    "weightedUsabilityTags": 596.4,
+    "sharesCount": 82,
+    "popularityScore": 2641.5,
+    "usabilityScore": 1.63,
+    "dailyLeaderboardScore": 0.0079,
+    "createdAt": "2026-10-28T17:58:59.878Z"
   },
   {
     "id": "post_23",
@@ -1183,7 +1491,21 @@
       "verifiedUtility": true
     },
     "postScore": 110.13,
-    "createdAt": "2026-10-28T12:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 2106,
+    "videoCompletions": 1368,
+    "sandboxBounces": 106,
+    "sandboxSingleRuns": 424,
+    "sandboxMultiRuns": 228,
+    "desktopHandoffs": 60,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 1575,
+    "weightedUsabilityTags": 656.6,
+    "sharesCount": 90,
+    "popularityScore": 2801,
+    "usabilityScore": 1.84,
+    "dailyLeaderboardScore": 0.0076,
+    "createdAt": "2026-10-28T14:58:59.878Z"
   },
   {
     "id": "post_24",
@@ -1236,7 +1558,21 @@
       "verifiedUtility": true
     },
     "postScore": 112.42,
-    "createdAt": "2026-10-28T09:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2059,
+    "videoCompletions": 1338,
+    "sandboxBounces": 115,
+    "sandboxSingleRuns": 460,
+    "sandboxMultiRuns": 248,
+    "desktopHandoffs": 65,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 1694,
+    "weightedUsabilityTags": 714,
+    "sharesCount": 98,
+    "popularityScore": 2953,
+    "usabilityScore": 2.06,
+    "dailyLeaderboardScore": 0.0074,
+    "createdAt": "2026-10-28T11:58:59.878Z"
   },
   {
     "id": "post_25",
@@ -1289,7 +1625,21 @@
       "verifiedUtility": true
     },
     "postScore": 114.59,
-    "createdAt": "2026-10-28T06:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 2012,
+    "videoCompletions": 1307,
+    "sandboxBounces": 123,
+    "sandboxSingleRuns": 495,
+    "sandboxMultiRuns": 267,
+    "desktopHandoffs": 70,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 1804,
+    "weightedUsabilityTags": 767.2,
+    "sharesCount": 106,
+    "popularityScore": 3093.5,
+    "usabilityScore": 2.12,
+    "dailyLeaderboardScore": 0.007,
+    "createdAt": "2026-10-28T08:58:59.878Z"
   },
   {
     "id": "post_26",
@@ -1343,7 +1693,21 @@
       "verifiedUtility": true
     },
     "postScore": 103.52,
-    "createdAt": "2026-10-28T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1965,
+    "videoCompletions": 1277,
+    "sandboxBounces": 77,
+    "sandboxSingleRuns": 308,
+    "sandboxMultiRuns": 165,
+    "desktopHandoffs": 44,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 1180,
+    "weightedUsabilityTags": 477.4,
+    "sharesCount": 66,
+    "popularityScore": 2214.5,
+    "usabilityScore": 1.37,
+    "dailyLeaderboardScore": 0.0058,
+    "createdAt": "2026-10-28T05:58:59.878Z"
   },
   {
     "id": "post_27",
@@ -1387,7 +1751,21 @@
       "verifiedUtility": true
     },
     "postScore": 106.01,
-    "createdAt": "2026-10-28T00:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1918,
+    "videoCompletions": 1246,
+    "sandboxBounces": 85,
+    "sandboxSingleRuns": 343,
+    "sandboxMultiRuns": 185,
+    "desktopHandoffs": 49,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 1293,
+    "weightedUsabilityTags": 532,
+    "sharesCount": 73,
+    "popularityScore": 2355,
+    "usabilityScore": 1.58,
+    "dailyLeaderboardScore": 0.0057,
+    "createdAt": "2026-10-28T02:58:59.878Z"
   },
   {
     "id": "post_28",
@@ -1440,7 +1818,21 @@
       "verifiedUtility": true
     },
     "postScore": 108.36,
-    "createdAt": "2026-10-27T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1871,
+    "videoCompletions": 1216,
+    "sandboxBounces": 94,
+    "sandboxSingleRuns": 376,
+    "sandboxMultiRuns": 203,
+    "desktopHandoffs": 53,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 1400,
+    "weightedUsabilityTags": 583.8,
+    "sharesCount": 80,
+    "popularityScore": 2490,
+    "usabilityScore": 1.79,
+    "dailyLeaderboardScore": 0.0056,
+    "createdAt": "2026-10-27T23:58:59.878Z"
   },
   {
     "id": "post_29",
@@ -1485,7 +1877,21 @@
       "verifiedUtility": true
     },
     "postScore": 110.56,
-    "createdAt": "2026-10-27T18:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1824,
+    "videoCompletions": 1185,
+    "sandboxBounces": 102,
+    "sandboxSingleRuns": 408,
+    "sandboxMultiRuns": 219,
+    "desktopHandoffs": 58,
+    "proxySuccessRate": 0.956,
+    "weightedUpvotes": 1498,
+    "weightedUsabilityTags": 631.4,
+    "sharesCount": 87,
+    "popularityScore": 2613.5,
+    "usabilityScore": 2,
+    "dailyLeaderboardScore": 0.0055,
+    "createdAt": "2026-10-27T20:58:59.878Z"
   },
   {
     "id": "post_30",
@@ -1538,7 +1944,21 @@
       "verifiedUtility": true
     },
     "postScore": 112.68,
-    "createdAt": "2026-10-27T15:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1777,
+    "videoCompletions": 1155,
+    "sandboxBounces": 109,
+    "sandboxSingleRuns": 437,
+    "sandboxMultiRuns": 235,
+    "desktopHandoffs": 62,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 1594,
+    "weightedUsabilityTags": 677.6,
+    "sharesCount": 93,
+    "popularityScore": 2730.5,
+    "usabilityScore": 2.22,
+    "dailyLeaderboardScore": 0.0054,
+    "createdAt": "2026-10-27T17:58:59.878Z"
   },
   {
     "id": "post_31",
@@ -1591,7 +2011,21 @@
       "verifiedUtility": true
     },
     "postScore": 101.64,
-    "createdAt": "2026-10-27T12:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1730,
+    "videoCompletions": 1124,
+    "sandboxBounces": 67,
+    "sandboxSingleRuns": 271,
+    "sandboxMultiRuns": 146,
+    "desktopHandoffs": 38,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 1038,
+    "weightedUsabilityTags": 420,
+    "sharesCount": 58,
+    "popularityScore": 1948,
+    "usabilityScore": 1.44,
+    "dailyLeaderboardScore": 0.0044,
+    "createdAt": "2026-10-27T14:58:59.878Z"
   },
   {
     "id": "post_32",
@@ -1645,7 +2079,21 @@
       "verifiedUtility": true
     },
     "postScore": 104.06,
-    "createdAt": "2026-10-27T09:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1683,
+    "videoCompletions": 1093,
+    "sandboxBounces": 75,
+    "sandboxSingleRuns": 301,
+    "sandboxMultiRuns": 162,
+    "desktopHandoffs": 43,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 1133,
+    "weightedUsabilityTags": 466.2,
+    "sharesCount": 64,
+    "popularityScore": 2063.5,
+    "usabilityScore": 1.66,
+    "dailyLeaderboardScore": 0.0044,
+    "createdAt": "2026-10-27T11:58:59.878Z"
   },
   {
     "id": "post_33",
@@ -1689,7 +2137,21 @@
       "verifiedUtility": true
     },
     "postScore": 106.32,
-    "createdAt": "2026-10-27T06:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1636,
+    "videoCompletions": 1063,
+    "sandboxBounces": 82,
+    "sandboxSingleRuns": 329,
+    "sandboxMultiRuns": 177,
+    "desktopHandoffs": 47,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 1222,
+    "weightedUsabilityTags": 509.6,
+    "sharesCount": 70,
+    "popularityScore": 2173.5,
+    "usabilityScore": 1.74,
+    "dailyLeaderboardScore": 0.0042,
+    "createdAt": "2026-10-27T08:58:59.878Z"
   },
   {
     "id": "post_34",
@@ -1742,7 +2204,21 @@
       "verifiedUtility": true
     },
     "postScore": 108.48,
-    "createdAt": "2026-10-27T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1589,
+    "videoCompletions": 1032,
+    "sandboxBounces": 88,
+    "sandboxSingleRuns": 355,
+    "sandboxMultiRuns": 192,
+    "desktopHandoffs": 50,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 1306,
+    "weightedUsabilityTags": 550.2,
+    "sharesCount": 76,
+    "popularityScore": 2278,
+    "usabilityScore": 1.94,
+    "dailyLeaderboardScore": 0.0042,
+    "createdAt": "2026-10-27T05:58:59.878Z"
   },
   {
     "id": "post_35",
@@ -1787,7 +2263,21 @@
       "verifiedUtility": true
     },
     "postScore": 110.52,
-    "createdAt": "2026-10-27T00:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1542,
+    "videoCompletions": 1002,
+    "sandboxBounces": 94,
+    "sandboxSingleRuns": 379,
+    "sandboxMultiRuns": 205,
+    "desktopHandoffs": 54,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 1383,
+    "weightedUsabilityTags": 588,
+    "sharesCount": 81,
+    "popularityScore": 2371,
+    "usabilityScore": 2.16,
+    "dailyLeaderboardScore": 0.0042,
+    "createdAt": "2026-10-27T02:58:59.878Z"
   },
   {
     "id": "post_36",
@@ -1840,7 +2330,21 @@
       "verifiedUtility": true
     },
     "postScore": 99.49,
-    "createdAt": "2026-10-26T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1495,
+    "videoCompletions": 971,
+    "sandboxBounces": 58,
+    "sandboxSingleRuns": 234,
+    "sandboxMultiRuns": 126,
+    "desktopHandoffs": 33,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 896,
+    "weightedUsabilityTags": 362.6,
+    "sharesCount": 50,
+    "popularityScore": 1681.5,
+    "usabilityScore": 1.4,
+    "dailyLeaderboardScore": 0.0034,
+    "createdAt": "2026-10-26T23:58:59.878Z"
   },
   {
     "id": "post_37",
@@ -1893,7 +2397,21 @@
       "verifiedUtility": true
     },
     "postScore": 101.86,
-    "createdAt": "2026-10-26T18:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1448,
+    "videoCompletions": 941,
+    "sandboxBounces": 64,
+    "sandboxSingleRuns": 259,
+    "sandboxMultiRuns": 140,
+    "desktopHandoffs": 37,
+    "proxySuccessRate": 0.956,
+    "weightedUpvotes": 976,
+    "weightedUsabilityTags": 401.8,
+    "sharesCount": 55,
+    "popularityScore": 1777.5,
+    "usabilityScore": 1.61,
+    "dailyLeaderboardScore": 0.0034,
+    "createdAt": "2026-10-26T20:58:59.878Z"
   },
   {
     "id": "post_38",
@@ -1947,7 +2465,21 @@
       "verifiedUtility": true
     },
     "postScore": 104.03,
-    "createdAt": "2026-10-26T15:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1401,
+    "videoCompletions": 910,
+    "sandboxBounces": 70,
+    "sandboxSingleRuns": 282,
+    "sandboxMultiRuns": 152,
+    "desktopHandoffs": 40,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 1048,
+    "weightedUsabilityTags": 436.8,
+    "sharesCount": 60,
+    "popularityScore": 1863,
+    "usabilityScore": 1.82,
+    "dailyLeaderboardScore": 0.0034,
+    "createdAt": "2026-10-26T17:58:59.878Z"
   },
   {
     "id": "post_39",
@@ -1991,7 +2523,21 @@
       "verifiedUtility": true
     },
     "postScore": 106.06,
-    "createdAt": "2026-10-26T12:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1354,
+    "videoCompletions": 880,
+    "sandboxBounces": 75,
+    "sandboxSingleRuns": 302,
+    "sandboxMultiRuns": 164,
+    "desktopHandoffs": 43,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 1113,
+    "weightedUsabilityTags": 469,
+    "sharesCount": 64,
+    "popularityScore": 1939,
+    "usabilityScore": 2.04,
+    "dailyLeaderboardScore": 0.0034,
+    "createdAt": "2026-10-26T14:58:59.878Z"
   },
   {
     "id": "post_40",
@@ -2044,7 +2590,21 @@
       "verifiedUtility": true
     },
     "postScore": 108,
-    "createdAt": "2026-10-26T09:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1307,
+    "videoCompletions": 849,
+    "sandboxBounces": 80,
+    "sandboxSingleRuns": 322,
+    "sandboxMultiRuns": 173,
+    "desktopHandoffs": 46,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 1172,
+    "weightedUsabilityTags": 498.4,
+    "sharesCount": 69,
+    "popularityScore": 2009.5,
+    "usabilityScore": 2.26,
+    "dailyLeaderboardScore": 0.0034,
+    "createdAt": "2026-10-26T11:58:59.878Z"
   },
   {
     "id": "post_41",
@@ -2089,7 +2649,21 @@
       "verifiedUtility": true
     },
     "postScore": 96.96,
-    "createdAt": "2026-10-26T06:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1260,
+    "videoCompletions": 819,
+    "sandboxBounces": 49,
+    "sandboxSingleRuns": 197,
+    "sandboxMultiRuns": 106,
+    "desktopHandoffs": 28,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 754,
+    "weightedUsabilityTags": 305.2,
+    "sharesCount": 42,
+    "popularityScore": 1415.5,
+    "usabilityScore": 1.35,
+    "dailyLeaderboardScore": 0.0028,
+    "createdAt": "2026-10-26T08:58:59.878Z"
   },
   {
     "id": "post_42",
@@ -2142,7 +2716,21 @@
       "verifiedUtility": true
     },
     "postScore": 99.23,
-    "createdAt": "2026-10-26T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1213,
+    "videoCompletions": 788,
+    "sandboxBounces": 54,
+    "sandboxSingleRuns": 217,
+    "sandboxMultiRuns": 117,
+    "desktopHandoffs": 31,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 817,
+    "weightedUsabilityTags": 336,
+    "sharesCount": 46,
+    "popularityScore": 1487,
+    "usabilityScore": 1.56,
+    "dailyLeaderboardScore": 0.0028,
+    "createdAt": "2026-10-26T05:58:59.878Z"
   },
   {
     "id": "post_43",
@@ -2195,7 +2783,21 @@
       "verifiedUtility": true
     },
     "postScore": 101.24,
-    "createdAt": "2026-10-26T00:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1166,
+    "videoCompletions": 757,
+    "sandboxBounces": 58,
+    "sandboxSingleRuns": 234,
+    "sandboxMultiRuns": 127,
+    "desktopHandoffs": 33,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 870,
+    "weightedUsabilityTags": 362.6,
+    "sharesCount": 50,
+    "popularityScore": 1548.5,
+    "usabilityScore": 1.76,
+    "dailyLeaderboardScore": 0.0028,
+    "createdAt": "2026-10-26T02:58:59.878Z"
   },
   {
     "id": "post_44",
@@ -2249,7 +2851,21 @@
       "verifiedUtility": true
     },
     "postScore": 103.19,
-    "createdAt": "2026-10-25T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1119,
+    "videoCompletions": 727,
+    "sandboxBounces": 62,
+    "sandboxSingleRuns": 250,
+    "sandboxMultiRuns": 135,
+    "desktopHandoffs": 35,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 920,
+    "weightedUsabilityTags": 387.8,
+    "sharesCount": 53,
+    "popularityScore": 1602.5,
+    "usabilityScore": 1.97,
+    "dailyLeaderboardScore": 0.0028,
+    "createdAt": "2026-10-25T23:58:59.878Z"
   },
   {
     "id": "post_45",
@@ -2293,7 +2909,21 @@
       "verifiedUtility": true
     },
     "postScore": 104.95,
-    "createdAt": "2026-10-25T18:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 1072,
+    "videoCompletions": 696,
+    "sandboxBounces": 65,
+    "sandboxSingleRuns": 263,
+    "sandboxMultiRuns": 143,
+    "desktopHandoffs": 37,
+    "proxySuccessRate": 0.956,
+    "weightedUpvotes": 961,
+    "weightedUsabilityTags": 408.8,
+    "sharesCount": 56,
+    "popularityScore": 1645,
+    "usabilityScore": 2.18,
+    "dailyLeaderboardScore": 0.0028,
+    "createdAt": "2026-10-25T20:58:59.878Z"
   },
   {
     "id": "post_46",
@@ -2346,7 +2976,21 @@
       "verifiedUtility": true
     },
     "postScore": 93.95,
-    "createdAt": "2026-10-25T15:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 1025,
+    "videoCompletions": 666,
+    "sandboxBounces": 40,
+    "sandboxSingleRuns": 160,
+    "sandboxMultiRuns": 87,
+    "desktopHandoffs": 22,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 613,
+    "weightedUsabilityTags": 247.8,
+    "sharesCount": 34,
+    "popularityScore": 1150,
+    "usabilityScore": 1.42,
+    "dailyLeaderboardScore": 0.0023,
+    "createdAt": "2026-10-25T17:58:59.878Z"
   },
   {
     "id": "post_47",
@@ -2391,7 +3035,21 @@
       "verifiedUtility": true
     },
     "postScore": 95.99,
-    "createdAt": "2026-10-25T12:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 978,
+    "videoCompletions": 635,
+    "sandboxBounces": 43,
+    "sandboxSingleRuns": 174,
+    "sandboxMultiRuns": 95,
+    "desktopHandoffs": 24,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 657,
+    "weightedUsabilityTags": 270.2,
+    "sharesCount": 37,
+    "popularityScore": 1197.5,
+    "usabilityScore": 1.62,
+    "dailyLeaderboardScore": 0.0023,
+    "createdAt": "2026-10-25T14:58:59.878Z"
   },
   {
     "id": "post_48",
@@ -2444,7 +3102,21 @@
       "verifiedUtility": true
     },
     "postScore": 97.9,
-    "createdAt": "2026-10-25T09:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 931,
+    "videoCompletions": 605,
+    "sandboxBounces": 46,
+    "sandboxSingleRuns": 187,
+    "sandboxMultiRuns": 102,
+    "desktopHandoffs": 26,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 695,
+    "weightedUsabilityTags": 289.8,
+    "sharesCount": 40,
+    "popularityScore": 1237.5,
+    "usabilityScore": 1.84,
+    "dailyLeaderboardScore": 0.0023,
+    "createdAt": "2026-10-25T11:58:59.878Z"
   },
   {
     "id": "post_49",
@@ -2497,7 +3169,21 @@
       "verifiedUtility": true
     },
     "postScore": 99.56,
-    "createdAt": "2026-10-25T06:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 884,
+    "videoCompletions": 574,
+    "sandboxBounces": 49,
+    "sandboxSingleRuns": 197,
+    "sandboxMultiRuns": 107,
+    "desktopHandoffs": 28,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 724,
+    "weightedUsabilityTags": 305.2,
+    "sharesCount": 42,
+    "popularityScore": 1263,
+    "usabilityScore": 1.91,
+    "dailyLeaderboardScore": 0.0023,
+    "createdAt": "2026-10-25T08:58:59.878Z"
   },
   {
     "id": "post_50",
@@ -2551,7 +3237,21 @@
       "verifiedUtility": true
     },
     "postScore": 101.18,
-    "createdAt": "2026-10-25T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 837,
+    "videoCompletions": 544,
+    "sandboxBounces": 51,
+    "sandboxSingleRuns": 206,
+    "sandboxMultiRuns": 111,
+    "desktopHandoffs": 29,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 750,
+    "weightedUsabilityTags": 319.2,
+    "sharesCount": 44,
+    "popularityScore": 1286,
+    "usabilityScore": 2.11,
+    "dailyLeaderboardScore": 0.0023,
+    "createdAt": "2026-10-25T05:58:59.878Z"
   },
   {
     "id": "post_51",
@@ -2595,7 +3295,21 @@
       "verifiedUtility": true
     },
     "postScore": 90.19,
-    "createdAt": "2026-10-25T00:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 790,
+    "videoCompletions": 513,
+    "sandboxBounces": 30,
+    "sandboxSingleRuns": 123,
+    "sandboxMultiRuns": 68,
+    "desktopHandoffs": 17,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 474,
+    "weightedUsabilityTags": 191.8,
+    "sharesCount": 26,
+    "popularityScore": 886.5,
+    "usabilityScore": 1.38,
+    "dailyLeaderboardScore": 0.0019,
+    "createdAt": "2026-10-25T02:58:59.878Z"
   },
   {
     "id": "post_52",
@@ -2648,7 +3362,21 @@
       "verifiedUtility": true
     },
     "postScore": 91.87,
-    "createdAt": "2026-10-24T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 743,
+    "videoCompletions": 482,
+    "sandboxBounces": 33,
+    "sandboxSingleRuns": 132,
+    "sandboxMultiRuns": 72,
+    "desktopHandoffs": 18,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 497,
+    "weightedUsabilityTags": 204.4,
+    "sharesCount": 28,
+    "popularityScore": 906,
+    "usabilityScore": 1.57,
+    "dailyLeaderboardScore": 0.0019,
+    "createdAt": "2026-10-24T23:58:59.878Z"
   },
   {
     "id": "post_53",
@@ -2693,7 +3421,21 @@
       "verifiedUtility": true
     },
     "postScore": 93.55,
-    "createdAt": "2026-10-24T18:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 696,
+    "videoCompletions": 452,
+    "sandboxBounces": 35,
+    "sandboxSingleRuns": 140,
+    "sandboxMultiRuns": 75,
+    "desktopHandoffs": 20,
+    "proxySuccessRate": 0.956,
+    "weightedUpvotes": 520,
+    "weightedUsabilityTags": 217,
+    "sharesCount": 30,
+    "popularityScore": 926,
+    "usabilityScore": 1.78,
+    "dailyLeaderboardScore": 0.0019,
+    "createdAt": "2026-10-24T20:58:59.878Z"
   },
   {
     "id": "post_54",
@@ -2746,7 +3488,21 @@
       "verifiedUtility": true
     },
     "postScore": 94.88,
-    "createdAt": "2026-10-24T15:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 649,
+    "videoCompletions": 421,
+    "sandboxBounces": 36,
+    "sandboxSingleRuns": 145,
+    "sandboxMultiRuns": 78,
+    "desktopHandoffs": 20,
+    "proxySuccessRate": 0.965,
+    "weightedUpvotes": 531,
+    "weightedUsabilityTags": 224,
+    "sharesCount": 31,
+    "popularityScore": 926.5,
+    "usabilityScore": 1.97,
+    "dailyLeaderboardScore": 0.0019,
+    "createdAt": "2026-10-24T17:58:59.878Z"
   },
   {
     "id": "post_55",
@@ -2799,7 +3555,21 @@
       "verifiedUtility": true
     },
     "postScore": 96.05,
-    "createdAt": "2026-10-24T12:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 602,
+    "videoCompletions": 391,
+    "sandboxBounces": 36,
+    "sandboxSingleRuns": 147,
+    "sandboxMultiRuns": 81,
+    "desktopHandoffs": 21,
+    "proxySuccessRate": 0.974,
+    "weightedUpvotes": 537,
+    "weightedUsabilityTags": 228.2,
+    "sharesCount": 31,
+    "popularityScore": 919.5,
+    "usabilityScore": 2.2,
+    "dailyLeaderboardScore": 0.0019,
+    "createdAt": "2026-10-24T14:58:59.878Z"
   },
   {
     "id": "post_56",
@@ -2853,7 +3623,21 @@
       "verifiedUtility": true
     },
     "postScore": 84.98,
-    "createdAt": "2026-10-24T09:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 555,
+    "videoCompletions": 360,
+    "sandboxBounces": 21,
+    "sandboxSingleRuns": 86,
+    "sandboxMultiRuns": 48,
+    "desktopHandoffs": 12,
+    "proxySuccessRate": 0.983,
+    "weightedUpvotes": 332,
+    "weightedUsabilityTags": 134.4,
+    "sharesCount": 18,
+    "popularityScore": 620,
+    "usabilityScore": 1.44,
+    "dailyLeaderboardScore": 0.0016,
+    "createdAt": "2026-10-24T11:58:59.878Z"
   },
   {
     "id": "post_57",
@@ -2897,7 +3681,21 @@
       "verifiedUtility": true
     },
     "postScore": 86.26,
-    "createdAt": "2026-10-24T06:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 508,
+    "videoCompletions": 330,
+    "sandboxBounces": 22,
+    "sandboxSingleRuns": 90,
+    "sandboxMultiRuns": 50,
+    "desktopHandoffs": 12,
+    "proxySuccessRate": 0.92,
+    "weightedUpvotes": 340,
+    "weightedUsabilityTags": 140,
+    "sharesCount": 19,
+    "popularityScore": 620,
+    "usabilityScore": 1.51,
+    "dailyLeaderboardScore": 0.0016,
+    "createdAt": "2026-10-24T08:58:59.878Z"
   },
   {
     "id": "post_58",
@@ -2950,7 +3748,21 @@
       "verifiedUtility": true
     },
     "postScore": 87.27,
-    "createdAt": "2026-10-24T03:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 461,
+    "videoCompletions": 299,
+    "sandboxBounces": 23,
+    "sandboxSingleRuns": 92,
+    "sandboxMultiRuns": 50,
+    "desktopHandoffs": 13,
+    "proxySuccessRate": 0.929,
+    "weightedUpvotes": 342,
+    "weightedUsabilityTags": 142.8,
+    "sharesCount": 19,
+    "popularityScore": 606.5,
+    "usabilityScore": 1.7,
+    "dailyLeaderboardScore": 0.0016,
+    "createdAt": "2026-10-24T05:58:59.878Z"
   },
   {
     "id": "post_59",
@@ -2995,7 +3807,21 @@
       "verifiedUtility": true
     },
     "postScore": 88.1,
-    "createdAt": "2026-10-24T00:13:29.030Z"
+    "projectType": "BROWSER",
+    "impressions": 414,
+    "videoCompletions": 269,
+    "sandboxBounces": 23,
+    "sandboxSingleRuns": 92,
+    "sandboxMultiRuns": 50,
+    "desktopHandoffs": 13,
+    "proxySuccessRate": 0.938,
+    "weightedUpvotes": 339,
+    "weightedUsabilityTags": 142.8,
+    "sharesCount": 19,
+    "popularityScore": 588.5,
+    "usabilityScore": 1.89,
+    "dailyLeaderboardScore": 0.0016,
+    "createdAt": "2026-10-24T02:58:59.878Z"
   },
   {
     "id": "post_60",
@@ -3048,6 +3874,20 @@
       "verifiedUtility": true
     },
     "postScore": 88.45,
-    "createdAt": "2026-10-23T21:13:29.030Z"
+    "projectType": "CONTAINER",
+    "impressions": 367,
+    "videoCompletions": 238,
+    "sandboxBounces": 22,
+    "sandboxSingleRuns": 90,
+    "sandboxMultiRuns": 49,
+    "desktopHandoffs": 12,
+    "proxySuccessRate": 0.947,
+    "weightedUpvotes": 326,
+    "weightedUsabilityTags": 138.6,
+    "sharesCount": 19,
+    "popularityScore": 558,
+    "usabilityScore": 2.07,
+    "dailyLeaderboardScore": 0.0016,
+    "createdAt": "2026-10-23T23:58:59.878Z"
   }
 ]

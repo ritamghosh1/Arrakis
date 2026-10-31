@@ -25,6 +25,8 @@ const TABS: { id: LeaderboardType; label: string; subtitle: string }[] = [
   { id: "builders", label: "Top Builders", subtitle: "Makers shipping reliable tools" },
   { id: "testers", label: "Top Scouts", subtitle: "Members testing & reviewing builds" },
   { id: "trending", label: "Trending Builds", subtitle: "Most tested projects this week" },
+  { id: "useful", label: "Most Useful", subtitle: "Highest Bayesian usability score" },
+  { id: "popular", label: "Most Popular", subtitle: "Highest community popularity score" },
 ];
 
 const PERIODS: { id: LeaderboardPeriod; label: string }[] = [
@@ -109,7 +111,7 @@ export function LeaderboardView({ initialData }: LeaderboardViewProps) {
       </header>
 
       {/* Category Tabs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {TABS.map((tab) => {
           const active = type === tab.id;
           return (

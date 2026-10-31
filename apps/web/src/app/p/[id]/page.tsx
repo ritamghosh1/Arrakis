@@ -3,13 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { VerifiedIcon } from "@/components/icons";
 import { PostDetailClient } from "@/components/post-detail-client";
-import { getPostById } from "@/lib/data";
+import { getLivePost } from "@/lib/data";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const post = getPostById(id);
+  const post = await getLivePost(id);
   if (!post) return { title: "Build Not Found" };
   const canonical = `https://arrakis.dev/p/${post.id}`;
   return {
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { id } = await params;
-  const post = getPostById(id);
+  const post = await getLivePost(id);
   if (!post) notFound();
 
   const jsonLd = {

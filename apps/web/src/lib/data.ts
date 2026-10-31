@@ -1,11 +1,17 @@
 import {
   SEED_FOLLOWS,
   SEED_POSTS,
+  SEED_POST_VECTORS,
   SEED_USERS,
+  SEED_USER_VECTORS,
+  classifyTelemetryRunTier,
+  cosineSim,
   getMockGlobalFeed,
   getMockHomeFeed,
   getMockLeaderboard,
   getMockProfile,
+  getQuickFeedbackTagDelta,
+  updateEmaVector,
   type DemoMode,
   type FeedItem,
   type FeedResponse,
@@ -15,32 +21,37 @@ import {
   type Post,
   type ProfileResponse,
   type Review,
+  type RunTier,
+  type TelemetryPayload,
   type UploadPostInput,
   type User,
 } from "@arrakis/contracts";
+import {
+  USE_DB,
+  dbLeaderboard,
+  dbGetUserVector,
+  dbPersonalizedFeed,
+  dbPostById,
+  dbRecordTelemetry,
+} from "./db";
 import { getYouTubeThumbnailUrl } from "./utils";
 
 /**
  * Runtime store overlaying deterministic seed data so newly uploaded posts,
- * 3-tap micro-reviews, and follow toggles persist across requests during the demo.
+ * 3-tap micro-reviews, outer-shell sandbox telemetry, and follow toggles persist across requests.
  */
 const runtimePosts: Post[] = [];
 const runtimeReviews: Review[] = [];
 const runtimeFollowDelta = new Map<string, boolean>(); // key: `${followerId}->${followeeId}`
 const runtimeXpBonus = new Map<string, number>();
+const runtimeUserVectors = new Map<string, number[]>();
+const runtimeUserImpressions = new Map<string, Set<string>>();
 
 const MOCK = process.env.MOCK !== "0";
 const RECOMMENDER_URL = process.env.NEXT_PUBLIC_RECOMMENDER_URL ?? "http://localhost:4001";
 const SCORING_URL = process.env.NEXT_PUBLIC_SCORING_URL ?? "http://localhost:4003";
 
-export const CATEGORIES = [
-  "Developer Tools",
-  "Document & PDF",
-  "Data & CSV",
-  "Productivity & Automation",
-  "Design & Media",
-  "Security & Privacy",
-] as const;
+export { CATEGORIES } from "./categories";
 
 export function getAllPosts(): Post[] {
   return [...runtimePosts, ...SEED_POSTS];
@@ -136,10 +147,226 @@ export function createRuntimePost(input: UploadPostInput): Post {
       verifiedUtility: true,
     },
     postScore: 48.6,
+    projectType: input.demo.mode === "web" ? "BROWSER" : "CONTAINER",
+    impressions: 14,
+    videoCompletions: 10,
+    sandboxBounces: 1,
+    sandboxSingleRuns: 3,
+    sandboxMultiRuns: 2,
+    desktopHandoffs: 1,
+    proxySuccessRate: 0.997,
+    weightedUpvotes: 13,
+    weightedUsabilityTags: 6.0,
+    sharesCount: 2,
+    popularityScore: 28.0,
+    usabilityScore: 1.54,
+    dailyLeaderboardScore: 0.89,
     createdAt: new Date().toISOString(),
   };
   runtimePosts.unshift(post);
   return post;
+}
+
+export function getUserIntentVector(userId: string): number[] | null {
+  return runtimeUserVectors.get(userId) ?? SEED_USER_VECTORS[userId] ?? null;
+}
+
+export function recordSandboxTelemetry(payload: TelemetryPayload): {
+  run_tier: RunTier;
+  tag_delta: number;
+  updated_post?: Post;
+  updated_user_vector?: number[] | null;
+} {
+  const runTier = classifyTelemetryRunTier(payload);
+  const tagDelta = getQuickFeedbackTagDelta(payload.quick_feedback_tag);
+  const userRep = 1.0;
+  const healthVal = payload.health_ok ? 1.0 : 0.0;
+  const priorC = 50.0;
+  const globalMeanM = 1.2;
+
+  const post = getPostById(payload.project_id);
+  if (post) {
+    const nextImpressions = (post.impressions ?? post.stats.views) + 1;
+    const nextBounces = (post.sandboxBounces ?? 0) + (runTier === "BOUNCE" ? 1 : 0);
+    const nextSingle = (post.sandboxSingleRuns ?? 0) + (runTier === "SINGLE" ? 1 : 0);
+    const nextMulti = (post.sandboxMultiRuns ?? 0) + (runTier === "MULTI" ? 1 : 0);
+    const nextTags = (post.weightedUsabilityTags ?? 0) + tagDelta * userRep;
+    const prevProxyRate = post.proxySuccessRate ?? post.health.uptimePct / 100;
+    const nextProxyRate = Number((0.9 * prevProxyRate + 0.1 * healthVal).toFixed(4));
+
+    const weightedUpvotes =
+      post.weightedUpvotes ?? post.stats.trialUpvotes * 3 + (post.stats.upvotes - post.stats.trialUpvotes);
+    const videoCompletions = post.videoCompletions ?? Math.floor(post.stats.views * 0.65);
+    const commentsCount = post.stats.comments;
+    const sharesCount = post.sharesCount ?? 2;
+    const desktopHandoffs = post.desktopHandoffs ?? 1;
+
+    const popularityScore = Number(
+      (
+        weightedUpvotes +
+        0.5 * videoCompletions +
+        2.0 * commentsCount +
+        3.0 * sharesCount
+      ).toFixed(2)
+    );
+
+    const rawConversion = Math.max(
+      0.0,
+      -1.0 * nextBounces +
+        3.0 * nextSingle +
+        7.0 * nextMulti +
+        10.0 * desktopHandoffs +
+        nextTags +
+        priorC * globalMeanM
+    );
+    const usabilityScore = Number(
+      (nextProxyRate * (rawConversion / (nextImpressions + priorC))).toFixed(2)
+    );
+
+    const ageHours = Math.max(
+      0,
+      (Date.now() - new Date(post.createdAt).getTime()) / 3_600_000
+    );
+    const dailyLeaderboardScore = Number(
+      (
+        (0.4 * Math.log(Math.max(popularityScore, 1.0)) + 0.6 * usabilityScore) /
+        Math.pow(ageHours + 2.0, 1.5)
+      ).toFixed(4)
+    );
+
+    post.impressions = nextImpressions;
+    post.stats.views = nextImpressions;
+    if (runTier === "SINGLE" || runTier === "MULTI") {
+      post.stats.tries += 1;
+    }
+    if (payload.quick_feedback_tag === "WORKS_GREAT") {
+      post.stats.upvotes += 1;
+      post.stats.trialUpvotes += 1;
+    }
+    post.sandboxBounces = nextBounces;
+    post.sandboxSingleRuns = nextSingle;
+    post.sandboxMultiRuns = nextMulti;
+    post.weightedUsabilityTags = nextTags;
+    post.proxySuccessRate = nextProxyRate;
+    post.health.uptimePct = Number((nextProxyRate * 100).toFixed(1));
+    post.popularityScore = popularityScore;
+    post.usabilityScore = usabilityScore;
+    post.dailyLeaderboardScore = dailyLeaderboardScore;
+    post.postScore = Number((post.postScore + (runTier === "MULTI" ? 3.2 : runTier === "SINGLE" ? 1.8 : 0)).toFixed(2));
+  }
+
+  // Record user impression
+  let seen = runtimeUserImpressions.get(payload.user_id);
+  if (!seen) {
+    seen = new Set<string>();
+    runtimeUserImpressions.set(payload.user_id, seen);
+  }
+  seen.add(payload.project_id);
+
+  // Update User Intent Vector via EMA if SINGLE or MULTI and not BUGGY
+  let updatedVec = getUserIntentVector(payload.user_id);
+  if (
+    (runTier === "SINGLE" || runTier === "MULTI") &&
+    payload.quick_feedback_tag !== "BUGGY"
+  ) {
+    const projectVec = SEED_POST_VECTORS[payload.project_id] ?? SEED_POST_VECTORS["post_resume_json"]!;
+    updatedVec = updateEmaVector(updatedVec, projectVec, runTier);
+    runtimeUserVectors.set(payload.user_id, updatedVec);
+    const xpGain = (runTier === "MULTI" ? 50 : 25) + (payload.quick_feedback_tag === "WORKS_GREAT" ? 15 : 0);
+    runtimeXpBonus.set(payload.user_id, (runtimeXpBonus.get(payload.user_id) ?? 0) + xpGain);
+  }
+
+  return {
+    run_tier: runTier,
+    tag_delta: tagDelta,
+    updated_post: post,
+    updated_user_vector: updatedVec,
+  };
+}
+
+/**
+ * Hybrid Personalized Feed Recommender (mirrors Supabase/Postgres get_personalized_feed RPC)
+ */
+export function getPersonalizedFeedProjects(userId: string, limit = 10): Post[] {
+  const userVec = getUserIntentVector(userId);
+  const seen = runtimeUserImpressions.get(userId) ?? new Set<string>();
+  const all = getAllPosts().filter((p) => (p.proxySuccessRate ?? 1.0) > 0.3);
+  const unseen = all.filter((p) => !seen.has(p.id));
+  const candidates = unseen.length >= Math.min(limit, 3) ? unseen : all;
+
+  const scored = candidates.map((p) => {
+    const postVec = SEED_POST_VECTORS[p.id];
+    const intentMatch =
+      userVec && postVec ? Math.max(0, Math.min(1, cosineSim(userVec, postVec))) : 0.5;
+    const normUsability = Math.min((p.usabilityScore ?? 1.2) / 5.0, 1.0);
+    const ageHours = Math.max(0, (Date.now() - new Date(p.createdAt).getTime()) / 3_600_000);
+    const timeDecayedPopularity =
+      Math.min(Math.log(Math.max(p.popularityScore ?? 1.0, 1.0)) / 10.0, 1.0) /
+      Math.pow(ageHours + 2.0, 1.2);
+    const coldStartBoost = Math.max(0.0, (100.0 - (p.impressions ?? 100)) / 100.0);
+
+    const hybridScore =
+      0.5 * intentMatch +
+      0.25 * normUsability +
+      0.15 * timeDecayedPopularity +
+      0.1 * coldStartBoost;
+
+    return { post: p, hybridScore };
+  });
+
+  scored.sort((a, b) => b.hybridScore - a.hybridScore);
+  return scored.slice(0, limit).map((s) => s.post);
+}
+
+/** Persistence-aware wrappers: Postgres when reachable & seeded, in-memory store otherwise. */
+export async function recordTelemetry(payload: TelemetryPayload) {
+  if (USE_DB) {
+    try {
+      const r = await dbRecordTelemetry(payload);
+      if (r.post) {
+        return { run_tier: r.run_tier, tag_delta: r.tag_delta, updated_post: r.post };
+      }
+    } catch {
+      // Fallback to in-memory store when local Postgres container is not running
+    }
+  }
+  return recordSandboxTelemetry(payload);
+}
+
+export async function rankedFeedProjects(userId: string, limit = 10): Promise<Post[]> {
+  if (USE_DB) {
+    try {
+      const rows = await dbPersonalizedFeed(userId, limit);
+      if (rows.length > 0) return rows;
+    } catch {
+      // Fallback to in-memory store
+    }
+  }
+  return getPersonalizedFeedProjects(userId, limit);
+}
+
+export async function intentVectorFor(userId: string): Promise<number[] | null> {
+  if (USE_DB) {
+    try {
+      const vec = await dbGetUserVector(userId);
+      if (vec) return vec;
+    } catch {
+      // Fallback to in-memory store
+    }
+  }
+  return getUserIntentVector(userId);
+}
+
+export async function getLivePost(id: string): Promise<Post | undefined> {
+  if (USE_DB) {
+    try {
+      const p = await dbPostById(id);
+      if (p) return p;
+    } catch {
+      // Fallback to in-memory store
+    }
+  }
+  return getPostById(id);
 }
 
 export function createRuntimeReview(params: {
@@ -187,6 +414,42 @@ export async function fetchHomeFeed(
   mode: "for_you" | "following",
   cursor?: string | null,
 ): Promise<FeedResponse> {
+  if (USE_DB && mode === "for_you" && !cursor) {
+    try {
+      const posts = await dbPersonalizedFeed(userId, 10);
+      if (posts.length > 0) {
+        const userVec = await dbGetUserVector(userId);
+        const followed = new Set(getFollowingForUser(userId).map((u) => u.id));
+        const items: FeedItem[] = posts.map((post) => {
+          const sim = userVec && SEED_POST_VECTORS[post.id] ? cosineSim(userVec, SEED_POST_VECTORS[post.id]!) : 0;
+          const authorSeed = SEED_USERS.find((u) => u.id === post.authorId);
+          const reason: FeedItem["reason"] = followed.has(post.authorId)
+            ? { kind: "followed", via: post.author, text: `Recommended because you follow @${post.author.handle}` }
+            : sim >= 0.8
+              ? {
+                  kind: "taste",
+                  matchedTopic: post.category,
+                  similarity: Number(sim.toFixed(2)),
+                  text: `Matches tools you tried in ${post.category} (${Math.round(sim * 100)}% match)`,
+                }
+              : authorSeed && authorSeed.followersCount === 0
+                ? { kind: "coldstart", text: `Fresh builder · 20% Cold-Start Spotlight (@${post.author.handle})` }
+                : {
+                    kind: "trending",
+                    text: `S_use ${(post.usabilityScore ?? 0).toFixed(2)} · S_pop ${Math.round(post.popularityScore ?? 0)} · live from Postgres`,
+                  };
+          return {
+            post,
+            reason,
+            viewerState: { upvoted: false, tried: false, saved: false, followingAuthor: followed.has(post.authorId) },
+          };
+        });
+        return { items, nextCursor: null, mode: "for_you" };
+      }
+    } catch {
+      // Fallback to in-memory mock feed if Postgres is not running or not yet seeded
+    }
+  }
   if (MOCK) {
     const base = getMockHomeFeed(userId, mode, cursor ?? null);
     if (!cursor && runtimePosts.length > 0) {
@@ -268,8 +531,16 @@ export async function fetchLeaderboard(
   period: LeaderboardPeriod = "7d",
   viewerId = "usr_ritam",
 ): Promise<LeaderboardResponse> {
+  if (USE_DB && (type === "trending" || type === "useful" || type === "popular")) {
+    try {
+      const res = await dbLeaderboard(type, period);
+      if (res.rows.length > 0) return res;
+    } catch {
+      // Fallback to in-memory store
+    }
+  }
   if (MOCK) {
-    return getMockLeaderboard(type, period, viewerId);
+    return getMockLeaderboard(type, period, viewerId, getAllPosts());
   }
   const qs = new URLSearchParams({ type, period, userId: viewerId });
   const res = await fetch(`${SCORING_URL}/leaderboard?${qs}`, { cache: "no-store" });

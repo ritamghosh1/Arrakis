@@ -46,6 +46,8 @@ export const users = pgTable("users", {
   verifiedUtility: boolean("verified_utility").notNull().default(false),
   cofounderOpen: boolean("cofounder_open").notNull().default(false),
   badges: jsonb("badges").$type<BadgeId[]>().notNull().default([]),
+  intentEmbedding: vector16("intent_embedding"),
+  reputationScore: doublePrecision("reputation_score").notNull().default(1.0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -64,6 +66,9 @@ export const posts = pgTable(
     durationSec: integer("duration_sec").notNull().default(60),
     demoMode: text("demo_mode").notNull(),
     demoTarget: text("demo_target").notNull(),
+    projectType: text("project_type").notNull().default("BROWSER"),
+    targetUrl: text("target_url"),
+    intentEmbedding: vector16("intent_embedding"),
     formSchema: jsonb("form_schema").$type<FormFieldSchema[] | null>(),
     tags: jsonb("tags").$type<string[]>().notNull().default([]),
     indexingStatus: text("indexing_status").notNull().default("ready"),
@@ -72,6 +77,19 @@ export const posts = pgTable(
     upvotesCount: integer("upvotes_count").notNull().default(0),
     trialUpvotesCount: integer("trial_upvotes_count").notNull().default(0),
     commentsCount: integer("comments_count").notNull().default(0),
+    impressions: integer("impressions").notNull().default(0),
+    videoCompletions: integer("video_completions").notNull().default(0),
+    sandboxBounces: integer("sandbox_bounces").notNull().default(0),
+    sandboxSingleRuns: integer("sandbox_single_runs").notNull().default(0),
+    sandboxMultiRuns: integer("sandbox_multi_runs").notNull().default(0),
+    desktopHandoffs: integer("desktop_handoffs").notNull().default(0),
+    proxySuccessRate: doublePrecision("proxy_success_rate").notNull().default(1.0),
+    weightedUpvotes: doublePrecision("weighted_upvotes").notNull().default(0.0),
+    weightedUsabilityTags: doublePrecision("weighted_usability_tags").notNull().default(0.0),
+    sharesCount: integer("shares_count").notNull().default(0),
+    popularityScore: doublePrecision("popularity_score").notNull().default(0.0),
+    usabilityScore: doublePrecision("usability_score").notNull().default(0.0),
+    dailyLeaderboardScore: doublePrecision("daily_leaderboard_score").notNull().default(0.0),
     uptimePct: doublePrecision("uptime_pct").notNull().default(99.0),
     p50LatencyMs: integer("p50_latency_ms").notNull().default(180),
     p95LatencyMs: integer("p95_latency_ms").notNull().default(420),
@@ -82,6 +100,23 @@ export const posts = pgTable(
   (table) => ({
     authorIdx: index("idx_posts_author").on(table.authorId),
     scoreIdx: index("idx_posts_score").on(table.postScore),
+  })
+);
+
+export const userImpressions = pgTable(
+  "user_impressions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    userProjectIdx: index("idx_user_impressions_user_project").on(table.userId, table.projectId),
   })
 );
 

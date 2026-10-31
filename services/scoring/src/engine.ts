@@ -656,22 +656,33 @@ export class ScoringLedger {
   ): LeaderboardResponse {
     const periodMultiplier = period === "24h" ? 0.38 : period === "7d" ? 1 : 2.15;
 
-    if (type === "trending") {
-      const sortedPosts = Array.from(this.posts.values()).sort((a, b) => b.postScore - a.postScore);
+    if (type === "trending" || type === "useful" || type === "popular") {
+      const sortedPosts = Array.from(this.posts.values()).sort((a, b) => {
+        if (type === "useful") return (b.usabilityScore ?? 0) - (a.usabilityScore ?? 0);
+        if (type === "popular")
+          return (b.popularityScore ?? b.postScore) - (a.popularityScore ?? a.postScore);
+        return b.postScore - a.postScore;
+      });
       const rows: LeaderboardRow[] = sortedPosts.slice(0, 15).map((p, idx) => {
         const rank = idx + 1;
         const prevRank =
-          this.previousRanks.get(`trending:${p.id}`) ??
+          this.previousRanks.get(`${type}:${p.id}`) ??
           (idx === 0 ? 2 : idx === 1 ? 1 : idx + ((idx % 3) - 1));
         const passive = Math.max(0, p.stats.upvotes - p.stats.trialUpvotes);
         const weighted = p.stats.trialUpvotes * 3 + passive;
+        const rawScore =
+          type === "useful"
+            ? Number(((p.usabilityScore ?? 1.45) * 20).toFixed(1))
+            : type === "popular"
+              ? Number((p.popularityScore ?? p.postScore).toFixed(1))
+              : p.postScore;
         return {
           rank,
           prevRank,
           delta: prevRank - rank,
           entityType: "post",
           post: p,
-          score: Number((p.postScore * periodMultiplier).toFixed(1)),
+          score: Number((rawScore * periodMultiplier).toFixed(1)),
           breakdown: {
             weightedVotes: weighted,
             passiveUpvotes: passive,
@@ -682,7 +693,12 @@ export class ScoringLedger {
             workedRate: 0.94,
             uptimePct: p.health.uptimePct,
             freshnessDecay: 0.91,
-            formulaSummary: `${p.stats.trialUpvotes} verified sandbox tries · ${p.health.uptimePct}% live reliability`,
+            formulaSummary:
+              type === "useful"
+                ? `Usability ${(p.usabilityScore ?? 1.45).toFixed(2)} · ${Math.round((p.proxySuccessRate ?? 0.98) * 100)}% proxy health`
+                : type === "popular"
+                  ? `Popularity ${Math.round(p.popularityScore ?? p.postScore)} · ${p.stats.comments} comments · ${p.sharesCount ?? 0} shares`
+                  : `${p.stats.trialUpvotes} verified sandbox tries · ${p.health.uptimePct}% live reliability`,
           },
         };
       });

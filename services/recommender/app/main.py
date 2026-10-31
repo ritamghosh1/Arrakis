@@ -6,9 +6,11 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Optional
+import math
+from typing import Dict, List, Literal, Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from .contracts import EventBatchRequest, FeedResponse
 
 SEED_DIR = Path(__file__).resolve().parents[3] / "infra" / "seed"
@@ -113,12 +115,81 @@ def ingest_events(batch: EventBatchRequest):
     return {"accepted": len(batch.events)}
 
 
+class TelemetryPayload(BaseModel):
+    project_id: str
+    user_id: str
+    project_type: Literal["BROWSER", "CONTAINER"] = "CONTAINER"
+    health_ok: bool = True
+    boot_time_ms: int = 0
+    switched_to_landscape: bool = False
+    active_dwell_seconds: int = 0
+    interaction_bursts: int = 0
+    quick_feedback_tag: Optional[Literal["WORKS_GREAT", "BUGGY"]] = None
+
+
+_RUNTIME_USER_VECTORS: Dict[str, List[float]] = {}
+_RUNTIME_IMPRESSIONS: Dict[str, set] = {}
+
+
+def _cosine_sim(a: List[float], b: List[float]) -> float:
+    if not a or not b:
+        return 0.5
+    n = min(len(a), len(b))
+    dot = sum(a[i] * b[i] for i in range(n))
+    na = math.sqrt(sum(a[i] * a[i] for i in range(n))) or 1.0
+    nb = math.sqrt(sum(b[i] * b[i] for i in range(n))) or 1.0
+    return dot / (na * nb)
+
+
+def _classify_run_tier(p: TelemetryPayload) -> str:
+    if p.active_dwell_seconds < 5 or p.interaction_bursts == 0:
+        return "BOUNCE"
+    if p.active_dwell_seconds >= 45 and (p.interaction_bursts >= 3 or p.switched_to_landscape):
+        return "MULTI"
+    if p.active_dwell_seconds >= 15 and p.interaction_bursts >= 1:
+        return "SINGLE"
+    return "BOUNCE"
+
+
+@app.post("/telemetry")
+def ingest_telemetry(payload: TelemetryPayload):
+    run_tier = _classify_run_tier(payload)
+    tag_delta = 2.0 if payload.quick_feedback_tag == "WORKS_GREAT" else (-3.0 if payload.quick_feedback_tag == "BUGGY" else 0.0)
+
+    seen = _RUNTIME_IMPRESSIONS.setdefault(payload.user_id, set())
+    seen.add(payload.project_id)
+
+    if run_tier in ("SINGLE", "MULTI") and payload.quick_feedback_tag != "BUGGY":
+        user_vectors = _load_seed("user_vectors.json") or {}
+        post_vectors = _load_seed("post_vectors.json") or {}
+        u_vec = _RUNTIME_USER_VECTORS.get(payload.user_id) or user_vectors.get(payload.user_id)
+        p_vec = post_vectors.get(payload.project_id)
+        if p_vec:
+            if not u_vec:
+                _RUNTIME_USER_VECTORS[payload.user_id] = list(p_vec)
+            else:
+                alpha = 0.30 if run_tier == "MULTI" else 0.15
+                _RUNTIME_USER_VECTORS[payload.user_id] = [
+                    round((1.0 - alpha) * u_vec[i] + alpha * p_vec[i], 4)
+                    for i in range(min(len(u_vec), len(p_vec)))
+                ]
+
+    return {
+        "ok": True,
+        "run_tier": run_tier,
+        "tag_delta": tag_delta,
+        "user_vector": _RUNTIME_USER_VECTORS.get(payload.user_id),
+    }
+
+
 @app.get("/feed/debug")
 def debug_feed(userId: str = Query(default="usr_ritam")):
     user_vectors = _load_seed("user_vectors.json") or {}
     return {
         "userId": userId,
-        "tasteVector": user_vectors.get(userId, []),
+        "tasteVector": _RUNTIME_USER_VECTORS.get(userId) or user_vectors.get(userId, []),
+        "impressionsCount": len(_RUNTIME_IMPRESSIONS.get(userId, set())),
         "weights": {"view": 0.2, "try": 0.6, "review": 1.0, "share": 0.4},
+        "hybridFormula": "0.50*intent + 0.25*usability + 0.15*popularity_decayed + 0.10*coldstart",
         "coldStartQuota": "20% (2 per 10 items)",
     }

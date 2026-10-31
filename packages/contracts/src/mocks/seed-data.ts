@@ -10,11 +10,15 @@ import type {
   LeaderboardType,
   Post,
   ProfileResponse,
+  QuickFeedbackTag,
   Reason,
   Review,
+  RunTier,
+  SandboxProjectType,
   ScoreBreakdown,
   SseStreamEvent,
   TelemetryEvent,
+  TelemetryPayload,
   TrialRun,
   User,
   UserRef,
@@ -442,6 +446,49 @@ export const SEED_POSTS: Post[] = Array.from({ length: 60 }, (_, idx) => {
     (Math.log(1 + weightedVotes) * (0.5 + 0.85) * (1 + 0.3 * (tries / Math.max(views, 1))) * 10).toFixed(2)
   );
 
+  // Dual-Scoring Engine fields (Spop, Suse, Daily Leaderboard)
+  const projectType: SandboxProjectType = mode === "web" ? "BROWSER" : "CONTAINER";
+  const impressions = views;
+  const videoCompletions = Math.floor(views * 0.65);
+  const sandboxBounces = Math.max(1, Math.floor(tries * 0.14));
+  const sandboxSingleRuns = Math.floor(tries * 0.56);
+  const sandboxMultiRuns = Math.max(1, tries - sandboxBounces - sandboxSingleRuns);
+  const desktopHandoffs = mode === "handoff" ? Math.floor(tries * 0.35) : Math.floor(tries * 0.08);
+  const proxySuccessRate = Number((uptimePct / 100).toFixed(3));
+  const weightedUsabilityTags = Number((trialUpvotes * 1.4).toFixed(1));
+  const commentsCount = Math.floor(tries * 0.18);
+  const sharesCount = Math.max(2, Math.floor(tries * 0.12));
+
+  const popularityScore = Number(
+    (
+      weightedVotes +
+      0.5 * videoCompletions +
+      2.0 * commentsCount +
+      3.0 * sharesCount
+    ).toFixed(2)
+  );
+
+  const priorC = 50.0;
+  const globalMeanM = 1.2;
+  const rawUsability =
+    -1.0 * sandboxBounces +
+    3.0 * sandboxSingleRuns +
+    7.0 * sandboxMultiRuns +
+    10.0 * desktopHandoffs +
+    weightedUsabilityTags +
+    priorC * globalMeanM;
+  const usabilityScore = Number(
+    (proxySuccessRate * (Math.max(0, rawUsability) / (impressions + priorC))).toFixed(2)
+  );
+
+  const ageHours = idx * 3;
+  const dailyLeaderboardScore = Number(
+    (
+      (0.4 * Math.log(Math.max(popularityScore, 1.0)) + 0.6 * usabilityScore) /
+      Math.pow(ageHours + 2.0, 1.5)
+    ).toFixed(4)
+  );
+
   return {
     id,
     authorId: author.id,
@@ -481,7 +528,7 @@ export const SEED_POSTS: Post[] = Array.from({ length: 60 }, (_, idx) => {
       tries,
       upvotes,
       trialUpvotes,
-      comments: Math.floor(tries * 0.18),
+      comments: commentsCount,
     },
     health: {
       uptimePct,
@@ -491,6 +538,20 @@ export const SEED_POSTS: Post[] = Array.from({ length: 60 }, (_, idx) => {
       verifiedUtility,
     },
     postScore,
+    projectType,
+    impressions,
+    videoCompletions,
+    sandboxBounces,
+    sandboxSingleRuns,
+    sandboxMultiRuns,
+    desktopHandoffs,
+    proxySuccessRate,
+    weightedUpvotes: weightedVotes,
+    weightedUsabilityTags,
+    sharesCount,
+    popularityScore,
+    usabilityScore,
+    dailyLeaderboardScore,
     createdAt: new Date(Date.now() - idx * 3600_000 * 3).toISOString(),
   };
 });
@@ -694,20 +755,84 @@ export function getMockGlobalFeed(query?: string, modeFilter?: DemoMode, categor
 }
 
 /**
- * Leaderboard generator (Builders / Testers / Trending Projects)
+ * Classify outer-shell telemetry session into BOUNCE | SINGLE | MULTI tier
+ */
+export function classifyTelemetryRunTier(
+  payload: Pick<
+    TelemetryPayload,
+    "active_dwell_seconds" | "interaction_bursts" | "switched_to_landscape"
+  >
+): RunTier {
+  if (payload.active_dwell_seconds < 5 || payload.interaction_bursts === 0) {
+    return "BOUNCE";
+  }
+  if (
+    payload.active_dwell_seconds >= 45 &&
+    (payload.interaction_bursts >= 3 || payload.switched_to_landscape === true)
+  ) {
+    return "MULTI";
+  }
+  if (payload.active_dwell_seconds >= 15 && payload.interaction_bursts >= 1) {
+    return "SINGLE";
+  }
+  return "BOUNCE";
+}
+
+export function getQuickFeedbackTagDelta(tag: QuickFeedbackTag): number {
+  if (tag === "WORKS_GREAT") return 2.0;
+  if (tag === "BUGGY") return -3.0;
+  return 0.0;
+}
+
+/**
+ * Element-wise Exponential Moving Average (EMA) for user intent vector
+ */
+export function updateEmaVector(
+  userVec: number[] | null | undefined,
+  projectVec: number[],
+  runTier: RunTier
+): number[] {
+  if (!userVec || userVec.length === 0) {
+    return [...projectVec];
+  }
+  const alpha = runTier === "MULTI" ? 0.3 : 0.15;
+  const len = Math.min(userVec.length, projectVec.length);
+  const next: number[] = [];
+  for (let i = 0; i < len; i++) {
+    next.push(Number(((1 - alpha) * userVec[i]! + alpha * projectVec[i]!).toFixed(4)));
+  }
+  return next;
+}
+
+/**
+ * Leaderboard generator (Builders / Testers / Trending / Most Useful / Most Popular)
  */
 export function getMockLeaderboard(
   type: LeaderboardType = "builders",
   period: LeaderboardPeriod = "7d",
-  viewerId = "usr_ritam"
+  viewerId = "usr_ritam",
+  postsOverride?: Post[]
 ): LeaderboardResponse {
-  if (type === "trending") {
-    const sortedPosts = [...SEED_POSTS].sort((a, b) => b.postScore - a.postScore).slice(0, 15);
+  const postsList = postsOverride ?? SEED_POSTS;
+  if (type === "trending" || type === "useful" || type === "popular") {
+    const sortedPosts = [...postsList]
+      .sort((a, b) => {
+        if (type === "useful") return (b.usabilityScore ?? 0) - (a.usabilityScore ?? 0);
+        if (type === "popular") return (b.popularityScore ?? 0) - (a.popularityScore ?? 0);
+        return (b.dailyLeaderboardScore ?? b.postScore) - (a.dailyLeaderboardScore ?? a.postScore);
+      })
+      .slice(0, 15);
     const rows: LeaderboardRow[] = sortedPosts.map((post, idx) => {
       const rank = idx + 1;
       const prevRank = Math.max(1, rank + (idx % 3 === 0 ? 2 : idx % 3 === 1 ? -1 : 0));
       const passive = post.stats.upvotes - post.stats.trialUpvotes;
       const weightedVotes = post.stats.trialUpvotes * 3 + passive;
+      const score =
+        type === "useful"
+          ? Number((post.usabilityScore ?? 0).toFixed(2))
+          : type === "popular"
+            ? Number((post.popularityScore ?? 0).toFixed(1))
+            : post.postScore;
       return {
         rank,
         prevRank,
@@ -715,7 +840,7 @@ export function getMockLeaderboard(
         entityType: "post",
         post,
         user: SEED_USERS.find((u) => u.id === post.authorId),
-        score: post.postScore,
+        score,
         breakdown: {
           weightedVotes,
           passiveUpvotes: passive,
@@ -724,7 +849,15 @@ export function getMockLeaderboard(
           workedRate: 0.94,
           uptimePct: post.health.uptimePct,
           freshnessDecay: 0.92,
-          formulaSummary: `${post.stats.trialUpvotes} trial upvotes (×3) + ${passive} passive (×1) · ${post.health.uptimePct}% uptime`,
+          popularityScore: post.popularityScore,
+          usabilityScore: post.usabilityScore,
+          dailyLeaderboardScore: post.dailyLeaderboardScore,
+          formulaSummary:
+            type === "useful"
+              ? `Usability S_use=${(post.usabilityScore ?? 0).toFixed(2)} · ${post.sandboxMultiRuns ?? 0} multi-runs · ${post.health.uptimePct}% proxy health`
+              : type === "popular"
+                ? `Popularity S_pop=${(post.popularityScore ?? 0).toFixed(0)} · ${weightedVotes} weighted votes · ${post.sharesCount ?? 0} shares`
+                : `${post.stats.trialUpvotes} trial upvotes (×3) + ${passive} passive (×1) · S_use=${(post.usabilityScore ?? 0).toFixed(2)}`,
         },
       };
     });

@@ -62,7 +62,14 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
   }
 
   if (req.method === "GET" && url.pathname === "/leaderboard") {
-    const type = (url.searchParams.get("type") ?? "builders") as LeaderboardType;
+    const typeParam = url.searchParams.get("type") ?? "builders";
+    const type: LeaderboardType =
+      typeParam === "testers" ||
+      typeParam === "trending" ||
+      typeParam === "useful" ||
+      typeParam === "popular"
+        ? typeParam
+        : "builders";
     const period = (url.searchParams.get("period") ?? "7d") as LeaderboardPeriod;
     const viewerId = url.searchParams.get("userId") ?? "usr_ritam";
     const data = defaultScoringLedger.getLeaderboard(type, period, viewerId);
