@@ -1,0 +1,28 @@
+{
+  "name": "arrakis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arrakis — Utility-First Social Feed for Indie Projects (Team UNEMPLOYEDS)",
+  "workspaces": [
+    "apps/*",
+    "services/sandbox",
+    "services/scoring",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace @arrakis/web run dev",
+    "dev:sandbox": "npm --workspace @arrakis/sandbox run dev",
+    "dev:scoring": "npm --workspace @arrakis/scoring run dev",
+    "dev:recommender": "cd services/recommender && .venv/bin/uvicorn app.main:app --reload --port 4001",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:generate": "npm --workspace @arrakis/contracts run db:generate",
+    "db:migrate": "npm --workspace @arrakis/contracts run db:migrate",
+    "seed": "node --experimental-strip-types packages/contracts/src/seed.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.4"
+  }
+}

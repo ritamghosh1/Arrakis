@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: arrakis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: arrakis
+      POSTGRES_PASSWORD: arrakis_dev
+      POSTGRES_DB: arrakis
+    ports:
+      - "5432:5432"
+    volumes:
+      - arrakis_pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/00_extensions.sql:ro
+      - ./migrations/0000_init.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arrakis -d arrakis"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: arrakis-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - arrakis_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  arrakis_pgdata:
+  arrakis_redisdata:

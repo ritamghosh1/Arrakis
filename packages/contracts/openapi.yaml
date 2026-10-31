@@ -1,0 +1,118 @@
+openapi: 3.1.0
+info:
+  title: Arrakis Shared API Contracts (Frozen v0)
+  version: 0.1.0
+  description: >
+    Contract between Dev A (Ritam: apps/web + services/scoring) and
+    Dev B (Srinjoy: services/recommender + services/sandbox).
+servers:
+  - url: http://localhost:3000/api
+    description: Next.js BFF / Mock Gateway
+  - url: http://localhost:4001
+    description: Recommender Service (FastAPI — Dev B)
+  - url: http://localhost:4002
+    description: Sandbox Orchestrator (Node/Docker — Dev B)
+  - url: http://localhost:4003
+    description: Scoring & Leaderboard Service (Node/TS — Dev A)
+
+paths:
+  /feed/home:
+    get:
+      summary: Personalized 80/20 Home Feed with Reason attribution chips
+      parameters:
+        - in: query
+          name: userId
+          schema: { type: string, default: usr_ritam }
+        - in: query
+          name: mode
+          schema: { type: string, enum: [for_you, following], default: for_you }
+        - in: query
+          name: cursor
+          schema: { type: string }
+      responses:
+        "200":
+          description: FeedResponse
+  /feed/global:
+    get:
+      summary: Hybrid BM25 + pgvector Problem-First Search Feed
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: mode
+          schema: { type: string, enum: [api, web, container, handoff] }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: FeedResponse
+  /follow/{userId}:
+    post:
+      summary: Follow a builder/tester (idempotent, nudges taste vector)
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Follow state updated
+    delete:
+      summary: Unfollow user
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Unfollowed
+  /events:
+    post:
+      summary: Batch telemetry events (view +0.2 | try +0.6 | review +1.0)
+      responses:
+        "202":
+          description: Accepted
+  /try/{postId}:
+    post:
+      summary: Start an ephemeral sandbox TrialRun (Docker container / API proxy / Web)
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema: { type: string }
+      responses:
+        "201":
+          description: TrialRun created with streamUrl
+  /try/{runId}/stream:
+    get:
+      summary: Server-Sent Events (SSE) stream for live container stdout/stderr/health
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: text/event-stream of SseStreamEvent
+  /reviews:
+    post:
+      summary: Submit 3-tap micro-review (Worked? Would use? 1-line bug)
+      responses:
+        "201":
+          description: Review recorded and Scout XP awarded
+  /leaderboard:
+    get:
+      summary: Proof-of-Trial Leaderboard (builders | testers | trending)
+      parameters:
+        - in: query
+          name: type
+          schema: { type: string, enum: [builders, testers, trending], default: builders }
+        - in: query
+          name: period
+          schema: { type: string, enum: [24h, 7d, all], default: 7d }
+      responses:
+        "200":
+          description: LeaderboardResponse

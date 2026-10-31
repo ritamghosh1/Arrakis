@@ -40,11 +40,12 @@ Next.js PWA (UI)  ──►  API routes / Edge  ──►  Postgres + pgvector  
 ```
 
 ### Tech stack
-- **Frontend:** Next.js 14 (App Router) PWA, TypeScript, Tailwind, native `<dialog>`/Popover, CSS scroll-snap + View Transitions.
-- **Backend:** Next.js route handlers + a small Node/Fastify (or Python FastAPI) service for recommender & sandbox orchestrator.
-- **Data:** Postgres + `pgvector`, Redis (Upstash locally via Docker Redis).
-- **Containers:** Docker Engine via `dockerode`; per-run network isolation, CPU/mem/time caps.
-- **AI:** Whisper (transcribe) → LLM utility extractor → `text-embedding-3-small`.
+- **Frontend (Dev A — Ritam):** Next.js 14/15 (App Router) PWA, TypeScript, Tailwind, native `<dialog>`/Popover, CSS scroll-snap + View Transitions.
+- **Scoring & Leaderboard Service (Dev A — Ritam):** TypeScript (`services/scoring`), Proof-of-Trial formula, Redis ZSETs.
+- **Recommender Service (Dev B — Srinjoy):** Python **FastAPI** (`services/recommender`), taste vector updater, follow-graph attribution, hybrid BM25 + `pgvector` search.
+- **Sandbox Orchestrator (Dev B — Srinjoy):** TypeScript (`services/sandbox`), Docker Engine isolation, live SSE terminal streaming.
+- **Data & ORM (Shared):** **Drizzle ORM** (`packages/contracts/src/db/schema.ts`), Postgres 16 + `pgvector` (`pgvector/pgvector:pg16`), Redis 7 (`infra/docker-compose.yml`).
+- **AI:** Whisper (transcribe) → LLM utility extractor → `text-embedding-3-small` (with deterministic 16-d seed fallback).
 
 > Hackathon rule: **every external dependency must have a mock/seed fallback** so the demo never breaks offline.
 

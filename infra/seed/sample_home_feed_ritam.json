@@ -1,0 +1,709 @@
+{
+  "items": [
+    {
+      "post": {
+        "id": "post_resume_json",
+        "authorId": "usr_aanya",
+        "author": {
+          "id": "usr_aanya",
+          "handle": "aanya",
+          "displayName": "Aanya Sharma",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+          "verifiedUtility": true
+        },
+        "title": "Resume2Schema — Convert messy PDF resumes into strict JSON",
+        "problemStatement": "Convert unstructured PDF or plain-text resumes into validated JSON Resume schema in under 1 second without manual copy-pasting.",
+        "category": "Document & PDF",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+        "thumbUrl": "https://picsum.photos/seed/post_resume_json/720/1280",
+        "durationSec": 45,
+        "demo": {
+          "mode": "container",
+          "target": "arrakis/resume2schema:latest",
+          "formSchema": [
+            {
+              "name": "resumeText",
+              "label": "Paste raw resume snippet",
+              "type": "text",
+              "required": true,
+              "defaultValue": "Aanya Sharma | B.Tech CSE 2026 | Built distributed PDF parser in Rust (12k req/s)"
+            },
+            {
+              "name": "strictMode",
+              "label": "Strict JSON Schema validation",
+              "type": "boolean",
+              "required": false,
+              "defaultValue": true
+            }
+          ],
+          "sampleCommand": "resume2schema --input stdin --format json-resume"
+        },
+        "tags": [
+          "resume",
+          "json",
+          "pdf",
+          "parser"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 740,
+          "tries": 207,
+          "upvotes": 187,
+          "trialUpvotes": 128,
+          "comments": 37
+        },
+        "health": {
+          "uptimePct": 99.4,
+          "p50LatencyMs": 142,
+          "p95LatencyMs": 310,
+          "crashRate": 0.006,
+          "verifiedUtility": true
+        },
+        "postScore": 89.2,
+        "createdAt": "2026-10-31T05:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_aanya",
+          "handle": "aanya",
+          "displayName": "Aanya Sharma",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+          "verifiedUtility": true
+        },
+        "text": "Recommended because you follow @aanya"
+      },
+      "viewerState": {
+        "upvoted": true,
+        "tried": true,
+        "saved": false,
+        "followingAuthor": true
+      }
+    },
+    {
+      "post": {
+        "id": "post_csv_surgeon",
+        "authorId": "usr_kabir",
+        "author": {
+          "id": "usr_kabir",
+          "handle": "kabir",
+          "displayName": "Kabir Verma",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=kabir",
+          "verifiedUtility": true
+        },
+        "title": "CSV Surgeon — Fix broken encodings, dedupe rows & emit SQL DDL",
+        "problemStatement": "Clean corrupted CSV exports with mixed date formats, duplicate rows, and broken UTF-8 characters, and output ready-to-run Postgres DDL.",
+        "category": "Data & CSV",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+        "thumbUrl": "https://picsum.photos/seed/post_csv_surgeon/720/1280",
+        "durationSec": 46,
+        "demo": {
+          "mode": "container",
+          "target": "arrakis/csv-surgeon:latest",
+          "formSchema": [
+            {
+              "name": "csvSample",
+              "label": "CSV rows (header + sample)",
+              "type": "text",
+              "required": true,
+              "defaultValue": "id,name,signup_date,amount\n1,Ritam,2026/10/31,$42.50\n1,Ritam,31-10-2026,$42.50"
+            },
+            {
+              "name": "dialect",
+              "label": "Target SQL dialect",
+              "type": "select",
+              "required": true,
+              "defaultValue": "postgres",
+              "options": [
+                "postgres",
+                "sqlite",
+                "duckdb"
+              ]
+            }
+          ],
+          "sampleCommand": "csv-surgeon --dedupe --infer-ddl --dialect postgres"
+        },
+        "tags": [
+          "csv",
+          "sql",
+          "data-cleaning",
+          "cli"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 693,
+          "tries": 221,
+          "upvotes": 192,
+          "trialUpvotes": 137,
+          "comments": 39
+        },
+        "health": {
+          "uptimePct": 98.9,
+          "p50LatencyMs": 118,
+          "p95LatencyMs": 265,
+          "crashRate": 0.011,
+          "verifiedUtility": true
+        },
+        "postScore": 90.91,
+        "createdAt": "2026-10-31T02:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_kabir",
+          "handle": "kabir",
+          "displayName": "Kabir Verma",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=kabir",
+          "verifiedUtility": true
+        },
+        "text": "Recommended because you follow @kabir"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": true
+      }
+    },
+    {
+      "post": {
+        "id": "post_27",
+        "authorId": "usr_27",
+        "author": {
+          "id": "usr_27",
+          "handle": "builder_27",
+          "displayName": "Indie Builder #27",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_27",
+          "verifiedUtility": false
+        },
+        "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#27)",
+        "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+        "category": "Developer Tools",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+        "thumbUrl": "https://picsum.photos/seed/post_27/720/1280",
+        "durationSec": 71,
+        "demo": {
+          "mode": "web",
+          "target": "https://demo.arrakis.dev/web/post_27",
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "cors",
+          "http",
+          "debugging"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 1918,
+          "tries": 613,
+          "upvotes": 533,
+          "trialUpvotes": 380,
+          "comments": 110
+        },
+        "health": {
+          "uptimePct": 93.8,
+          "p50LatencyMs": 265,
+          "p95LatencyMs": 545,
+          "crashRate": 0.062,
+          "verifiedUtility": true
+        },
+        "postScore": 106.01,
+        "createdAt": "2026-10-27T23:58:45.753Z"
+      },
+      "reason": {
+        "kind": "coldstart",
+        "text": "Fresh builder · 20% Cold-Start Spotlight (@builder_27)"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": false
+      }
+    },
+    {
+      "post": {
+        "id": "post_cron_human",
+        "authorId": "usr_rohan",
+        "author": {
+          "id": "usr_rohan",
+          "handle": "rohan",
+          "displayName": "Rohan Kulkarni",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=rohan",
+          "verifiedUtility": false
+        },
+        "title": "CronSpeak — Turn natural English schedules into tested cron + systemd timers",
+        "problemStatement": "Translate plain English scheduling rules like 'every weekday at 9:15am IST except bank holidays' into cron expressions with next-10 firing timestamps.",
+        "category": "Productivity & Automation",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+        "thumbUrl": "https://picsum.photos/seed/post_cron_human/720/1280",
+        "durationSec": 48,
+        "demo": {
+          "mode": "api",
+          "target": "https://demo.arrakis.dev/api/cronspeak",
+          "formSchema": [
+            {
+              "name": "scheduleText",
+              "label": "Describe when the job should run",
+              "type": "text",
+              "required": true,
+              "defaultValue": "Every Monday and Thursday at 9:30 AM IST"
+            }
+          ],
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "cron",
+          "scheduling",
+          "automation"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 599,
+          "tries": 239,
+          "upvotes": 195,
+          "trialUpvotes": 148,
+          "comments": 43
+        },
+        "health": {
+          "uptimePct": 96.5,
+          "p50LatencyMs": 210,
+          "p95LatencyMs": 480,
+          "crashRate": 0.035,
+          "verifiedUtility": true
+        },
+        "postScore": 93.7,
+        "createdAt": "2026-10-30T20:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_rohan",
+          "handle": "rohan",
+          "displayName": "Rohan Kulkarni",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=rohan",
+          "verifiedUtility": false
+        },
+        "text": "Recommended because you follow @rohan"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": true
+      }
+    },
+    {
+      "post": {
+        "id": "post_svg_Minify_canvas",
+        "authorId": "usr_ritam",
+        "author": {
+          "id": "usr_ritam",
+          "handle": "ritam",
+          "displayName": "Ritam Ghosh",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+          "verifiedUtility": true
+        },
+        "title": "VectorDiet — Interactive SVG path simplifier & React component generator",
+        "problemStatement": "Shrink bloated Figma/Illustrator SVG exports by up to 80% while previewing visual fidelity side-by-side and copying accessible React components.",
+        "category": "Design & Media",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+        "thumbUrl": "https://picsum.photos/seed/post_svg_Minify_canvas/720/1280",
+        "durationSec": 49,
+        "demo": {
+          "mode": "web",
+          "target": "https://demo.arrakis.dev/sandbox/vectordiet",
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "svg",
+          "design-engineering",
+          "accessibility",
+          "frontend"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 552,
+          "tries": 242,
+          "upvotes": 194,
+          "trialUpvotes": 150,
+          "comments": 43
+        },
+        "health": {
+          "uptimePct": 99.6,
+          "p50LatencyMs": 130,
+          "p95LatencyMs": 250,
+          "crashRate": 0.004,
+          "verifiedUtility": true
+        },
+        "postScore": 94.78,
+        "createdAt": "2026-10-30T17:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_devika",
+          "handle": "devika",
+          "displayName": "Devika Nair",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=devika",
+          "verifiedUtility": true
+        },
+        "text": "Recommended because @devika tried & verified this"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": false
+      }
+    },
+    {
+      "post": {
+        "id": "post_invoice_chaser",
+        "authorId": "usr_aanya",
+        "author": {
+          "id": "usr_aanya",
+          "handle": "aanya",
+          "displayName": "Aanya Sharma",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+          "verifiedUtility": true
+        },
+        "title": "LedgerPing — Extract line items from freelance invoices & draft polite reminders",
+        "problemStatement": "Parse overdue PDF/email invoices into structured due dates and generate polite, context-aware payment follow-up drafts automatically.",
+        "category": "Productivity & Automation",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+        "thumbUrl": "https://picsum.photos/seed/post_invoice_chaser/720/1280",
+        "durationSec": 50,
+        "demo": {
+          "mode": "api",
+          "target": "https://demo.arrakis.dev/api/ledgerping",
+          "formSchema": [
+            {
+              "name": "invoiceSummary",
+              "label": "Invoice line & due date",
+              "type": "text",
+              "required": true,
+              "defaultValue": "INV-204 • Landing page redesign • $650 • Due 14 days ago"
+            }
+          ],
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "invoices",
+          "freelance",
+          "automation",
+          "pdf"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 505,
+          "tries": 141,
+          "upvotes": 127,
+          "trialUpvotes": 87,
+          "comments": 25
+        },
+        "health": {
+          "uptimePct": 97.8,
+          "p50LatencyMs": 225,
+          "p95LatencyMs": 510,
+          "crashRate": 0.022,
+          "verifiedUtility": true
+        },
+        "postScore": 83.55,
+        "createdAt": "2026-10-30T14:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_aanya",
+          "handle": "aanya",
+          "displayName": "Aanya Sharma",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+          "verifiedUtility": true
+        },
+        "text": "Recommended because you follow @aanya"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": true
+      }
+    },
+    {
+      "post": {
+        "id": "post_7",
+        "authorId": "usr_7",
+        "author": {
+          "id": "usr_7",
+          "handle": "builder_7",
+          "displayName": "Indie Builder #7",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_7",
+          "verifiedUtility": true
+        },
+        "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#7)",
+        "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+        "category": "Developer Tools",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+        "thumbUrl": "https://picsum.photos/seed/post_7/720/1280",
+        "durationSec": 51,
+        "demo": {
+          "mode": "container",
+          "target": "arrakis/demo-7:latest",
+          "formSchema": [
+            {
+              "name": "input",
+              "label": "Sample input payload",
+              "type": "text",
+              "required": true,
+              "defaultValue": "Sample input for instant 1-tap trial"
+            }
+          ],
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "git",
+          "debugging",
+          "regression"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 458,
+          "tries": 146,
+          "upvotes": 126,
+          "trialUpvotes": 90,
+          "comments": 26
+        },
+        "health": {
+          "uptimePct": 97.4,
+          "p50LatencyMs": 290,
+          "p95LatencyMs": 590,
+          "crashRate": 0.026,
+          "verifiedUtility": true
+        },
+        "postScore": 84.71,
+        "createdAt": "2026-10-30T11:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_7",
+          "handle": "builder_7",
+          "displayName": "Indie Builder #7",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_7",
+          "verifiedUtility": true
+        },
+        "text": "Recommended because you follow @builder_7"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": true
+      }
+    },
+    {
+      "post": {
+        "id": "post_56",
+        "authorId": "usr_26",
+        "author": {
+          "id": "usr_26",
+          "handle": "builder_26",
+          "displayName": "Indie Builder #26",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_26",
+          "verifiedUtility": false
+        },
+        "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#56)",
+        "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+        "category": "Document & PDF",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+        "thumbUrl": "https://picsum.photos/seed/post_56/720/1280",
+        "durationSec": 100,
+        "demo": {
+          "mode": "api",
+          "target": "https://demo.arrakis.dev/api/post_56",
+          "formSchema": [
+            {
+              "name": "input",
+              "label": "Sample input payload",
+              "type": "text",
+              "required": true,
+              "defaultValue": "Sample input for instant 1-tap trial"
+            }
+          ],
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "ocr",
+          "markdown",
+          "tables",
+          "research"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 555,
+          "tries": 155,
+          "upvotes": 140,
+          "trialUpvotes": 96,
+          "comments": 27
+        },
+        "health": {
+          "uptimePct": 98.3,
+          "p50LatencyMs": 290,
+          "p95LatencyMs": 590,
+          "crashRate": 0.017,
+          "verifiedUtility": true
+        },
+        "postScore": 84.98,
+        "createdAt": "2026-10-24T08:58:45.753Z"
+      },
+      "reason": {
+        "kind": "coldstart",
+        "text": "Fresh builder · 20% Cold-Start Spotlight (@builder_26)"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": false
+      }
+    },
+    {
+      "post": {
+        "id": "post_9",
+        "authorId": "usr_9",
+        "author": {
+          "id": "usr_9",
+          "handle": "builder_9",
+          "displayName": "Indie Builder #9",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_9",
+          "verifiedUtility": true
+        },
+        "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#9)",
+        "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+        "category": "Developer Tools",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+        "thumbUrl": "https://picsum.photos/seed/post_9/720/1280",
+        "durationSec": 53,
+        "demo": {
+          "mode": "web",
+          "target": "https://demo.arrakis.dev/web/post_9",
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "cors",
+          "http",
+          "debugging"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 364,
+          "tries": 145,
+          "upvotes": 118,
+          "trialUpvotes": 89,
+          "comments": 26
+        },
+        "health": {
+          "uptimePct": 92,
+          "p50LatencyMs": 165,
+          "p95LatencyMs": 365,
+          "crashRate": 0.08,
+          "verifiedUtility": true
+        },
+        "postScore": 86.05,
+        "createdAt": "2026-10-30T05:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_9",
+          "handle": "builder_9",
+          "displayName": "Indie Builder #9",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_9",
+          "verifiedUtility": true
+        },
+        "text": "Recommended because you follow @builder_9"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": true
+      }
+    },
+    {
+      "post": {
+        "id": "post_10",
+        "authorId": "usr_10",
+        "author": {
+          "id": "usr_10",
+          "handle": "builder_10",
+          "displayName": "Indie Builder #10",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_10",
+          "verifiedUtility": false
+        },
+        "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#10)",
+        "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+        "category": "Data & CSV",
+        "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+        "thumbUrl": "https://picsum.photos/seed/post_10/720/1280",
+        "durationSec": 54,
+        "demo": {
+          "mode": "container",
+          "target": "arrakis/demo-10:latest",
+          "formSchema": [
+            {
+              "name": "input",
+              "label": "Sample input payload",
+              "type": "text",
+              "required": true,
+              "defaultValue": "Sample input for instant 1-tap trial"
+            }
+          ],
+          "sampleCommand": "run-tool --input \"sample\""
+        },
+        "tags": [
+          "logs",
+          "observability",
+          "cli"
+        ],
+        "indexingStatus": "ready",
+        "stats": {
+          "views": 2717,
+          "tries": 1195,
+          "upvotes": 957,
+          "trialUpvotes": 740,
+          "comments": 215
+        },
+        "health": {
+          "uptimePct": 92.9,
+          "p50LatencyMs": 190,
+          "p95LatencyMs": 410,
+          "crashRate": 0.071,
+          "verifiedUtility": true
+        },
+        "postScore": 119.18,
+        "createdAt": "2026-10-30T02:58:45.753Z"
+      },
+      "reason": {
+        "kind": "followed",
+        "via": {
+          "id": "usr_10",
+          "handle": "builder_10",
+          "displayName": "Indie Builder #10",
+          "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_10",
+          "verifiedUtility": false
+        },
+        "text": "Recommended because you follow @builder_10"
+      },
+      "viewerState": {
+        "upvoted": false,
+        "tried": false,
+        "saved": false,
+        "followingAuthor": true
+      }
+    }
+  ],
+  "nextCursor": "10",
+  "mode": "for_you"
+}

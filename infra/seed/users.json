@@ -1,0 +1,590 @@
+[
+  {
+    "id": "usr_ritam",
+    "handle": "ritam",
+    "displayName": "Ritam Ghosh",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+    "role": "both",
+    "bio": "Design engineer & indie builder. Testing utility-first tools on Arrakis.",
+    "githubUrl": "https://github.com/ritam",
+    "followersCount": 285,
+    "followingCount": 8,
+    "scoutXp": 1480,
+    "builderScore": 95,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "first_25_scout",
+      "top_10_builder"
+    ],
+    "createdAt": "2026-09-26T05:58:45.751Z"
+  },
+  {
+    "id": "usr_srinjoy",
+    "handle": "srinjoy",
+    "displayName": "Srinjoy Mukherjee",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=srinjoy",
+    "role": "both",
+    "bio": "Systems & sandbox infrastructure. Building ephemeral micro-VMs and container tooling.",
+    "githubUrl": "https://github.com/srinjoy",
+    "followersCount": 276,
+    "followingCount": 11,
+    "scoutXp": 1620,
+    "builderScore": 92.7,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "top_10_builder",
+      "bug_hunter"
+    ],
+    "createdAt": "2026-09-27T05:58:45.752Z"
+  },
+  {
+    "id": "usr_aanya",
+    "handle": "aanya",
+    "displayName": "Aanya Sharma",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+    "role": "builder",
+    "bio": "Shipping document & resume parsers that run in <200ms.",
+    "githubUrl": "https://github.com/aanya",
+    "followersCount": 267,
+    "followingCount": 14,
+    "scoutXp": 940,
+    "builderScore": 90.4,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "top_10_builder",
+      "cofounder_open"
+    ],
+    "createdAt": "2026-09-28T05:58:45.752Z"
+  },
+  {
+    "id": "usr_kabir",
+    "handle": "kabir",
+    "displayName": "Kabir Verma",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=kabir",
+    "role": "builder",
+    "bio": "CLI minimalist. Rust + Docker tools for messy data files.",
+    "githubUrl": "https://github.com/kabir",
+    "followersCount": 258,
+    "followingCount": 17,
+    "scoutXp": 810,
+    "builderScore": 88.1,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "verified_utility",
+      "streak_7d"
+    ],
+    "createdAt": "2026-09-29T05:58:45.752Z"
+  },
+  {
+    "id": "usr_devika",
+    "handle": "devika",
+    "displayName": "Devika Nair",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=devika",
+    "role": "both",
+    "bio": "First-25 Scout on 40+ indie tools. Breaking APIs so users don't have to.",
+    "githubUrl": "https://github.com/devika",
+    "followersCount": 249,
+    "followingCount": 20,
+    "scoutXp": 2150,
+    "builderScore": 85.8,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout",
+      "bug_hunter",
+      "streak_7d"
+    ],
+    "createdAt": "2026-09-30T05:58:45.752Z"
+  },
+  {
+    "id": "usr_rohan",
+    "handle": "rohan",
+    "displayName": "Rohan Kulkarni",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=rohan",
+    "role": "builder",
+    "bio": "Solo student builder — zero followers, shipping my first container tool!",
+    "githubUrl": "https://github.com/rohan",
+    "followersCount": 240,
+    "followingCount": 23,
+    "scoutXp": 120,
+    "builderScore": 83.5,
+    "verifiedUtility": false,
+    "cofounderOpen": true,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-01T05:58:45.752Z"
+  },
+  {
+    "id": "usr_7",
+    "handle": "builder_7",
+    "displayName": "Indie Builder #7",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_7",
+    "role": "tester",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_7",
+    "followersCount": 231,
+    "followingCount": 26,
+    "scoutXp": 160,
+    "builderScore": 81.2,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-02T05:58:45.752Z"
+  },
+  {
+    "id": "usr_8",
+    "handle": "builder_8",
+    "displayName": "Indie Builder #8",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_8",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_8",
+    "followersCount": 222,
+    "followingCount": 29,
+    "scoutXp": 1595,
+    "builderScore": 78.9,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-03T05:58:45.752Z"
+  },
+  {
+    "id": "usr_9",
+    "handle": "builder_9",
+    "displayName": "Indie Builder #9",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_9",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_9",
+    "followersCount": 213,
+    "followingCount": 32,
+    "scoutXp": 1530,
+    "builderScore": 76.6,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-04T05:58:45.752Z"
+  },
+  {
+    "id": "usr_10",
+    "handle": "builder_10",
+    "displayName": "Indie Builder #10",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_10",
+    "role": "tester",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_10",
+    "followersCount": 204,
+    "followingCount": 35,
+    "scoutXp": 1465,
+    "builderScore": 74.3,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-05T05:58:45.752Z"
+  },
+  {
+    "id": "usr_11",
+    "handle": "builder_11",
+    "displayName": "Indie Builder #11",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_11",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_11",
+    "followersCount": 195,
+    "followingCount": 38,
+    "scoutXp": 1400,
+    "builderScore": 72,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-06T05:58:45.752Z"
+  },
+  {
+    "id": "usr_12",
+    "handle": "builder_12",
+    "displayName": "Indie Builder #12",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_12",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_12",
+    "followersCount": 186,
+    "followingCount": 41,
+    "scoutXp": 1335,
+    "builderScore": 69.7,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-07T05:58:45.752Z"
+  },
+  {
+    "id": "usr_13",
+    "handle": "builder_13",
+    "displayName": "Indie Builder #13",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_13",
+    "role": "tester",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_13",
+    "followersCount": 177,
+    "followingCount": 8,
+    "scoutXp": 1270,
+    "builderScore": 67.4,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-08T05:58:45.752Z"
+  },
+  {
+    "id": "usr_14",
+    "handle": "builder_14",
+    "displayName": "Indie Builder #14",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_14",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_14",
+    "followersCount": 168,
+    "followingCount": 11,
+    "scoutXp": 1205,
+    "builderScore": 65.1,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-09T05:58:45.752Z"
+  },
+  {
+    "id": "usr_15",
+    "handle": "builder_15",
+    "displayName": "Indie Builder #15",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_15",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_15",
+    "followersCount": 159,
+    "followingCount": 14,
+    "scoutXp": 1140,
+    "builderScore": 62.8,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-10T05:58:45.752Z"
+  },
+  {
+    "id": "usr_16",
+    "handle": "builder_16",
+    "displayName": "Indie Builder #16",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_16",
+    "role": "tester",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_16",
+    "followersCount": 150,
+    "followingCount": 17,
+    "scoutXp": 1075,
+    "builderScore": 60.5,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-11T05:58:45.752Z"
+  },
+  {
+    "id": "usr_17",
+    "handle": "builder_17",
+    "displayName": "Indie Builder #17",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_17",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_17",
+    "followersCount": 141,
+    "followingCount": 20,
+    "scoutXp": 1010,
+    "builderScore": 58.2,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-12T05:58:45.752Z"
+  },
+  {
+    "id": "usr_18",
+    "handle": "builder_18",
+    "displayName": "Indie Builder #18",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_18",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_18",
+    "followersCount": 132,
+    "followingCount": 23,
+    "scoutXp": 945,
+    "builderScore": 55.9,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-13T05:58:45.752Z"
+  },
+  {
+    "id": "usr_19",
+    "handle": "builder_19",
+    "displayName": "Indie Builder #19",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_19",
+    "role": "tester",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_19",
+    "followersCount": 123,
+    "followingCount": 26,
+    "scoutXp": 880,
+    "builderScore": 53.6,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-14T05:58:45.752Z"
+  },
+  {
+    "id": "usr_20",
+    "handle": "builder_20",
+    "displayName": "Indie Builder #20",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_20",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_20",
+    "followersCount": 114,
+    "followingCount": 29,
+    "scoutXp": 815,
+    "builderScore": 51.3,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-15T05:58:45.752Z"
+  },
+  {
+    "id": "usr_21",
+    "handle": "builder_21",
+    "displayName": "Indie Builder #21",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_21",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_21",
+    "followersCount": 105,
+    "followingCount": 32,
+    "scoutXp": 750,
+    "builderScore": 49,
+    "verifiedUtility": true,
+    "cofounderOpen": true,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-16T05:58:45.752Z"
+  },
+  {
+    "id": "usr_22",
+    "handle": "builder_22",
+    "displayName": "Indie Builder #22",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_22",
+    "role": "tester",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_22",
+    "followersCount": 96,
+    "followingCount": 35,
+    "scoutXp": 685,
+    "builderScore": 46.7,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-17T05:58:45.752Z"
+  },
+  {
+    "id": "usr_23",
+    "handle": "builder_23",
+    "displayName": "Indie Builder #23",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_23",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_23",
+    "followersCount": 87,
+    "followingCount": 38,
+    "scoutXp": 620,
+    "builderScore": 44.4,
+    "verifiedUtility": true,
+    "cofounderOpen": false,
+    "badges": [
+      "verified_utility",
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-18T05:58:45.752Z"
+  },
+  {
+    "id": "usr_24",
+    "handle": "builder_24",
+    "displayName": "Indie Builder #24",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_24",
+    "role": "builder",
+    "bio": "Building practical micro-tools for everyday problems.",
+    "githubUrl": "https://github.com/builder_24",
+    "followersCount": 78,
+    "followingCount": 41,
+    "scoutXp": 555,
+    "builderScore": 42.1,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "first_25_scout"
+    ],
+    "createdAt": "2026-10-19T05:58:45.752Z"
+  },
+  {
+    "id": "usr_25",
+    "handle": "builder_25",
+    "displayName": "Indie Builder #25",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_25",
+    "role": "tester",
+    "bio": "New indie builder on Arrakis — try my first micro-demo in 1 tap!",
+    "githubUrl": "https://github.com/builder_25",
+    "followersCount": 0,
+    "followingCount": 8,
+    "scoutXp": 490,
+    "builderScore": 18.4,
+    "verifiedUtility": false,
+    "cofounderOpen": true,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-20T05:58:45.752Z"
+  },
+  {
+    "id": "usr_26",
+    "handle": "builder_26",
+    "displayName": "Indie Builder #26",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_26",
+    "role": "builder",
+    "bio": "New indie builder on Arrakis — try my first micro-demo in 1 tap!",
+    "githubUrl": "https://github.com/builder_26",
+    "followersCount": 0,
+    "followingCount": 11,
+    "scoutXp": 425,
+    "builderScore": 18.4,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-21T05:58:45.752Z"
+  },
+  {
+    "id": "usr_27",
+    "handle": "builder_27",
+    "displayName": "Indie Builder #27",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_27",
+    "role": "builder",
+    "bio": "New indie builder on Arrakis — try my first micro-demo in 1 tap!",
+    "githubUrl": "https://github.com/builder_27",
+    "followersCount": 0,
+    "followingCount": 14,
+    "scoutXp": 360,
+    "builderScore": 18.4,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-22T05:58:45.752Z"
+  },
+  {
+    "id": "usr_28",
+    "handle": "builder_28",
+    "displayName": "Indie Builder #28",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_28",
+    "role": "tester",
+    "bio": "New indie builder on Arrakis — try my first micro-demo in 1 tap!",
+    "githubUrl": "https://github.com/builder_28",
+    "followersCount": 0,
+    "followingCount": 17,
+    "scoutXp": 295,
+    "builderScore": 18.4,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-23T05:58:45.752Z"
+  },
+  {
+    "id": "usr_29",
+    "handle": "builder_29",
+    "displayName": "Indie Builder #29",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_29",
+    "role": "builder",
+    "bio": "New indie builder on Arrakis — try my first micro-demo in 1 tap!",
+    "githubUrl": "https://github.com/builder_29",
+    "followersCount": 0,
+    "followingCount": 20,
+    "scoutXp": 230,
+    "builderScore": 18.4,
+    "verifiedUtility": false,
+    "cofounderOpen": true,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-24T05:58:45.752Z"
+  },
+  {
+    "id": "usr_30",
+    "handle": "builder_30",
+    "displayName": "Indie Builder #30",
+    "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_30",
+    "role": "builder",
+    "bio": "New indie builder on Arrakis — try my first micro-demo in 1 tap!",
+    "githubUrl": "https://github.com/builder_30",
+    "followersCount": 0,
+    "followingCount": 23,
+    "scoutXp": 165,
+    "builderScore": 18.4,
+    "verifiedUtility": false,
+    "cofounderOpen": false,
+    "badges": [
+      "cofounder_open"
+    ],
+    "createdAt": "2026-10-25T05:58:45.752Z"
+  }
+]

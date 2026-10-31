@@ -1,24 +1,24 @@
 # TODOS.md — Task Board
 
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · 🔗 = depends on other dev · 🤝 = joint
-Owners: **Dev A** = UI + Ranking/Leaderboard · **Dev B** = Recommendation + Containerization. Details: [PLANS.md](./PLANS.md).
+Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Recommendation (FastAPI) + Containerization (TS/Docker). Details: [PLANS.md](./PLANS.md).
 
 ---
 
 ## 🤝 M0 — Joint Setup (do together first)
-- [ ] 🤝 Pick final stack (Next.js 14 + TS + Tailwind, Postgres+pgvector, Redis, Docker) and init pnpm workspace
-- [ ] 🤝 Create folder layout (`apps/web`, `services/*`, `packages/contracts`, `infra`)
-- [ ] 🤝 Write & **freeze contracts v0** (`Post, FeedItem, Reason, Event, TrialRun, Review`) + OpenAPI stubs
-- [ ] 🤝 `infra/docker-compose.yml` (postgres+pgvector, redis)
-- [ ] 🤝 DB schema + migrations (users, posts, follows, events, trial_runs, reviews, scores)
-- [ ] 🤝 Seed script `pnpm seed` (30 users / 60 posts / 200 follows / events) + demo persona
-- [ ] 🤝 `.env.example`, lint/format/typecheck, GitHub Actions CI, branch protection
-- [ ] 🤝 Mock mode (`MOCK=1`) convention agreed; mocks in `packages/contracts/mocks`
-- [ ] 🤝 Push to `origin main` (https://github.com/ritamghosh1/Arrakis)
+- [x] 🤝 Pick final stack (TS monorepo for Web/Sandbox/Scoring + Python FastAPI for Recommender, Drizzle ORM + Postgres/pgvector + Redis) and init workspace
+- [x] 🤝 Create folder layout (`apps/web`, `services/recommender`, `services/sandbox`, `services/scoring`, `packages/contracts`, `infra`)
+- [x] 🤝 Write & **freeze contracts v0** (`packages/contracts/src/types.ts`, `services/recommender/app/contracts.py`, `packages/contracts/openapi.yaml`)
+- [x] 🤝 `infra/docker-compose.yml` (`pgvector/pgvector:pg16`, `redis:7-alpine`) + `infra/init.sql`
+- [x] 🤝 DB schema + migrations (`packages/contracts/src/db/schema.ts` with Drizzle ORM + `infra/migrations/0000_init.sql`)
+- [x] 🤝 Seed script `npm run seed` / `pnpm seed` (30 users / 60 posts / 200 follows / 50 events in `infra/seed/*.json`) + demo personas (`@ritam`, `@srinjoy`, `@aanya`, `@kabir`, `@devika`)
+- [x] 🤝 `.env.example`, `.gitignore`, lint/format/typecheck scripts, GitHub Actions CI (`.github/workflows/ci.yml`)
+- [x] 🤝 Mock mode (`MOCK=1`) convention implemented in `packages/contracts/src/mocks/seed-data.ts` and wired into all service entrypoints
+- [ ] 🤝 Push to `origin main` (https://github.com/ritamghosh1/Arrakis) — *ready locally for your review before pushing*
 
 ---
 
-## 👤 DEV A — UI + Ranking & Leaderboard
+## 👤 DEV A (Ritam) — UI + Ranking & Leaderboard
 
 ### A1. Design foundation (M0–M1)
 - [ ] Run `ui-skills-root`; generate `DESIGN.md` via `create-design-md` (palette: dune/ember/ink/sage, type scale, spacing, radii, motion tokens)
@@ -101,7 +101,7 @@ Owners: **Dev A** = UI + Ranking/Leaderboard · **Dev B** = Recommendation + Con
 
 ---
 
-## 👤 DEV B — Recommendation Engine + Containerization
+## 👤 DEV B (Srinjoy) — Recommendation Engine (FastAPI) + Containerization
 
 ### B1. Data & infra (M0–M1)
 - [ ] Postgres schema for `follows`, `events`, `post_embeddings` (pgvector + HNSW/IVFFlat index), `taste_vectors`

@@ -10,9 +10,9 @@ Two developers work **in parallel**. Never edit the other's owned paths without 
 
 | Owner | Pillars | Paths |
 |-------|---------|-------|
-| **Dev A** | 1. UI · 4. Ranking & Leaderboard | `apps/web/**`, `services/scoring/**` |
-| **Dev B** | 2. Recommendation · 3. Containerization | `services/recommender/**`, `services/sandbox/**`, `infra/**` |
-| **Shared** | API contracts | `packages/contracts/**` (PR + both approve) |
+| **Dev A (Ritam)** | 1. UI · 4. Ranking & Leaderboard | `apps/web/**`, `services/scoring/**` |
+| **Dev B (Srinjoy)** | 2. Recommendation (FastAPI) · 3. Containerization | `services/recommender/**`, `services/sandbox/**`, `infra/**` |
+| **Shared** | API contracts, Drizzle DB schema & mocks | `packages/contracts/**` (PR + both approve) |
 
 ## Skills to Use (mandatory)
 Located in `.agents/skills/` (ui-skills) and the global modern-web-guidance plugin.

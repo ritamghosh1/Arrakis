@@ -1,0 +1,3053 @@
+[
+  {
+    "id": "post_resume_json",
+    "authorId": "usr_aanya",
+    "author": {
+      "id": "usr_aanya",
+      "handle": "aanya",
+      "displayName": "Aanya Sharma",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+      "verifiedUtility": true
+    },
+    "title": "Resume2Schema — Convert messy PDF resumes into strict JSON",
+    "problemStatement": "Convert unstructured PDF or plain-text resumes into validated JSON Resume schema in under 1 second without manual copy-pasting.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_resume_json/720/1280",
+    "durationSec": 45,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/resume2schema:latest",
+      "formSchema": [
+        {
+          "name": "resumeText",
+          "label": "Paste raw resume snippet",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Aanya Sharma | B.Tech CSE 2026 | Built distributed PDF parser in Rust (12k req/s)"
+        },
+        {
+          "name": "strictMode",
+          "label": "Strict JSON Schema validation",
+          "type": "boolean",
+          "required": false,
+          "defaultValue": true
+        }
+      ],
+      "sampleCommand": "resume2schema --input stdin --format json-resume"
+    },
+    "tags": [
+      "resume",
+      "json",
+      "pdf",
+      "parser"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 740,
+      "tries": 207,
+      "upvotes": 187,
+      "trialUpvotes": 128,
+      "comments": 37
+    },
+    "health": {
+      "uptimePct": 99.4,
+      "p50LatencyMs": 142,
+      "p95LatencyMs": 310,
+      "crashRate": 0.006,
+      "verifiedUtility": true
+    },
+    "postScore": 89.2,
+    "createdAt": "2026-10-31T05:58:45.753Z"
+  },
+  {
+    "id": "post_csv_surgeon",
+    "authorId": "usr_kabir",
+    "author": {
+      "id": "usr_kabir",
+      "handle": "kabir",
+      "displayName": "Kabir Verma",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=kabir",
+      "verifiedUtility": true
+    },
+    "title": "CSV Surgeon — Fix broken encodings, dedupe rows & emit SQL DDL",
+    "problemStatement": "Clean corrupted CSV exports with mixed date formats, duplicate rows, and broken UTF-8 characters, and output ready-to-run Postgres DDL.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_csv_surgeon/720/1280",
+    "durationSec": 46,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/csv-surgeon:latest",
+      "formSchema": [
+        {
+          "name": "csvSample",
+          "label": "CSV rows (header + sample)",
+          "type": "text",
+          "required": true,
+          "defaultValue": "id,name,signup_date,amount\n1,Ritam,2026/10/31,$42.50\n1,Ritam,31-10-2026,$42.50"
+        },
+        {
+          "name": "dialect",
+          "label": "Target SQL dialect",
+          "type": "select",
+          "required": true,
+          "defaultValue": "postgres",
+          "options": [
+            "postgres",
+            "sqlite",
+            "duckdb"
+          ]
+        }
+      ],
+      "sampleCommand": "csv-surgeon --dedupe --infer-ddl --dialect postgres"
+    },
+    "tags": [
+      "csv",
+      "sql",
+      "data-cleaning",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 693,
+      "tries": 221,
+      "upvotes": 192,
+      "trialUpvotes": 137,
+      "comments": 39
+    },
+    "health": {
+      "uptimePct": 98.9,
+      "p50LatencyMs": 118,
+      "p95LatencyMs": 265,
+      "crashRate": 0.011,
+      "verifiedUtility": true
+    },
+    "postScore": 90.91,
+    "createdAt": "2026-10-31T02:58:45.753Z"
+  },
+  {
+    "id": "post_env_doctor",
+    "authorId": "usr_srinjoy",
+    "author": {
+      "id": "usr_srinjoy",
+      "handle": "srinjoy",
+      "displayName": "Srinjoy Mukherjee",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=srinjoy",
+      "verifiedUtility": true
+    },
+    "title": "EnvDoctor — Detect missing, leaked, or mismatched .env keys across monorepos",
+    "problemStatement": "Scan project .env.example files and source references to catch missing environment variables and accidental secret patterns before deployment.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_env_doctor/720/1280",
+    "durationSec": 47,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/env-doctor:latest",
+      "formSchema": [
+        {
+          "name": "envContent",
+          "label": ".env snippet to audit",
+          "type": "text",
+          "required": true,
+          "defaultValue": "DATABASE_URL=postgresql://localhost:5432/app\nPORT=3000\nSTRIPE_KEY=sk_test_51H..."
+        }
+      ],
+      "sampleCommand": "env-doctor audit --redact-secrets"
+    },
+    "tags": [
+      "security",
+      "dotenv",
+      "devops",
+      "linter"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 646,
+      "tries": 232,
+      "upvotes": 194,
+      "trialUpvotes": 143,
+      "comments": 41
+    },
+    "health": {
+      "uptimePct": 99.8,
+      "p50LatencyMs": 95,
+      "p95LatencyMs": 190,
+      "crashRate": 0.002,
+      "verifiedUtility": true
+    },
+    "postScore": 92.36,
+    "createdAt": "2026-10-30T23:58:45.753Z"
+  },
+  {
+    "id": "post_cron_human",
+    "authorId": "usr_rohan",
+    "author": {
+      "id": "usr_rohan",
+      "handle": "rohan",
+      "displayName": "Rohan Kulkarni",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=rohan",
+      "verifiedUtility": false
+    },
+    "title": "CronSpeak — Turn natural English schedules into tested cron + systemd timers",
+    "problemStatement": "Translate plain English scheduling rules like 'every weekday at 9:15am IST except bank holidays' into cron expressions with next-10 firing timestamps.",
+    "category": "Productivity & Automation",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_cron_human/720/1280",
+    "durationSec": 48,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/cronspeak",
+      "formSchema": [
+        {
+          "name": "scheduleText",
+          "label": "Describe when the job should run",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Every Monday and Thursday at 9:30 AM IST"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cron",
+      "scheduling",
+      "automation"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 599,
+      "tries": 239,
+      "upvotes": 195,
+      "trialUpvotes": 148,
+      "comments": 43
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 210,
+      "p95LatencyMs": 480,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 93.7,
+    "createdAt": "2026-10-30T20:58:45.753Z"
+  },
+  {
+    "id": "post_svg_Minify_canvas",
+    "authorId": "usr_ritam",
+    "author": {
+      "id": "usr_ritam",
+      "handle": "ritam",
+      "displayName": "Ritam Ghosh",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+      "verifiedUtility": true
+    },
+    "title": "VectorDiet — Interactive SVG path simplifier & React component generator",
+    "problemStatement": "Shrink bloated Figma/Illustrator SVG exports by up to 80% while previewing visual fidelity side-by-side and copying accessible React components.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_svg_Minify_canvas/720/1280",
+    "durationSec": 49,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/sandbox/vectordiet",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "svg",
+      "design-engineering",
+      "accessibility",
+      "frontend"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 552,
+      "tries": 242,
+      "upvotes": 194,
+      "trialUpvotes": 150,
+      "comments": 43
+    },
+    "health": {
+      "uptimePct": 99.6,
+      "p50LatencyMs": 130,
+      "p95LatencyMs": 250,
+      "crashRate": 0.004,
+      "verifiedUtility": true
+    },
+    "postScore": 94.78,
+    "createdAt": "2026-10-30T17:58:45.753Z"
+  },
+  {
+    "id": "post_invoice_chaser",
+    "authorId": "usr_aanya",
+    "author": {
+      "id": "usr_aanya",
+      "handle": "aanya",
+      "displayName": "Aanya Sharma",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+      "verifiedUtility": true
+    },
+    "title": "LedgerPing — Extract line items from freelance invoices & draft polite reminders",
+    "problemStatement": "Parse overdue PDF/email invoices into structured due dates and generate polite, context-aware payment follow-up drafts automatically.",
+    "category": "Productivity & Automation",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_invoice_chaser/720/1280",
+    "durationSec": 50,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/ledgerping",
+      "formSchema": [
+        {
+          "name": "invoiceSummary",
+          "label": "Invoice line & due date",
+          "type": "text",
+          "required": true,
+          "defaultValue": "INV-204 • Landing page redesign • $650 • Due 14 days ago"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "invoices",
+      "freelance",
+      "automation",
+      "pdf"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 505,
+      "tries": 141,
+      "upvotes": 127,
+      "trialUpvotes": 87,
+      "comments": 25
+    },
+    "health": {
+      "uptimePct": 97.8,
+      "p50LatencyMs": 225,
+      "p95LatencyMs": 510,
+      "crashRate": 0.022,
+      "verifiedUtility": true
+    },
+    "postScore": 83.55,
+    "createdAt": "2026-10-30T14:58:45.753Z"
+  },
+  {
+    "id": "post_7",
+    "authorId": "usr_7",
+    "author": {
+      "id": "usr_7",
+      "handle": "builder_7",
+      "displayName": "Indie Builder #7",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_7",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#7)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_7/720/1280",
+    "durationSec": 51,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-7:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 458,
+      "tries": 146,
+      "upvotes": 126,
+      "trialUpvotes": 90,
+      "comments": 26
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 84.71,
+    "createdAt": "2026-10-30T11:58:45.753Z"
+  },
+  {
+    "id": "post_8",
+    "authorId": "usr_8",
+    "author": {
+      "id": "usr_8",
+      "handle": "builder_8",
+      "displayName": "Indie Builder #8",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_8",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#8)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_8/720/1280",
+    "durationSec": 52,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_8",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 411,
+      "tries": 147,
+      "upvotes": 123,
+      "trialUpvotes": 91,
+      "comments": 26
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 85.56,
+    "createdAt": "2026-10-30T08:58:45.753Z"
+  },
+  {
+    "id": "post_9",
+    "authorId": "usr_9",
+    "author": {
+      "id": "usr_9",
+      "handle": "builder_9",
+      "displayName": "Indie Builder #9",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_9",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#9)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_9/720/1280",
+    "durationSec": 53,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_9",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 364,
+      "tries": 145,
+      "upvotes": 118,
+      "trialUpvotes": 89,
+      "comments": 26
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 86.05,
+    "createdAt": "2026-10-30T05:58:45.753Z"
+  },
+  {
+    "id": "post_10",
+    "authorId": "usr_10",
+    "author": {
+      "id": "usr_10",
+      "handle": "builder_10",
+      "displayName": "Indie Builder #10",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_10",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#10)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_10/720/1280",
+    "durationSec": 54,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-10:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2717,
+      "tries": 1195,
+      "upvotes": 957,
+      "trialUpvotes": 740,
+      "comments": 215
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 119.18,
+    "createdAt": "2026-10-30T02:58:45.753Z"
+  },
+  {
+    "id": "post_11",
+    "authorId": "usr_11",
+    "author": {
+      "id": "usr_11",
+      "handle": "builder_11",
+      "displayName": "Indie Builder #11",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_11",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#11)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_11/720/1280",
+    "durationSec": 55,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_11",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2670,
+      "tries": 747,
+      "upvotes": 676,
+      "trialUpvotes": 463,
+      "comments": 134
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 107.99,
+    "createdAt": "2026-10-29T23:58:45.753Z"
+  },
+  {
+    "id": "post_12",
+    "authorId": "usr_12",
+    "author": {
+      "id": "usr_12",
+      "handle": "builder_12",
+      "displayName": "Indie Builder #12",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_12",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#12)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_12/720/1280",
+    "durationSec": 56,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-12:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2623,
+      "tries": 839,
+      "upvotes": 729,
+      "trialUpvotes": 520,
+      "comments": 151
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 110.65,
+    "createdAt": "2026-10-29T20:58:45.753Z"
+  },
+  {
+    "id": "post_13",
+    "authorId": "usr_13",
+    "author": {
+      "id": "usr_13",
+      "handle": "builder_13",
+      "displayName": "Indie Builder #13",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_13",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#13)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_13/720/1280",
+    "durationSec": 57,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-13:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2576,
+      "tries": 927,
+      "upvotes": 780,
+      "trialUpvotes": 574,
+      "comments": 166
+    },
+    "health": {
+      "uptimePct": 95.6,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.044,
+      "verifiedUtility": true
+    },
+    "postScore": 113.15,
+    "createdAt": "2026-10-29T17:58:45.753Z"
+  },
+  {
+    "id": "post_14",
+    "authorId": "usr_14",
+    "author": {
+      "id": "usr_14",
+      "handle": "builder_14",
+      "displayName": "Indie Builder #14",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_14",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#14)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_14/720/1280",
+    "durationSec": 58,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_14",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2529,
+      "tries": 1011,
+      "upvotes": 828,
+      "trialUpvotes": 626,
+      "comments": 181
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 115.52,
+    "createdAt": "2026-10-29T14:58:45.753Z"
+  },
+  {
+    "id": "post_15",
+    "authorId": "usr_15",
+    "author": {
+      "id": "usr_15",
+      "handle": "builder_15",
+      "displayName": "Indie Builder #15",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_15",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#15)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_15/720/1280",
+    "durationSec": 59,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_15",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2482,
+      "tries": 1092,
+      "upvotes": 875,
+      "trialUpvotes": 677,
+      "comments": 196
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 117.82,
+    "createdAt": "2026-10-29T11:58:45.753Z"
+  },
+  {
+    "id": "post_16",
+    "authorId": "usr_16",
+    "author": {
+      "id": "usr_16",
+      "handle": "builder_16",
+      "displayName": "Indie Builder #16",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_16",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#16)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_16/720/1280",
+    "durationSec": 60,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-16:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2435,
+      "tries": 681,
+      "upvotes": 616,
+      "trialUpvotes": 422,
+      "comments": 122
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 106.63,
+    "createdAt": "2026-10-29T08:58:45.753Z"
+  },
+  {
+    "id": "post_17",
+    "authorId": "usr_17",
+    "author": {
+      "id": "usr_17",
+      "handle": "builder_17",
+      "displayName": "Indie Builder #17",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_17",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#17)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_17/720/1280",
+    "durationSec": 61,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_17",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2388,
+      "tries": 764,
+      "upvotes": 664,
+      "trialUpvotes": 473,
+      "comments": 137
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 109.26,
+    "createdAt": "2026-10-29T05:58:45.753Z"
+  },
+  {
+    "id": "post_18",
+    "authorId": "usr_18",
+    "author": {
+      "id": "usr_18",
+      "handle": "builder_18",
+      "displayName": "Indie Builder #18",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_18",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#18)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_18/720/1280",
+    "durationSec": 62,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-18:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2341,
+      "tries": 842,
+      "upvotes": 709,
+      "trialUpvotes": 522,
+      "comments": 151
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 111.72,
+    "createdAt": "2026-10-29T02:58:45.753Z"
+  },
+  {
+    "id": "post_19",
+    "authorId": "usr_19",
+    "author": {
+      "id": "usr_19",
+      "handle": "builder_19",
+      "displayName": "Indie Builder #19",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_19",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#19)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_19/720/1280",
+    "durationSec": 63,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-19:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2294,
+      "tries": 917,
+      "upvotes": 751,
+      "trialUpvotes": 568,
+      "comments": 165
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 114.05,
+    "createdAt": "2026-10-28T23:58:45.753Z"
+  },
+  {
+    "id": "post_20",
+    "authorId": "usr_20",
+    "author": {
+      "id": "usr_20",
+      "handle": "builder_20",
+      "displayName": "Indie Builder #20",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_20",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#20)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_20/720/1280",
+    "durationSec": 64,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_20",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2247,
+      "tries": 988,
+      "upvotes": 791,
+      "trialUpvotes": 612,
+      "comments": 177
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 116.27,
+    "createdAt": "2026-10-28T20:58:45.753Z"
+  },
+  {
+    "id": "post_21",
+    "authorId": "usr_21",
+    "author": {
+      "id": "usr_21",
+      "handle": "builder_21",
+      "displayName": "Indie Builder #21",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_21",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#21)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_21/720/1280",
+    "durationSec": 65,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_21",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2200,
+      "tries": 616,
+      "upvotes": 557,
+      "trialUpvotes": 381,
+      "comments": 110
+    },
+    "health": {
+      "uptimePct": 95.6,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.044,
+      "verifiedUtility": true
+    },
+    "postScore": 105.15,
+    "createdAt": "2026-10-28T17:58:45.753Z"
+  },
+  {
+    "id": "post_22",
+    "authorId": "usr_22",
+    "author": {
+      "id": "usr_22",
+      "handle": "builder_22",
+      "displayName": "Indie Builder #22",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_22",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#22)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_22/720/1280",
+    "durationSec": 66,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-22:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2153,
+      "tries": 688,
+      "upvotes": 598,
+      "trialUpvotes": 426,
+      "comments": 123
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 107.7,
+    "createdAt": "2026-10-28T14:58:45.753Z"
+  },
+  {
+    "id": "post_23",
+    "authorId": "usr_23",
+    "author": {
+      "id": "usr_23",
+      "handle": "builder_23",
+      "displayName": "Indie Builder #23",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_23",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#23)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_23/720/1280",
+    "durationSec": 67,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_23",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2106,
+      "tries": 758,
+      "upvotes": 637,
+      "trialUpvotes": 469,
+      "comments": 136
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 110.13,
+    "createdAt": "2026-10-28T11:58:45.753Z"
+  },
+  {
+    "id": "post_24",
+    "authorId": "usr_24",
+    "author": {
+      "id": "usr_24",
+      "handle": "builder_24",
+      "displayName": "Indie Builder #24",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_24",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#24)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_24/720/1280",
+    "durationSec": 68,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-24:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2059,
+      "tries": 823,
+      "upvotes": 674,
+      "trialUpvotes": 510,
+      "comments": 148
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 112.42,
+    "createdAt": "2026-10-28T08:58:45.753Z"
+  },
+  {
+    "id": "post_25",
+    "authorId": "usr_25",
+    "author": {
+      "id": "usr_25",
+      "handle": "builder_25",
+      "displayName": "Indie Builder #25",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_25",
+      "verifiedUtility": false
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#25)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_25/720/1280",
+    "durationSec": 69,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-25:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 2012,
+      "tries": 885,
+      "upvotes": 708,
+      "trialUpvotes": 548,
+      "comments": 159
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 114.59,
+    "createdAt": "2026-10-28T05:58:45.753Z"
+  },
+  {
+    "id": "post_26",
+    "authorId": "usr_26",
+    "author": {
+      "id": "usr_26",
+      "handle": "builder_26",
+      "displayName": "Indie Builder #26",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_26",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#26)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_26/720/1280",
+    "durationSec": 70,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_26",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1965,
+      "tries": 550,
+      "upvotes": 498,
+      "trialUpvotes": 341,
+      "comments": 99
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 103.52,
+    "createdAt": "2026-10-28T02:58:45.753Z"
+  },
+  {
+    "id": "post_27",
+    "authorId": "usr_27",
+    "author": {
+      "id": "usr_27",
+      "handle": "builder_27",
+      "displayName": "Indie Builder #27",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_27",
+      "verifiedUtility": false
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#27)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_27/720/1280",
+    "durationSec": 71,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_27",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1918,
+      "tries": 613,
+      "upvotes": 533,
+      "trialUpvotes": 380,
+      "comments": 110
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 106.01,
+    "createdAt": "2026-10-27T23:58:45.753Z"
+  },
+  {
+    "id": "post_28",
+    "authorId": "usr_28",
+    "author": {
+      "id": "usr_28",
+      "handle": "builder_28",
+      "displayName": "Indie Builder #28",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_28",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#28)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_28/720/1280",
+    "durationSec": 72,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-28:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1871,
+      "tries": 673,
+      "upvotes": 566,
+      "trialUpvotes": 417,
+      "comments": 121
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 108.36,
+    "createdAt": "2026-10-27T20:58:45.753Z"
+  },
+  {
+    "id": "post_29",
+    "authorId": "usr_29",
+    "author": {
+      "id": "usr_29",
+      "handle": "builder_29",
+      "displayName": "Indie Builder #29",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_29",
+      "verifiedUtility": false
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#29)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_29/720/1280",
+    "durationSec": 73,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_29",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1824,
+      "tries": 729,
+      "upvotes": 596,
+      "trialUpvotes": 451,
+      "comments": 131
+    },
+    "health": {
+      "uptimePct": 95.6,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.044,
+      "verifiedUtility": true
+    },
+    "postScore": 110.56,
+    "createdAt": "2026-10-27T17:58:45.753Z"
+  },
+  {
+    "id": "post_30",
+    "authorId": "usr_30",
+    "author": {
+      "id": "usr_30",
+      "handle": "builder_30",
+      "displayName": "Indie Builder #30",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_30",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#30)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_30/720/1280",
+    "durationSec": 74,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-30:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1777,
+      "tries": 781,
+      "upvotes": 626,
+      "trialUpvotes": 484,
+      "comments": 140
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 112.68,
+    "createdAt": "2026-10-27T14:58:45.753Z"
+  },
+  {
+    "id": "post_31",
+    "authorId": "usr_ritam",
+    "author": {
+      "id": "usr_ritam",
+      "handle": "ritam",
+      "displayName": "Ritam Ghosh",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#31)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_31/720/1280",
+    "durationSec": 75,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-31:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1730,
+      "tries": 484,
+      "upvotes": 438,
+      "trialUpvotes": 300,
+      "comments": 87
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 101.64,
+    "createdAt": "2026-10-27T11:58:45.753Z"
+  },
+  {
+    "id": "post_32",
+    "authorId": "usr_srinjoy",
+    "author": {
+      "id": "usr_srinjoy",
+      "handle": "srinjoy",
+      "displayName": "Srinjoy Mukherjee",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=srinjoy",
+      "verifiedUtility": true
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#32)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_32/720/1280",
+    "durationSec": 76,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_32",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1683,
+      "tries": 538,
+      "upvotes": 467,
+      "trialUpvotes": 333,
+      "comments": 96
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 104.06,
+    "createdAt": "2026-10-27T08:58:45.753Z"
+  },
+  {
+    "id": "post_33",
+    "authorId": "usr_aanya",
+    "author": {
+      "id": "usr_aanya",
+      "handle": "aanya",
+      "displayName": "Aanya Sharma",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#33)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_33/720/1280",
+    "durationSec": 77,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_33",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1636,
+      "tries": 588,
+      "upvotes": 494,
+      "trialUpvotes": 364,
+      "comments": 105
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 106.32,
+    "createdAt": "2026-10-27T05:58:45.753Z"
+  },
+  {
+    "id": "post_34",
+    "authorId": "usr_kabir",
+    "author": {
+      "id": "usr_kabir",
+      "handle": "kabir",
+      "displayName": "Kabir Verma",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=kabir",
+      "verifiedUtility": true
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#34)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_34/720/1280",
+    "durationSec": 78,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-34:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1589,
+      "tries": 635,
+      "upvotes": 520,
+      "trialUpvotes": 393,
+      "comments": 114
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 108.48,
+    "createdAt": "2026-10-27T02:58:45.753Z"
+  },
+  {
+    "id": "post_35",
+    "authorId": "usr_devika",
+    "author": {
+      "id": "usr_devika",
+      "handle": "devika",
+      "displayName": "Devika Nair",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=devika",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#35)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_35/720/1280",
+    "durationSec": 79,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_35",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1542,
+      "tries": 678,
+      "upvotes": 543,
+      "trialUpvotes": 420,
+      "comments": 122
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 110.52,
+    "createdAt": "2026-10-26T23:58:45.753Z"
+  },
+  {
+    "id": "post_36",
+    "authorId": "usr_rohan",
+    "author": {
+      "id": "usr_rohan",
+      "handle": "rohan",
+      "displayName": "Rohan Kulkarni",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=rohan",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#36)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_36/720/1280",
+    "durationSec": 80,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-36:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1495,
+      "tries": 418,
+      "upvotes": 378,
+      "trialUpvotes": 259,
+      "comments": 75
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 99.49,
+    "createdAt": "2026-10-26T20:58:45.753Z"
+  },
+  {
+    "id": "post_37",
+    "authorId": "usr_7",
+    "author": {
+      "id": "usr_7",
+      "handle": "builder_7",
+      "displayName": "Indie Builder #7",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_7",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#37)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_37/720/1280",
+    "durationSec": 81,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-37:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1448,
+      "tries": 463,
+      "upvotes": 402,
+      "trialUpvotes": 287,
+      "comments": 83
+    },
+    "health": {
+      "uptimePct": 95.6,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.044,
+      "verifiedUtility": true
+    },
+    "postScore": 101.86,
+    "createdAt": "2026-10-26T17:58:45.753Z"
+  },
+  {
+    "id": "post_38",
+    "authorId": "usr_8",
+    "author": {
+      "id": "usr_8",
+      "handle": "builder_8",
+      "displayName": "Indie Builder #8",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_8",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#38)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_38/720/1280",
+    "durationSec": 82,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_38",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1401,
+      "tries": 504,
+      "upvotes": 424,
+      "trialUpvotes": 312,
+      "comments": 90
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 104.03,
+    "createdAt": "2026-10-26T14:58:45.753Z"
+  },
+  {
+    "id": "post_39",
+    "authorId": "usr_9",
+    "author": {
+      "id": "usr_9",
+      "handle": "builder_9",
+      "displayName": "Indie Builder #9",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_9",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#39)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_39/720/1280",
+    "durationSec": 83,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_39",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1354,
+      "tries": 541,
+      "upvotes": 443,
+      "trialUpvotes": 335,
+      "comments": 97
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 106.06,
+    "createdAt": "2026-10-26T11:58:45.753Z"
+  },
+  {
+    "id": "post_40",
+    "authorId": "usr_10",
+    "author": {
+      "id": "usr_10",
+      "handle": "builder_10",
+      "displayName": "Indie Builder #10",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_10",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#40)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_40/720/1280",
+    "durationSec": 84,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-40:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1307,
+      "tries": 575,
+      "upvotes": 460,
+      "trialUpvotes": 356,
+      "comments": 103
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 108,
+    "createdAt": "2026-10-26T08:58:45.753Z"
+  },
+  {
+    "id": "post_41",
+    "authorId": "usr_11",
+    "author": {
+      "id": "usr_11",
+      "handle": "builder_11",
+      "displayName": "Indie Builder #11",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_11",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#41)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_41/720/1280",
+    "durationSec": 85,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_41",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1260,
+      "tries": 352,
+      "upvotes": 318,
+      "trialUpvotes": 218,
+      "comments": 63
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 96.96,
+    "createdAt": "2026-10-26T05:58:45.753Z"
+  },
+  {
+    "id": "post_42",
+    "authorId": "usr_12",
+    "author": {
+      "id": "usr_12",
+      "handle": "builder_12",
+      "displayName": "Indie Builder #12",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_12",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#42)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_42/720/1280",
+    "durationSec": 86,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-42:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1213,
+      "tries": 388,
+      "upvotes": 337,
+      "trialUpvotes": 240,
+      "comments": 69
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 99.23,
+    "createdAt": "2026-10-26T02:58:45.753Z"
+  },
+  {
+    "id": "post_43",
+    "authorId": "usr_13",
+    "author": {
+      "id": "usr_13",
+      "handle": "builder_13",
+      "displayName": "Indie Builder #13",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_13",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#43)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_43/720/1280",
+    "durationSec": 87,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-43:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1166,
+      "tries": 419,
+      "upvotes": 352,
+      "trialUpvotes": 259,
+      "comments": 75
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 101.24,
+    "createdAt": "2026-10-25T23:58:45.753Z"
+  },
+  {
+    "id": "post_44",
+    "authorId": "usr_14",
+    "author": {
+      "id": "usr_14",
+      "handle": "builder_14",
+      "displayName": "Indie Builder #14",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_14",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#44)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_44/720/1280",
+    "durationSec": 88,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_44",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1119,
+      "tries": 447,
+      "upvotes": 366,
+      "trialUpvotes": 277,
+      "comments": 80
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 103.19,
+    "createdAt": "2026-10-25T20:58:45.753Z"
+  },
+  {
+    "id": "post_45",
+    "authorId": "usr_15",
+    "author": {
+      "id": "usr_15",
+      "handle": "builder_15",
+      "displayName": "Indie Builder #15",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_15",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#45)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_45/720/1280",
+    "durationSec": 89,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_45",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1072,
+      "tries": 471,
+      "upvotes": 377,
+      "trialUpvotes": 292,
+      "comments": 84
+    },
+    "health": {
+      "uptimePct": 95.6,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.044,
+      "verifiedUtility": true
+    },
+    "postScore": 104.95,
+    "createdAt": "2026-10-25T17:58:45.753Z"
+  },
+  {
+    "id": "post_46",
+    "authorId": "usr_16",
+    "author": {
+      "id": "usr_16",
+      "handle": "builder_16",
+      "displayName": "Indie Builder #16",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_16",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#46)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_46/720/1280",
+    "durationSec": 90,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-46:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 1025,
+      "tries": 287,
+      "upvotes": 259,
+      "trialUpvotes": 177,
+      "comments": 51
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 93.95,
+    "createdAt": "2026-10-25T14:58:45.753Z"
+  },
+  {
+    "id": "post_47",
+    "authorId": "usr_17",
+    "author": {
+      "id": "usr_17",
+      "handle": "builder_17",
+      "displayName": "Indie Builder #17",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_17",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#47)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_47/720/1280",
+    "durationSec": 91,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_47",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 978,
+      "tries": 312,
+      "upvotes": 271,
+      "trialUpvotes": 193,
+      "comments": 56
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 95.99,
+    "createdAt": "2026-10-25T11:58:45.753Z"
+  },
+  {
+    "id": "post_48",
+    "authorId": "usr_18",
+    "author": {
+      "id": "usr_18",
+      "handle": "builder_18",
+      "displayName": "Indie Builder #18",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_18",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#48)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_48/720/1280",
+    "durationSec": 92,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-48:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 931,
+      "tries": 335,
+      "upvotes": 281,
+      "trialUpvotes": 207,
+      "comments": 60
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 97.9,
+    "createdAt": "2026-10-25T08:58:45.753Z"
+  },
+  {
+    "id": "post_49",
+    "authorId": "usr_19",
+    "author": {
+      "id": "usr_19",
+      "handle": "builder_19",
+      "displayName": "Indie Builder #19",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_19",
+      "verifiedUtility": true
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#49)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_49/720/1280",
+    "durationSec": 93,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-49:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 884,
+      "tries": 353,
+      "upvotes": 288,
+      "trialUpvotes": 218,
+      "comments": 63
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 99.56,
+    "createdAt": "2026-10-25T05:58:45.753Z"
+  },
+  {
+    "id": "post_50",
+    "authorId": "usr_20",
+    "author": {
+      "id": "usr_20",
+      "handle": "builder_20",
+      "displayName": "Indie Builder #20",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_20",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#50)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_50/720/1280",
+    "durationSec": 94,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_50",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 837,
+      "tries": 368,
+      "upvotes": 294,
+      "trialUpvotes": 228,
+      "comments": 66
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 101.18,
+    "createdAt": "2026-10-25T02:58:45.753Z"
+  },
+  {
+    "id": "post_51",
+    "authorId": "usr_21",
+    "author": {
+      "id": "usr_21",
+      "handle": "builder_21",
+      "displayName": "Indie Builder #21",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_21",
+      "verifiedUtility": true
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#51)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_51/720/1280",
+    "durationSec": 95,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_51",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 790,
+      "tries": 221,
+      "upvotes": 200,
+      "trialUpvotes": 137,
+      "comments": 39
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 90.19,
+    "createdAt": "2026-10-24T23:58:45.753Z"
+  },
+  {
+    "id": "post_52",
+    "authorId": "usr_22",
+    "author": {
+      "id": "usr_22",
+      "handle": "builder_22",
+      "displayName": "Indie Builder #22",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_22",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#52)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_52/720/1280",
+    "durationSec": 96,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-52:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 743,
+      "tries": 237,
+      "upvotes": 205,
+      "trialUpvotes": 146,
+      "comments": 42
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 91.87,
+    "createdAt": "2026-10-24T20:58:45.753Z"
+  },
+  {
+    "id": "post_53",
+    "authorId": "usr_23",
+    "author": {
+      "id": "usr_23",
+      "handle": "builder_23",
+      "displayName": "Indie Builder #23",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_23",
+      "verifiedUtility": true
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#53)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_53/720/1280",
+    "durationSec": 97,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_53",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 696,
+      "tries": 250,
+      "upvotes": 210,
+      "trialUpvotes": 155,
+      "comments": 45
+    },
+    "health": {
+      "uptimePct": 95.6,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.044,
+      "verifiedUtility": true
+    },
+    "postScore": 93.55,
+    "createdAt": "2026-10-24T17:58:45.753Z"
+  },
+  {
+    "id": "post_54",
+    "authorId": "usr_24",
+    "author": {
+      "id": "usr_24",
+      "handle": "builder_24",
+      "displayName": "Indie Builder #24",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_24",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#54)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_54/720/1280",
+    "durationSec": 98,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-54:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 649,
+      "tries": 259,
+      "upvotes": 211,
+      "trialUpvotes": 160,
+      "comments": 46
+    },
+    "health": {
+      "uptimePct": 96.5,
+      "p50LatencyMs": 240,
+      "p95LatencyMs": 500,
+      "crashRate": 0.035,
+      "verifiedUtility": true
+    },
+    "postScore": 94.88,
+    "createdAt": "2026-10-24T14:58:45.753Z"
+  },
+  {
+    "id": "post_55",
+    "authorId": "usr_25",
+    "author": {
+      "id": "usr_25",
+      "handle": "builder_25",
+      "displayName": "Indie Builder #25",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_25",
+      "verifiedUtility": false
+    },
+    "title": "GitBisect Replay — Find the exact commit that broke your JSON API response (#55)",
+    "problemStatement": "Automatically replay a curl request against recent git commits in a container to pinpoint regressions.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_55/720/1280",
+    "durationSec": 99,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-55:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "git",
+      "debugging",
+      "regression"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 602,
+      "tries": 264,
+      "upvotes": 211,
+      "trialUpvotes": 163,
+      "comments": 47
+    },
+    "health": {
+      "uptimePct": 97.4,
+      "p50LatencyMs": 265,
+      "p95LatencyMs": 545,
+      "crashRate": 0.026,
+      "verifiedUtility": true
+    },
+    "postScore": 96.05,
+    "createdAt": "2026-10-24T11:58:45.753Z"
+  },
+  {
+    "id": "post_56",
+    "authorId": "usr_26",
+    "author": {
+      "id": "usr_26",
+      "handle": "builder_26",
+      "displayName": "Indie Builder #26",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_26",
+      "verifiedUtility": false
+    },
+    "title": "TableSnap — Extract HTML/Markdown tables from screenshots of research papers (#56)",
+    "problemStatement": "Turn dense academic PDF tables into clean Markdown or Pandas DataFrames without retyping numbers.",
+    "category": "Document & PDF",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=0",
+    "thumbUrl": "https://picsum.photos/seed/post_56/720/1280",
+    "durationSec": 100,
+    "demo": {
+      "mode": "api",
+      "target": "https://demo.arrakis.dev/api/post_56",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "ocr",
+      "markdown",
+      "tables",
+      "research"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 555,
+      "tries": 155,
+      "upvotes": 140,
+      "trialUpvotes": 96,
+      "comments": 27
+    },
+    "health": {
+      "uptimePct": 98.3,
+      "p50LatencyMs": 290,
+      "p95LatencyMs": 590,
+      "crashRate": 0.017,
+      "verifiedUtility": true
+    },
+    "postScore": 84.98,
+    "createdAt": "2026-10-24T08:58:45.753Z"
+  },
+  {
+    "id": "post_57",
+    "authorId": "usr_27",
+    "author": {
+      "id": "usr_27",
+      "handle": "builder_27",
+      "displayName": "Indie Builder #27",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_27",
+      "verifiedUtility": false
+    },
+    "title": "CORS-Explain — Paste a failed fetch error and get the exact server header fix (#57)",
+    "problemStatement": "Diagnose opaque browser CORS preflight failures and generate exact Nginx, Fastify, or Next.js headers.",
+    "category": "Developer Tools",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
+    "thumbUrl": "https://picsum.photos/seed/post_57/720/1280",
+    "durationSec": 101,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_57",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "cors",
+      "http",
+      "debugging"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 508,
+      "tries": 162,
+      "upvotes": 140,
+      "trialUpvotes": 100,
+      "comments": 29
+    },
+    "health": {
+      "uptimePct": 92,
+      "p50LatencyMs": 140,
+      "p95LatencyMs": 320,
+      "crashRate": 0.08,
+      "verifiedUtility": true
+    },
+    "postScore": 86.26,
+    "createdAt": "2026-10-24T05:58:45.753Z"
+  },
+  {
+    "id": "post_58",
+    "authorId": "usr_28",
+    "author": {
+      "id": "usr_28",
+      "handle": "builder_28",
+      "displayName": "Indie Builder #28",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_28",
+      "verifiedUtility": false
+    },
+    "title": "LogSlim — Deduplicate 100k-line stack traces into 5 root-cause clusters (#58)",
+    "problemStatement": "Compress noisy production container logs into unique stack-trace signatures so you find crashes fast.",
+    "category": "Data & CSV",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=4",
+    "thumbUrl": "https://picsum.photos/seed/post_58/720/1280",
+    "durationSec": 102,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-58:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "logs",
+      "observability",
+      "cli"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 461,
+      "tries": 165,
+      "upvotes": 138,
+      "trialUpvotes": 102,
+      "comments": 29
+    },
+    "health": {
+      "uptimePct": 92.9,
+      "p50LatencyMs": 165,
+      "p95LatencyMs": 365,
+      "crashRate": 0.071,
+      "verifiedUtility": true
+    },
+    "postScore": 87.27,
+    "createdAt": "2026-10-24T02:58:45.753Z"
+  },
+  {
+    "id": "post_59",
+    "authorId": "usr_29",
+    "author": {
+      "id": "usr_29",
+      "handle": "builder_29",
+      "displayName": "Indie Builder #29",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_29",
+      "verifiedUtility": false
+    },
+    "title": "ContrastFix — Suggest the closest WCAG AA/AAA accessible color palette tokens (#59)",
+    "problemStatement": "Fix low-contrast UI design tokens while preserving the original hue and brand personality.",
+    "category": "Design & Media",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=6",
+    "thumbUrl": "https://picsum.photos/seed/post_59/720/1280",
+    "durationSec": 103,
+    "demo": {
+      "mode": "web",
+      "target": "https://demo.arrakis.dev/web/post_59",
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "accessibility",
+      "wcag",
+      "colors",
+      "ui"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 414,
+      "tries": 165,
+      "upvotes": 135,
+      "trialUpvotes": 102,
+      "comments": 29
+    },
+    "health": {
+      "uptimePct": 93.8,
+      "p50LatencyMs": 190,
+      "p95LatencyMs": 410,
+      "crashRate": 0.062,
+      "verifiedUtility": true
+    },
+    "postScore": 88.1,
+    "createdAt": "2026-10-23T23:58:45.753Z"
+  },
+  {
+    "id": "post_60",
+    "authorId": "usr_30",
+    "author": {
+      "id": "usr_30",
+      "handle": "builder_30",
+      "displayName": "Indie Builder #30",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_30",
+      "verifiedUtility": false
+    },
+    "title": "PII-Scrub — Redact phone numbers, Aadhaar/PAN, and emails before LLM prompts (#60)",
+    "problemStatement": "Strip sensitive personal identifiers from customer support tickets locally before calling external APIs.",
+    "category": "Security & Privacy",
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=8",
+    "thumbUrl": "https://picsum.photos/seed/post_60/720/1280",
+    "durationSec": 104,
+    "demo": {
+      "mode": "container",
+      "target": "arrakis/demo-60:latest",
+      "formSchema": [
+        {
+          "name": "input",
+          "label": "Sample input payload",
+          "type": "text",
+          "required": true,
+          "defaultValue": "Sample input for instant 1-tap trial"
+        }
+      ],
+      "sampleCommand": "run-tool --input \"sample\""
+    },
+    "tags": [
+      "privacy",
+      "redaction",
+      "security"
+    ],
+    "indexingStatus": "ready",
+    "stats": {
+      "views": 367,
+      "tries": 161,
+      "upvotes": 128,
+      "trialUpvotes": 99,
+      "comments": 28
+    },
+    "health": {
+      "uptimePct": 94.7,
+      "p50LatencyMs": 215,
+      "p95LatencyMs": 455,
+      "crashRate": 0.053,
+      "verifiedUtility": true
+    },
+    "postScore": 88.45,
+    "createdAt": "2026-10-23T20:58:45.753Z"
+  }
+]

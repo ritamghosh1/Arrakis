@@ -1,0 +1,599 @@
+{
+  "type": "builders",
+  "period": "7d",
+  "updatedAt": "2026-10-31T05:58:45.755Z",
+  "rows": [
+    {
+      "rank": 1,
+      "prevRank": 2,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_ritam",
+        "handle": "ritam",
+        "displayName": "Ritam Ghosh",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+        "role": "both",
+        "bio": "Design engineer & indie builder. Testing utility-first tools on Arrakis.",
+        "githubUrl": "https://github.com/ritam",
+        "followersCount": 285,
+        "followingCount": 8,
+        "scoutXp": 1480,
+        "builderScore": 95,
+        "verifiedUtility": true,
+        "cofounderOpen": true,
+        "badges": [
+          "verified_utility",
+          "first_25_scout",
+          "top_10_builder"
+        ],
+        "createdAt": "2026-09-26T05:58:45.751Z"
+      },
+      "score": 95,
+      "breakdown": {
+        "weightedVotes": 140,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 39,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 2,
+      "prevRank": 1,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_srinjoy",
+        "handle": "srinjoy",
+        "displayName": "Srinjoy Mukherjee",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=srinjoy",
+        "role": "both",
+        "bio": "Systems & sandbox infrastructure. Building ephemeral micro-VMs and container tooling.",
+        "githubUrl": "https://github.com/srinjoy",
+        "followersCount": 276,
+        "followingCount": 11,
+        "scoutXp": 1620,
+        "builderScore": 92.7,
+        "verifiedUtility": true,
+        "cofounderOpen": true,
+        "badges": [
+          "verified_utility",
+          "top_10_builder",
+          "bug_hunter"
+        ],
+        "createdAt": "2026-09-27T05:58:45.752Z"
+      },
+      "score": 92.7,
+      "breakdown": {
+        "weightedVotes": 134,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 38,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 3,
+      "prevRank": 4,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_aanya",
+        "handle": "aanya",
+        "displayName": "Aanya Sharma",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=aanya",
+        "role": "builder",
+        "bio": "Shipping document & resume parsers that run in <200ms.",
+        "githubUrl": "https://github.com/aanya",
+        "followersCount": 267,
+        "followingCount": 14,
+        "scoutXp": 940,
+        "builderScore": 90.4,
+        "verifiedUtility": true,
+        "cofounderOpen": true,
+        "badges": [
+          "verified_utility",
+          "top_10_builder",
+          "cofounder_open"
+        ],
+        "createdAt": "2026-09-28T05:58:45.752Z"
+      },
+      "score": 90.4,
+      "breakdown": {
+        "weightedVotes": 128,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 37,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 4,
+      "prevRank": 3,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_kabir",
+        "handle": "kabir",
+        "displayName": "Kabir Verma",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=kabir",
+        "role": "builder",
+        "bio": "CLI minimalist. Rust + Docker tools for messy data files.",
+        "githubUrl": "https://github.com/kabir",
+        "followersCount": 258,
+        "followingCount": 17,
+        "scoutXp": 810,
+        "builderScore": 88.1,
+        "verifiedUtility": true,
+        "cofounderOpen": false,
+        "badges": [
+          "verified_utility",
+          "streak_7d"
+        ],
+        "createdAt": "2026-09-29T05:58:45.752Z"
+      },
+      "score": 88.1,
+      "breakdown": {
+        "weightedVotes": 122,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 36,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 5,
+      "prevRank": 6,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_devika",
+        "handle": "devika",
+        "displayName": "Devika Nair",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=devika",
+        "role": "both",
+        "bio": "First-25 Scout on 40+ indie tools. Breaking APIs so users don't have to.",
+        "githubUrl": "https://github.com/devika",
+        "followersCount": 249,
+        "followingCount": 20,
+        "scoutXp": 2150,
+        "builderScore": 85.8,
+        "verifiedUtility": true,
+        "cofounderOpen": false,
+        "badges": [
+          "first_25_scout",
+          "bug_hunter",
+          "streak_7d"
+        ],
+        "createdAt": "2026-09-30T05:58:45.752Z"
+      },
+      "score": 85.8,
+      "breakdown": {
+        "weightedVotes": 116,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 35,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 6,
+      "prevRank": 5,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_rohan",
+        "handle": "rohan",
+        "displayName": "Rohan Kulkarni",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=rohan",
+        "role": "builder",
+        "bio": "Solo student builder — zero followers, shipping my first container tool!",
+        "githubUrl": "https://github.com/rohan",
+        "followersCount": 240,
+        "followingCount": 23,
+        "scoutXp": 120,
+        "builderScore": 83.5,
+        "verifiedUtility": false,
+        "cofounderOpen": true,
+        "badges": [
+          "cofounder_open"
+        ],
+        "createdAt": "2026-10-01T05:58:45.752Z"
+      },
+      "score": 83.5,
+      "breakdown": {
+        "weightedVotes": 110,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 34,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 7,
+      "prevRank": 8,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_7",
+        "handle": "builder_7",
+        "displayName": "Indie Builder #7",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_7",
+        "role": "tester",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_7",
+        "followersCount": 231,
+        "followingCount": 26,
+        "scoutXp": 160,
+        "builderScore": 81.2,
+        "verifiedUtility": true,
+        "cofounderOpen": false,
+        "badges": [
+          "verified_utility",
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-02T05:58:45.752Z"
+      },
+      "score": 81.2,
+      "breakdown": {
+        "weightedVotes": 104,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 33,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 8,
+      "prevRank": 7,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_8",
+        "handle": "builder_8",
+        "displayName": "Indie Builder #8",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_8",
+        "role": "builder",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_8",
+        "followersCount": 222,
+        "followingCount": 29,
+        "scoutXp": 1595,
+        "builderScore": 78.9,
+        "verifiedUtility": false,
+        "cofounderOpen": false,
+        "badges": [
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-03T05:58:45.752Z"
+      },
+      "score": 78.9,
+      "breakdown": {
+        "weightedVotes": 98,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 32,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 9,
+      "prevRank": 10,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_9",
+        "handle": "builder_9",
+        "displayName": "Indie Builder #9",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_9",
+        "role": "builder",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_9",
+        "followersCount": 213,
+        "followingCount": 32,
+        "scoutXp": 1530,
+        "builderScore": 76.6,
+        "verifiedUtility": true,
+        "cofounderOpen": true,
+        "badges": [
+          "verified_utility",
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-04T05:58:45.752Z"
+      },
+      "score": 76.6,
+      "breakdown": {
+        "weightedVotes": 92,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 31,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 10,
+      "prevRank": 9,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_10",
+        "handle": "builder_10",
+        "displayName": "Indie Builder #10",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_10",
+        "role": "tester",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_10",
+        "followersCount": 204,
+        "followingCount": 35,
+        "scoutXp": 1465,
+        "builderScore": 74.3,
+        "verifiedUtility": false,
+        "cofounderOpen": false,
+        "badges": [
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-05T05:58:45.752Z"
+      },
+      "score": 74.3,
+      "breakdown": {
+        "weightedVotes": 86,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 30,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 11,
+      "prevRank": 12,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_11",
+        "handle": "builder_11",
+        "displayName": "Indie Builder #11",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_11",
+        "role": "builder",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_11",
+        "followersCount": 195,
+        "followingCount": 38,
+        "scoutXp": 1400,
+        "builderScore": 72,
+        "verifiedUtility": true,
+        "cofounderOpen": false,
+        "badges": [
+          "verified_utility",
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-06T05:58:45.752Z"
+      },
+      "score": 72,
+      "breakdown": {
+        "weightedVotes": 80,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 29,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 12,
+      "prevRank": 11,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_12",
+        "handle": "builder_12",
+        "displayName": "Indie Builder #12",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_12",
+        "role": "builder",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_12",
+        "followersCount": 186,
+        "followingCount": 41,
+        "scoutXp": 1335,
+        "builderScore": 69.7,
+        "verifiedUtility": false,
+        "cofounderOpen": false,
+        "badges": [
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-07T05:58:45.752Z"
+      },
+      "score": 69.7,
+      "breakdown": {
+        "weightedVotes": 74,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 28,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 13,
+      "prevRank": 14,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_13",
+        "handle": "builder_13",
+        "displayName": "Indie Builder #13",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_13",
+        "role": "tester",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_13",
+        "followersCount": 177,
+        "followingCount": 8,
+        "scoutXp": 1270,
+        "builderScore": 67.4,
+        "verifiedUtility": true,
+        "cofounderOpen": true,
+        "badges": [
+          "verified_utility",
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-08T05:58:45.752Z"
+      },
+      "score": 67.4,
+      "breakdown": {
+        "weightedVotes": 68,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 27,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 14,
+      "prevRank": 13,
+      "delta": -1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_14",
+        "handle": "builder_14",
+        "displayName": "Indie Builder #14",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_14",
+        "role": "builder",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_14",
+        "followersCount": 168,
+        "followingCount": 11,
+        "scoutXp": 1205,
+        "builderScore": 65.1,
+        "verifiedUtility": false,
+        "cofounderOpen": false,
+        "badges": [
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-09T05:58:45.752Z"
+      },
+      "score": 65.1,
+      "breakdown": {
+        "weightedVotes": 62,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 26,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    },
+    {
+      "rank": 15,
+      "prevRank": 16,
+      "delta": 1,
+      "entityType": "user",
+      "user": {
+        "id": "usr_15",
+        "handle": "builder_15",
+        "displayName": "Indie Builder #15",
+        "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=builder_15",
+        "role": "builder",
+        "bio": "Building practical micro-tools for everyday problems.",
+        "githubUrl": "https://github.com/builder_15",
+        "followersCount": 159,
+        "followingCount": 14,
+        "scoutXp": 1140,
+        "builderScore": 62.8,
+        "verifiedUtility": true,
+        "cofounderOpen": false,
+        "badges": [
+          "verified_utility",
+          "first_25_scout"
+        ],
+        "createdAt": "2026-10-10T05:58:45.752Z"
+      },
+      "score": 62.8,
+      "breakdown": {
+        "weightedVotes": 56,
+        "passiveUpvotes": 22,
+        "trialUpvotes3x": 25,
+        "trialConversionRate": 0.34,
+        "workedRate": 0.95,
+        "uptimePct": 99.1,
+        "freshnessDecay": 0.96,
+        "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+      }
+    }
+  ],
+  "me": {
+    "rank": 1,
+    "prevRank": 2,
+    "delta": 1,
+    "entityType": "user",
+    "user": {
+      "id": "usr_ritam",
+      "handle": "ritam",
+      "displayName": "Ritam Ghosh",
+      "avatarUrl": "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+      "role": "both",
+      "bio": "Design engineer & indie builder. Testing utility-first tools on Arrakis.",
+      "githubUrl": "https://github.com/ritam",
+      "followersCount": 285,
+      "followingCount": 8,
+      "scoutXp": 1480,
+      "builderScore": 95,
+      "verifiedUtility": true,
+      "cofounderOpen": true,
+      "badges": [
+        "verified_utility",
+        "first_25_scout",
+        "top_10_builder"
+      ],
+      "createdAt": "2026-09-26T05:58:45.751Z"
+    },
+    "score": 95,
+    "breakdown": {
+      "weightedVotes": 140,
+      "passiveUpvotes": 22,
+      "trialUpvotes3x": 39,
+      "trialConversionRate": 0.34,
+      "workedRate": 0.95,
+      "uptimePct": 99.1,
+      "freshnessDecay": 0.96,
+      "formulaSummary": "Top-5 Proof-of-Trial projects + >98% live sandbox uptime"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 # PLANS.md — Detailed Plan for Arrakis (2 Developers, Parallel Tracks)
 
-Owners: **Dev A** = UI + Ranking/Leaderboard · **Dev B** = Recommendation + Containerization.
+Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Recommendation (Python FastAPI) + Containerization (TypeScript/Docker).
+Database: **Drizzle ORM + Postgres 16 (`pgvector/pg16`) + Redis 7** in `infra/docker-compose.yml`.
 Tracks are decoupled by **contracts + mock mode** (§1). Checklists live in [TODOS.md](./TODOS.md).
 
 ---
