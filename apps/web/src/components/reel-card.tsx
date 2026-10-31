@@ -292,7 +292,7 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
               </button>
             </div>
 
-            {/* Clean Try Live Demo Dock */}
+            {/* Clean Try Live Demo & View Project Dock */}
             <div className="pt-1 flex items-center gap-2.5">
               <button
                 type="button"
@@ -304,9 +304,16 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
                   <span>Try Live Demo</span>
                 </span>
                 <span className="rounded-lg bg-ink/20 px-2.5 py-0.5 text-xs font-medium">
-                  Launch →
+                  In-App Browser →
                 </span>
               </button>
+
+              <Link
+                href={`/p/${post.id}`}
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-dune px-4 py-3 text-xs font-semibold text-ink hover:bg-border/50 transition-colors shrink-0"
+              >
+                View Project
+              </Link>
             </div>
           </div>
         </div>

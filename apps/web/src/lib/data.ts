@@ -28,6 +28,7 @@ import {
 } from "@arrakis/contracts";
 import {
   USE_DB,
+  dbCreatePost,
   dbLeaderboard,
   dbGetUserVector,
   dbPersonalizedFeed,
@@ -164,6 +165,11 @@ export function createRuntimePost(input: UploadPostInput): Post {
     createdAt: new Date().toISOString(),
   };
   runtimePosts.unshift(post);
+  if (USE_DB) {
+    void dbCreatePost(post).catch(() => {
+      // Fallback to in-memory runtimePosts if Postgres is offline
+    });
+  }
   return post;
 }
 

@@ -52,7 +52,7 @@ export default async function PostPage({ params }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-[820px] px-4 sm:px-6 py-6 lg:py-9">
+    <div className="mx-auto max-w-[1040px] px-4 sm:px-6 py-6 lg:py-9">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

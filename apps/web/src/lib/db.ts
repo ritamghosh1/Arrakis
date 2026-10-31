@@ -117,6 +117,68 @@ export async function dbPostById(id: string): Promise<Post | null> {
   return rows[0] ? rowToPost(rows[0]) : null;
 }
 
+export async function dbCreatePost(p: Post): Promise<void> {
+  const vec = SEED_POSTS[0]
+    ? Array.from({ length: 16 }, (_, i) => Number((i === 0 ? 0.85 : 0.12).toFixed(4)))
+    : Array(16).fill(0.25);
+  await pool().query(
+    `INSERT INTO posts (
+      id, author_id, title, problem_statement, category, video_url, thumb_url, duration_sec,
+      demo_mode, demo_target, target_url, project_type, form_schema, tags, indexing_status,
+      embedding, intent_embedding, views_count, tries_count, upvotes_count, trial_upvotes_count,
+      comments_count, impressions, video_completions, sandbox_bounces, sandbox_single_runs,
+      sandbox_multi_runs, desktop_handoffs, proxy_success_rate, weighted_upvotes,
+      weighted_usability_tags, shares_count, popularity_score, usability_score,
+      daily_leaderboard_score, uptime_pct, p50_latency_ms, p95_latency_ms, crash_rate,
+      post_score, created_at
+    ) VALUES (
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb,'ready',
+      $15::vector,$15::vector,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39
+    ) ON CONFLICT (id) DO NOTHING`,
+    [
+      p.id,
+      p.authorId,
+      p.title,
+      p.problemStatement,
+      p.category,
+      p.videoUrl,
+      p.thumbUrl,
+      p.durationSec,
+      p.demo.mode,
+      p.demo.target,
+      p.demo.target,
+      p.projectType ?? (p.demo.mode === "web" ? "BROWSER" : "CONTAINER"),
+      JSON.stringify(p.demo.formSchema ?? null),
+      JSON.stringify(p.tags),
+      toVec(vec),
+      p.stats.views,
+      p.stats.tries,
+      p.stats.upvotes,
+      p.stats.trialUpvotes,
+      p.stats.comments,
+      p.impressions ?? p.stats.views,
+      p.videoCompletions ?? 10,
+      p.sandboxBounces ?? 1,
+      p.sandboxSingleRuns ?? 3,
+      p.sandboxMultiRuns ?? 2,
+      p.desktopHandoffs ?? 1,
+      p.proxySuccessRate ?? 0.997,
+      p.weightedUpvotes ?? 13,
+      p.weightedUsabilityTags ?? 6.0,
+      p.sharesCount ?? 2,
+      p.popularityScore ?? 28.0,
+      p.usabilityScore ?? 1.54,
+      p.dailyLeaderboardScore ?? 0.89,
+      p.health.uptimePct,
+      p.health.p50LatencyMs,
+      p.health.p95LatencyMs,
+      p.health.crashRate,
+      p.postScore,
+      p.createdAt,
+    ],
+  );
+}
+
 /** Ranked feed via get_personalized_feed RPC; tops up with unseen-agnostic ranking when exhausted. */
 export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Post[]> {
   const userVec = await dbGetUserVector(userId);

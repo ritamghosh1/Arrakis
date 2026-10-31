@@ -2,12 +2,14 @@
 
 import type { Post } from "@arrakis/contracts";
 import { useState } from "react";
-import { ShareIcon, TerminalIcon } from "./icons";
+import { PlayIcon, ShareIcon, TerminalIcon } from "./icons";
+import { InAppBrowser } from "./in-app-browser";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
-import { getYouTubeEmbedUrl } from "@/lib/utils";
+import { cn, getYouTubeEmbedUrl } from "@/lib/utils";
 
 export function PostDetailClient({ post }: { post: Post }) {
+  const [stageTab, setStageTab] = useState<"browser" | "video">("browser");
   const [tryOpen, setTryOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -17,7 +19,7 @@ export function PostDetailClient({ post }: { post: Post }) {
     {
       id: "c1",
       handle: "srinjoy",
-      text: "Tested the live demo — super clean output and zero setup needed.",
+      text: "Tested the live demo in the in-app browser — super clean output and zero setup needed.",
       time: "2h ago",
     },
     {
@@ -47,47 +49,81 @@ export function PostDetailClient({ post }: { post: Post }) {
 
   return (
     <div className="space-y-6">
-      {/* Video or YouTube Stage */}
-      <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-ink border border-border">
-        {ytEmbedUrl ? (
-          <iframe
-            title={post.title}
-            src={ytEmbedUrl}
-            className="h-full w-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        ) : (
-          <video
-            src={post.videoUrl}
-            poster={post.thumbUrl}
-            controls
-            playsInline
-            className="h-full w-full object-cover"
-          />
-        )}
+      {/* Stage Switcher: In-App Browser vs Pitch Video */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-dune p-1">
+          <button
+            type="button"
+            onClick={() => setStageTab("browser")}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors",
+              stageTab === "browser"
+                ? "bg-ink text-dune shadow-sm"
+                : "text-muted hover:text-ink"
+            )}
+          >
+            <TerminalIcon className="size-3.5" />
+            <span>In-App Browser</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStageTab("video")}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors",
+              stageTab === "video"
+                ? "bg-ink text-dune shadow-sm"
+                : "text-muted hover:text-ink"
+            )}
+          >
+            <PlayIcon className="size-3.5" />
+            <span>Pitch Video</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTryOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-white hover:bg-accent-hover transition-colors shadow-sm"
+          >
+            <TerminalIcon className="size-3.5" />
+            <span>Open Full-Screen Sandbox</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-dune px-3.5 py-2 text-xs font-semibold text-ink hover:bg-border/50 transition-colors"
+          >
+            <ShareIcon className="size-3.5" />
+            <span>Share</span>
+          </button>
+        </div>
       </div>
 
-      {/* Primary Action Bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => setTryOpen(true)}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-hover transition-colors shadow-sm"
-        >
-          <TerminalIcon className="size-4" />
-          <span>Try Live Demo</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setShareOpen(true)}
-          className="inline-flex items-center gap-2 rounded-xl border border-border bg-dune px-4 py-3 text-sm font-semibold text-ink hover:bg-border/50 transition-colors"
-        >
-          <ShareIcon className="size-4" />
-          <span>Share</span>
-        </button>
-      </div>
+      {/* Stage Body */}
+      {stageTab === "browser" ? (
+        <InAppBrowser post={post} className="min-h-[500px]" />
+      ) : (
+        <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-ink border border-border">
+          {ytEmbedUrl ? (
+            <iframe
+              title={post.title}
+              src={ytEmbedUrl}
+              className="h-full w-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video
+              src={post.videoUrl}
+              poster={post.thumbUrl}
+              controls
+              playsInline
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
+      )}
 
       {/* Discussion / Builder Feedback */}
       <section className="pt-4 border-t border-border space-y-4">

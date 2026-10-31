@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       demo: body.demo,
       tags: Array.isArray(body.tags) ? body.tags : ["utility", "indie"],
     });
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json({ post: created, ...created }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "invalid_post_payload" }, { status: 400 });
   }
