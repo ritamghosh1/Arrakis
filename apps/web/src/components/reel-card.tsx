@@ -124,14 +124,6 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
               Verified Demo
             </span>
           )}
-          <span
-            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-dune px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink tabular-nums"
-            title="Bayesian Usability Score (S_use) and Popularity Score (S_pop)"
-          >
-            <span className="text-sage">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
-            <span className="text-muted">·</span>
-            <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
-          </span>
         </div>
       </div>
 
@@ -262,6 +254,8 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
                 <img
                   src={post.author.avatarUrl}
                   alt={post.author.displayName}
+                  width={36}
+                  height={36}
                   className="size-9 rounded-full border border-border bg-dune object-cover shrink-0"
                 />
                 <div className="min-w-0">
@@ -297,7 +291,7 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
               <button
                 type="button"
                 onClick={() => onTry(item)}
-                className="flex-1 flex items-center justify-between gap-3 rounded-xl bg-accent px-4 py-3 text-white font-semibold text-sm hover:bg-accent-hover active:scale-[0.99] transition-all shadow-sm"
+                className="flex-1 flex items-center justify-between gap-3 rounded-xl bg-accent px-4 py-3 text-white font-semibold text-sm hover:bg-accent-hover active:scale-[0.99] transition-colors shadow-sm"
               >
                 <span className="flex items-center gap-2.5">
                   <TerminalIcon className="size-4 shrink-0" />

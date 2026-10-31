@@ -119,8 +119,8 @@ export function ShareSheet({ post, onClose }: { post: Post | null; onClose: () =
         <div className="flex flex-col">
           <header className="border-line flex items-start justify-between gap-3 border-b p-4">
             <div>
-              <p className="text-ink-muted font-mono text-[11px] font-semibold uppercase">
-                Share Utility Tool · +15 Scout XP on Referral Trial
+              <p className="text-ink-muted text-[11px] font-semibold uppercase tracking-wider">
+                Share Project
               </p>
               <h2 id="share-sheet-title" className="font-display text-lg font-bold text-balance">
                 {post.title}
@@ -141,8 +141,8 @@ export function ShareSheet({ post, onClose }: { post: Post | null; onClose: () =
             {/* Post summary + QR */}
             <div className="border-line bg-paper flex flex-col gap-4 rounded-2xl border p-3.5 sm:flex-row sm:items-center">
               <div className="min-w-0 flex-1 space-y-1.5">
-                <span className="bg-paper-sunken text-ink inline-block rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold">
-                  {MODE_LABEL[post.demo.mode]} · {post.health.uptimePct}% uptime
+                <span className="bg-paper-sunken text-ink inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold">
+                  {MODE_LABEL[post.demo.mode]}
                 </span>
                 <p className="text-ink-muted text-xs leading-relaxed text-pretty">
                   {post.problemStatement}

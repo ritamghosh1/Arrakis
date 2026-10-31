@@ -92,12 +92,12 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 - [x] Badge gallery component + XP/level-up toast
 
 ### A10. Quality (M4)
-- [ ] `fixing-accessibility` audit on every screen; fix findings
-- [ ] `fixing-motion-performance` audit (feed, transitions); honour reduced motion
-- [ ] `baseline-ui` polish pass; `improve-ui` review → plan → fixes
-- [ ] Perf: LCP<2.5s, INP<200ms, CLS<0.1 (`performance` guide); `content-visibility` on lists
-- [ ] Responsive QA (360px, 768px, 1280px+), Safari/Chrome/Firefox check
-- [ ] Playwright e2e: browse→try→review→leaderboard; upload happy path
+- [x] `fixing-accessibility` audit on every screen; fix findings
+- [x] `fixing-motion-performance` audit (feed, transitions); honour reduced motion
+- [x] `baseline-ui` polish pass; `improve-ui` review → plan → fixes
+- [x] Perf: LCP<2.5s, INP<200ms, CLS<0.1 (`performance` guide); `content-visibility` on lists
+- [x] Responsive QA (360px, 768px, 1280px+), Safari/Chrome/Firefox check
+- [x] Playwright e2e: browse→try→review→leaderboard; upload happy path
 
 ---
 

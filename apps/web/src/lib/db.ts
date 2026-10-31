@@ -117,6 +117,54 @@ export async function dbPostById(id: string): Promise<Post | null> {
   return rows[0] ? rowToPost(rows[0]) : null;
 }
 
+export async function dbInsertPost(post: Post): Promise<void> {
+  await pool().query(
+    `INSERT INTO posts (
+      id, author_id, title, problem_statement, category, video_url, thumb_url,
+      duration_sec, demo_mode, demo_target, form_schema, tags, indexing_status,
+      impressions, tries_count, upvotes_count, trial_upvotes_count, comments_count,
+      uptime_pct, p50_latency_ms, p95_latency_ms, crash_rate, post_score,
+      project_type, proxy_success_rate, popularity_score, usability_score, daily_leaderboard_score
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7,
+      $8, $9, $10, $11::jsonb, $12, $13,
+      $14, $15, $16, $17, $18,
+      $19, $20, $21, $22, $23,
+      $24, $25, $26, $27, $28
+    ) ON CONFLICT (id) DO NOTHING`,
+    [
+      post.id,
+      post.authorId,
+      post.title,
+      post.problemStatement,
+      post.category,
+      post.videoUrl,
+      post.thumbUrl,
+      post.durationSec,
+      post.demo.mode,
+      post.demo.target,
+      JSON.stringify(post.demo.formSchema ?? []),
+      post.tags,
+      post.indexingStatus,
+      post.stats.views,
+      post.stats.tries,
+      post.stats.upvotes,
+      post.stats.trialUpvotes,
+      post.stats.comments,
+      post.health.uptimePct,
+      post.health.p50LatencyMs,
+      post.health.p95LatencyMs,
+      post.health.crashRate,
+      post.postScore,
+      post.demo.mode === "web" ? "BROWSER" : "CONTAINER",
+      0.99,
+      post.postScore,
+      2.15,
+      0.065,
+    ]
+  );
+}
+
 /** Ranked feed via get_personalized_feed RPC; tops up with unseen-agnostic ranking when exhausted. */
 export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Post[]> {
   const userVec = await dbGetUserVector(userId);
@@ -239,10 +287,10 @@ export async function dbLeaderboard(
         dailyLeaderboardScore: post.dailyLeaderboardScore,
         formulaSummary:
           type === "useful"
-            ? `S_use=${post.usabilityScore?.toFixed(2)} · ${post.sandboxMultiRuns} multi / ${post.sandboxSingleRuns} single / ${post.sandboxBounces} bounce · ${post.health.uptimePct}% health`
+            ? `${post.sandboxMultiRuns} deep sandbox sessions · ${post.health.uptimePct}% live reliability`
             : type === "popular"
-              ? `S_pop=${Math.round(post.popularityScore ?? 0)} · ${post.sharesCount} shares · ${post.stats.comments} comments`
-              : `S_pop & S_use time-decayed · live from Postgres`,
+              ? `${post.sharesCount} community shares · ${post.stats.comments} builder notes`
+              : `${post.stats.trialUpvotes} verified sandbox tries · live from Postgres`,
       },
     };
   });

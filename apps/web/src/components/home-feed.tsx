@@ -56,14 +56,18 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
       ) {
         return;
       }
+      const scrollBehavior: ScrollBehavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "auto"
+        : "smooth";
       if (e.key === "j") {
         e.preventDefault();
         const nextIdx = Math.min(items.length - 1, activeIndex + 1);
-        cardRefs.current[nextIdx]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        cardRefs.current[nextIdx]?.scrollIntoView({ behavior: scrollBehavior, block: "center" });
       } else if (e.key === "k") {
         e.preventDefault();
         const prevIdx = Math.max(0, activeIndex - 1);
-        cardRefs.current[prevIdx]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        cardRefs.current[prevIdx]?.scrollIntoView({ behavior: scrollBehavior, block: "center" });
       } else if (e.key === "t") {
         e.preventDefault();
         const current = items[activeIndex];

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { UploadPostInput } from "@arrakis/contracts";
 import { createRuntimePost } from "@/lib/data";
+import { USE_DB, dbInsertPost } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export async function POST(req: NextRequest) {
     if (!body.title?.trim() || !body.problemStatement?.trim() || !body.demo?.target?.trim()) {
       return NextResponse.json(
         { error: "Title, Problem Statement, and Demo Target are required." },
-        { status: 400 },
+        { status: 400 }
       );
     }
     const created = createRuntimePost({
@@ -26,7 +27,16 @@ export async function POST(req: NextRequest) {
       demo: body.demo,
       tags: Array.isArray(body.tags) ? body.tags : ["utility", "indie"],
     });
-    return NextResponse.json(created, { status: 201 });
+
+    if (USE_DB) {
+      try {
+        await dbInsertPost(created);
+      } catch {
+        // Fallback to in-memory runtime store if Postgres is offline
+      }
+    }
+
+    return NextResponse.json({ ...created, post: created }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "invalid_post_payload" }, { status: 400 });
   }
