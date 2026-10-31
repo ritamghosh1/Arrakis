@@ -1,315 +1,342 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { FeedItem, Post, User } from "@arrakis/contracts";
 import Link from "next/link";
-import type { FeedItem, FeedResponse, Post } from "@arrakis/contracts";
-import { cn, VIEWER_ID } from "@/lib/utils";
-import { track } from "@/lib/events";
+import { useEffect, useRef, useState } from "react";
 import { FreshBuilds } from "./fresh-builds";
+import { SparklesIcon, TrophyIcon, VerifiedIcon } from "./icons";
 import { ReelCard } from "./reel-card";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
+import { cn } from "@/lib/utils";
 
-type Mode = "for_you" | "following";
-type Status = "idle" | "loading" | "error";
-
-function Skeleton() {
-  return (
-    <div className="h-full p-2" aria-hidden="true">
-      <div className="bg-paper-sunken mx-auto h-full max-w-[27.5rem] animate-pulse rounded-[var(--radius-card)]" />
-    </div>
-  );
+interface HomeFeedProps {
+  initialItems: FeedItem[];
+  freshPosts: Post[];
+  suggestedUsers: User[];
 }
 
-export function HomeFeed({ initial, freshBuilds }: { initial: FeedResponse; freshBuilds: Post[] }) {
-  const [mode, setMode] = useState<Mode>("for_you");
-  const [items, setItems] = useState<FeedItem[]>(initial.items);
-  const [cursor, setCursor] = useState<string | null>(initial.nextCursor);
-  const [status, setStatus] = useState<Status>("idle");
-  const [activeId, setActiveId] = useState<string | null>(initial.items[0]?.post.id ?? null);
-  const [upvoted, setUpvoted] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(initial.items.map((i) => [i.post.id, Boolean(i.viewerState?.upvoted)])),
-  );
-  const [tried, setTried] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(initial.items.map((i) => [i.post.id, Boolean(i.viewerState?.tried)])),
-  );
-  const [saved, setSaved] = useState<Record<string, boolean>>({});
-  const [following, setFollowing] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(initial.items.map((i) => [i.post.authorId, Boolean(i.viewerState?.followingAuthor)])),
-  );
-  const [tryPost, setTryPost] = useState<Post | null>(null);
-  const [sharePost, setSharePost] = useState<Post | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const reqId = useRef(0);
-
-  const say = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2600);
-  }, []);
-
-  const load = useCallback(async (nextMode: Mode, nextCursor: string | null, replace: boolean) => {
-    const id = ++reqId.current;
-    setStatus("loading");
-    try {
-      const qs = new URLSearchParams({ mode: nextMode, userId: VIEWER_ID });
-      if (nextCursor) qs.set("cursor", nextCursor);
-      const res = await fetch(`/api/feed/home?${qs}`);
-      if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as FeedResponse;
-      if (id !== reqId.current) return;
-      setItems((prev) => (replace ? data.items : [...prev, ...data.items]));
-      setCursor(data.nextCursor);
-      setUpvoted((u) => ({
-        ...u,
-        ...Object.fromEntries(data.items.map((i) => [i.post.id, u[i.post.id] ?? Boolean(i.viewerState?.upvoted)])),
-      }));
-      setTried((t) => ({
-        ...t,
-        ...Object.fromEntries(data.items.map((i) => [i.post.id, t[i.post.id] ?? Boolean(i.viewerState?.tried)])),
-      }));
-      setFollowing((f) => ({
-        ...f,
-        ...Object.fromEntries(
-          data.items.map((i) => [i.post.authorId, f[i.post.authorId] ?? Boolean(i.viewerState?.followingAuthor)]),
-        ),
-      }));
-      if (replace) {
-        setActiveId(data.items[0]?.post.id ?? null);
-        scrollerRef.current?.scrollTo({ top: 0 });
-      }
-      setStatus("idle");
-    } catch {
-      if (id === reqId.current) setStatus("error");
-    }
-  }, []);
-
-  function switchMode(next: Mode) {
-    if (next === mode) return;
-    setMode(next);
-    setItems([]);
-    setCursor(null);
-    void load(next, null, true);
-  }
+export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedProps) {
+  const [mode, setMode] = useState<"for_you" | "following">("for_you");
+  const [items, setItems] = useState<FeedItem[]>(initialItems);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTryPost, setActiveTryPost] = useState<Post | null>(null);
+  const [activeSharePost, setActiveSharePost] = useState<Post | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [followedSuggestions, setFollowedSuggestions] = useState<Record<string, boolean>>({});
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const root = scrollerRef.current;
-    if (!root) return;
-    if ("onscrollsnapchange" in HTMLElement.prototype) {
-      const onSnap = (e: Event) => {
-        const target = (e as Event & { snapTargetBlock?: Element | null }).snapTargetBlock;
-        const id =
-          target?.getAttribute("data-post-id") ??
-          target?.querySelector("[data-post-id]")?.getAttribute("data-post-id");
-        if (id) setActiveId(id);
-      };
-      root.addEventListener("scrollsnapchange", onSnap);
-      return () => root.removeEventListener("scrollsnapchange", onSnap);
-    }
-    const io = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActiveId(e.target.getAttribute("data-post-id"));
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+            const idx = Number((entry.target as HTMLElement).dataset.index ?? 0);
+            setActiveIndex(idx);
+          }
         }
       },
-      { root, threshold: 0.6 },
+      { threshold: [0.55] }
     );
-    root.querySelectorAll("[data-post-id]").forEach((el) => io.observe(el));
-    return () => io.disconnect();
+
+    for (const el of cardRefs.current) {
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
   }, [items]);
 
-  const activeIndex = items.findIndex((i) => i.post.id === activeId);
+  // Keyboard shortcuts (j = next, k = prev, t = try active)
   useEffect(() => {
-    if (cursor && status === "idle" && activeIndex >= 0 && activeIndex >= items.length - 3) {
-      void load(mode, cursor, false);
-    }
-  }, [activeIndex, cursor, items.length, load, mode, status]);
-
-  const scrollBy = useCallback((dir: 1 | -1) => {
-    const root = scrollerRef.current;
-    if (root) root.scrollBy({ top: dir * root.clientHeight, behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && (t.closest("input,textarea,select,dialog[open]") || t.isContentEditable)) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const cur = items[activeIndex];
-      if (e.key === "j") scrollBy(1);
-      else if (e.key === "k") scrollBy(-1);
-      else if (e.key === "t" && cur) setTryPost(cur.post);
-      else if (e.key === "u" && cur) toggleUpvote(cur.post);
-      else if (e.key === "/") {
-        e.preventDefault();
-        window.location.assign("/explore?focus=1");
+    function onKeyDown(e: KeyboardEvent) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
       }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, activeIndex, scrollBy]);
-
-  function toggleUpvote(post: Post) {
-    const next = !upvoted[post.id];
-    setUpvoted((u) => ({ ...u, [post.id]: next }));
-    if (next) {
-      track("upvote", post.id, tried[post.id] ? 3 : 1);
-      say(tried[post.id] ? "3× Proof-of-Trial Upvote recorded" : "Upvoted (Try demo to upgrade to 3×)");
+      if (e.key === "j") {
+        e.preventDefault();
+        const nextIdx = Math.min(items.length - 1, activeIndex + 1);
+        cardRefs.current[nextIdx]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (e.key === "k") {
+        e.preventDefault();
+        const prevIdx = Math.max(0, activeIndex - 1);
+        cardRefs.current[prevIdx]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (e.key === "t") {
+        e.preventDefault();
+        const current = items[activeIndex];
+        if (current) setActiveTryPost(current.post);
+      }
     }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeIndex, items]);
+
+  async function handleSwitchMode(nextMode: "for_you" | "following") {
+    setMode(nextMode);
+    try {
+      const res = await fetch(`/api/feed/home?mode=${nextMode}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.items) && data.items.length > 0) {
+          setItems(data.items);
+          setActiveIndex(0);
+          return;
+        }
+      }
+    } catch {
+      // Fallback to local filter
+    }
+    if (nextMode === "following") {
+      setItems(initialItems.filter((item) => item.reason.kind === "followed"));
+    } else {
+      setItems(initialItems);
+    }
+    setActiveIndex(0);
   }
 
-  async function toggleFollow(post: Post) {
-    const was = Boolean(following[post.authorId]);
-    setFollowing((f) => ({ ...f, [post.authorId]: !was }));
+  function showToast(msg: string) {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((curr) => (curr === msg ? null : curr));
+    }, 3600);
+  }
+
+  function handleTrialCompleted(postId: string) {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.post.id === postId
+          ? {
+              ...item,
+              viewerState: {
+                upvoted: Boolean(item.viewerState?.upvoted),
+                saved: Boolean(item.viewerState?.saved),
+                followingAuthor: Boolean(item.viewerState?.followingAuthor),
+                tried: true,
+              },
+            }
+          : item
+      )
+    );
+    showToast("Feedback saved! Thanks for testing this build.");
+  }
+
+  async function handleToggleFollowUser(userId: string) {
+    const next = !followedSuggestions[userId];
+    setFollowedSuggestions((prev) => ({ ...prev, [userId]: next }));
     try {
-      const res = await fetch(`/api/follow/${post.authorId}?followerId=${VIEWER_ID}`, {
-        method: was ? "DELETE" : "POST",
+      await fetch(`/api/follow/${encodeURIComponent(userId)}`, {
+        method: next ? "POST" : "DELETE",
       });
-      if (!res.ok) throw new Error(String(res.status));
-      if (!was) track("follow", undefined, 1, post.authorId);
-      say(
-        was
-          ? `Unfollowed @${post.author.handle}`
-          : `Following @${post.author.handle} — taste vector updated`,
-      );
     } catch {
-      setFollowing((f) => ({ ...f, [post.authorId]: was }));
-      say("Could not update follow. Try again.");
+      // Ignore offline error
     }
   }
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col">
-      <header className="pt-safe border-line bg-paper/95 z-feed flex flex-col gap-2 border-b pt-2 pb-2">
-        <div className="flex items-center justify-between px-4">
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-display text-xl font-bold sm:text-2xl">Utility Feed</h1>
-            <span className="border-line bg-paper-raised text-ink-muted hidden rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium sm:inline-block">
-              80% Taste & Graph · 20% Cold-Start
-            </span>
-          </div>
-          <div
-            role="group"
-            aria-label="Feed type"
-            className="border-line bg-paper-sunken flex rounded-full border p-0.5 text-xs font-bold"
+    <div className="mx-auto max-w-[1140px] px-4 sm:px-6 py-5 lg:py-7">
+      {/* Top Feed Header */}
+      <header className="sticky top-0 z-feed mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface/95 backdrop-blur-md px-4 py-3 shadow-sm">
+        {/* Mobile App Logo (shown below lg where left rail is hidden) */}
+        <Link
+          href="/"
+          className="flex lg:hidden items-center gap-2.5 focus-visible:outline-none"
+        >
+          <span className="flex size-8 items-center justify-center rounded-xl bg-ink text-dune font-display text-sm font-bold tracking-tight">
+            A
+          </span>
+          <span className="font-display text-lg font-bold tracking-tight text-ink">
+            Arrakis
+          </span>
+        </Link>
+
+        {/* For You / Following Toggle */}
+        <div className="flex items-center gap-1 rounded-xl bg-dune p-1 border border-border">
+          <button
+            type="button"
+            onClick={() => handleSwitchMode("for_you")}
+            aria-pressed={mode === "for_you"}
+            className={cn(
+              "rounded-lg px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-colors",
+              mode === "for_you" ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
+            )}
           >
-            {(
-              [
-                ["for_you", "For you"],
-                ["following", "Following"],
-              ] as const
-            ).map(([m, label]) => (
-              <button
-                key={m}
-                type="button"
-                aria-pressed={mode === m}
-                onClick={() => switchMode(m)}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 transition-colors",
-                  mode === m ? "bg-ink text-paper shadow-xs" : "text-ink-muted",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+            For You
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSwitchMode("following")}
+            aria-pressed={mode === "following"}
+            className={cn(
+              "rounded-lg px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-colors",
+              mode === "following" ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
+            )}
+          >
+            Following
+          </button>
         </div>
-        <FreshBuilds posts={freshBuilds} />
+
+        <div className="hidden lg:flex items-center gap-2 text-xs text-muted">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-dune px-2.5 py-1 font-medium text-ink border border-border">
+            <SparklesIcon className="size-3.5 text-accent" />
+            Real working demos · Zero clout bias
+          </span>
+        </div>
       </header>
 
-      <div
-        ref={scrollerRef}
-        className="feed-scroller min-h-0 flex-1 overflow-y-auto"
-        tabIndex={-1}
-        aria-busy={status === "loading"}
-      >
-        {items.map((item) => (
-          <div key={item.post.id} className="h-full">
-            <ReelCard
-              item={item}
-              active={item.post.id === activeId}
-              upvoted={Boolean(upvoted[item.post.id])}
-              tried={Boolean(tried[item.post.id])}
-              saved={Boolean(saved[item.post.id])}
-              following={Boolean(following[item.post.authorId])}
-              onUpvote={() => toggleUpvote(item.post)}
-              onSave={() => {
-                const next = !saved[item.post.id];
-                setSaved((s) => ({ ...s, [item.post.id]: next }));
-                say(next ? "Saved to your Scout shelf" : "Removed from saved");
-              }}
-              onFollow={() => void toggleFollow(item.post)}
-              onTry={() => setTryPost(item.post)}
-              onShare={() => setSharePost(item.post)}
-            />
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_310px] gap-7 items-start">
+        {/* Main Feed Column */}
+        <div className="space-y-6 min-w-0">
+          {/* Fresh Builds Spotlight Rail */}
+          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <div>
+                <h2 className="font-display text-sm font-bold text-ink">Fresh Builds</h2>
+                <p className="text-xs text-muted">New launches from emerging builders</p>
+              </div>
+              <Link
+                href="/explore"
+                className="text-xs font-semibold text-accent hover:underline"
+              >
+                Explore all →
+              </Link>
+            </div>
+            <FreshBuilds posts={freshPosts} />
           </div>
-        ))}
 
-        {status === "loading" && items.length === 0 && (
-          <div className="feed-item h-full">
-            <Skeleton />
-          </div>
-        )}
-
-        {status === "error" && (
-          <div className="feed-item grid h-full place-items-center p-6">
-            <div className="max-w-xs text-center">
-              <p className="font-display text-lg font-bold">We could not load the feed</p>
-              <p className="text-ink-muted mt-1 text-sm">
-                Check that the recommender is running, or switch to mock mode.
+          {/* Reels Stack */}
+          {items.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface p-10 text-center space-y-3">
+              <p className="font-display text-base font-bold text-ink">
+                No builds in your Following feed yet
+              </p>
+              <p className="text-sm text-muted max-w-md mx-auto">
+                Switch back to For You or follow builders on the right to see their latest releases.
               </p>
               <button
                 type="button"
-                onClick={() => void load(mode, items.length ? cursor : null, items.length === 0)}
-                className="bg-primary text-primary-ink mt-4 rounded-full px-5 py-2.5 font-semibold"
+                onClick={() => handleSwitchMode("for_you")}
+                className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-dune"
               >
-                Try again
+                Back to For You
               </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="space-y-7">
+              {items.map((item, idx) => (
+                <div
+                  key={item.post.id}
+                  data-index={idx}
+                  ref={(el) => {
+                    cardRefs.current[idx] = el;
+                  }}
+                >
+                  <ReelCard
+                    item={item}
+                    isActive={idx === activeIndex}
+                    onTry={(it) => setActiveTryPost(it.post)}
+                    onShare={(it) => setActiveSharePost(it.post)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        {status === "idle" && items.length === 0 && (
-          <div className="feed-item grid h-full place-items-center p-6">
-            <div className="max-w-xs text-center">
-              <p className="font-display text-lg font-bold text-balance">
-                {mode === "following" ? "Nobody you follow has posted yet" : "No reels yet"}
-              </p>
-              <p className="text-ink-muted mt-1 text-sm text-pretty">
-                Follow builders in Explore and their demos will appear here with attribution chips.
-              </p>
-              <Link
-                href="/explore"
-                className="bg-primary text-primary-ink mt-4 inline-block rounded-full px-5 py-2.5 font-semibold"
-              >
-                Find builders in Explore
+        {/* Right Context Rail (Desktop >= 1280px) */}
+        <aside className="hidden xl:block space-y-5 sticky top-24">
+          {/* Builders to Follow */}
+          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-sm font-bold text-ink">Builders to Follow</h2>
+              <Link href="/ranks" className="text-xs font-semibold text-accent hover:underline">
+                Standings
               </Link>
             </div>
+
+            <div className="space-y-3">
+              {suggestedUsers.slice(0, 5).map((u) => {
+                const isFollowed = Boolean(followedSuggestions[u.id]);
+                return (
+                  <div key={u.id} className="flex items-center justify-between gap-2.5">
+                    <Link href={`/u/${u.handle}`} className="flex items-center gap-2.5 min-w-0 group">
+                      <img
+                        src={u.avatarUrl}
+                        alt={u.displayName}
+                        className="size-9 rounded-full border border-border bg-dune object-cover shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-semibold text-ink group-hover:text-accent truncate">
+                            {u.displayName}
+                          </span>
+                          {u.verifiedUtility && (
+                            <VerifiedIcon className="size-3.5 text-sage shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted truncate">@{u.handle}</p>
+                      </div>
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFollowUser(u.id)}
+                      className={cn(
+                        "rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors shrink-0",
+                        isFollowed
+                          ? "border border-border bg-dune text-ink"
+                          : "bg-ink text-dune hover:bg-ink/90"
+                      )}
+                    >
+                      {isFollowed ? "Following" : "Follow"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
+
+          {/* Community Standings Card */}
+          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-2.5">
+            <div className="flex items-center gap-2 text-ink">
+              <TrophyIcon className="size-4 text-accent" />
+              <h3 className="font-display text-sm font-bold">Community Standings</h3>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Projects are ranked by hands-on community testing and real working demos rather than follower count.
+            </p>
+            <Link
+              href="/ranks"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline pt-1"
+            >
+              View Top Builders & Tools →
+            </Link>
+          </div>
+        </aside>
       </div>
 
-      <div aria-live="polite" className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-        {toast && (
-          <p className="bg-ink text-paper z-toast max-w-[90%] truncate rounded-full px-4 py-2 font-mono text-xs font-semibold shadow-lg">
-            {toast}
-          </p>
-        )}
-      </div>
+      {/* Live Toast */}
+      {toastMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-20 lg:bottom-6 right-6 z-toast rounded-xl border border-sage/40 bg-ink px-4 py-3 text-xs font-semibold text-dune shadow-lg"
+        >
+          {toastMessage}
+        </div>
+      )}
 
+      {/* Try-It Sandbox Sheet */}
       <TrySheet
-        post={tryPost}
-        onClose={() => setTryPost(null)}
-        onVerifiedTrial={(postId, xp) => {
-          setTried((t) => ({ ...t, [postId]: true }));
-          setUpvoted((u) => ({ ...u, [postId]: true }));
-          say(`+${xp} Scout XP · 3× Proof-of-Trial Upvote unlocked!`);
-        }}
+        post={activeTryPost}
+        onClose={() => setActiveTryPost(null)}
+        onTrialCompleted={handleTrialCompleted}
       />
-      <ShareSheet post={sharePost} onClose={() => setSharePost(null)} />
+
+      {/* Share Sheet */}
+      <ShareSheet post={activeSharePost} onClose={() => setActiveSharePost(null)} />
     </div>
   );
 }

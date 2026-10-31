@@ -29,6 +29,15 @@ export function track(type: EventType, postId?: string, value?: number, targetUs
   if (!timer) timer = setTimeout(flush, 2000);
 }
 
+export function queueEvent(evt: {
+  type: EventType;
+  postId?: string;
+  value?: number;
+  targetUserId?: string;
+}) {
+  track(evt.type, evt.postId, evt.value, evt.targetUserId);
+}
+
 if (typeof document !== "undefined") {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") flush();
