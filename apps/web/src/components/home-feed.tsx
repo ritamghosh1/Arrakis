@@ -138,14 +138,28 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
   return (
     <div className="mx-auto max-w-[1140px] px-4 sm:px-6 py-5 lg:py-7">
       {/* Top Feed Header */}
-      <header className="sticky top-0 z-feed mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface/95 backdrop-blur-md px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-1.5 rounded-xl bg-dune p-1 border border-border">
+      <header className="sticky top-0 z-feed mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface/95 backdrop-blur-md px-4 py-3 shadow-sm">
+        {/* Mobile App Logo (shown below lg where left rail is hidden) */}
+        <Link
+          href="/"
+          className="flex lg:hidden items-center gap-2.5 focus-visible:outline-none"
+        >
+          <span className="flex size-8 items-center justify-center rounded-xl bg-ink text-dune font-display text-sm font-bold tracking-tight">
+            A
+          </span>
+          <span className="font-display text-lg font-bold tracking-tight text-ink">
+            Arrakis
+          </span>
+        </Link>
+
+        {/* For You / Following Toggle */}
+        <div className="flex items-center gap-1 rounded-xl bg-dune p-1 border border-border">
           <button
             type="button"
             onClick={() => handleSwitchMode("for_you")}
             aria-pressed={mode === "for_you"}
             className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors",
+              "rounded-lg px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-colors",
               mode === "for_you" ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
             )}
           >
@@ -156,7 +170,7 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
             onClick={() => handleSwitchMode("following")}
             aria-pressed={mode === "following"}
             className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-colors",
+              "rounded-lg px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-colors",
               mode === "following" ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
             )}
           >
@@ -164,17 +178,11 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-muted">
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-dune px-2.5 py-1 font-medium text-ink border border-border">
+        <div className="hidden lg:flex items-center gap-2 text-xs text-muted">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-dune px-2.5 py-1 font-medium text-ink border border-border">
             <SparklesIcon className="size-3.5 text-accent" />
             Real working demos · Zero clout bias
           </span>
-          <Link
-            href="/create"
-            className="rounded-xl bg-accent px-3.5 py-1.5 font-semibold text-white hover:bg-accent-hover transition-colors"
-          >
-            + Share Build
-          </Link>
         </div>
       </header>
 
