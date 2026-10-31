@@ -8,9 +8,11 @@ import {
   hammingDistance64,
   type DemoMode,
   type FormFieldSchema,
+  type Hackathon,
   type Post,
 } from "@arrakis/contracts";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   CheckCircleIcon,
@@ -58,7 +60,24 @@ const SAMPLE_YOUTUBE_LINKS = [
 const DRAFT_STORAGE_KEY = "arrakis_create_post_draft_v2";
 
 export function CreatePostForm() {
+  const searchParams = useSearchParams();
+  const hackathonParam = searchParams.get("hackathon");
+
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+
+  // Hackathon Mapping & Dynamic Link states
+  const [hackathons, setHackathons] = useState<Hackathon[]>([]);
+  const [selectedHackathon, setSelectedHackathon] = useState<Hackathon | null>(null);
+  const [createHackModalOpen, setCreateHackModalOpen] = useState(false);
+  const [newHackName, setNewHackName] = useState("");
+  const [newHackTag, setNewHackTag] = useState("");
+  const [newHackOrganizer, setNewHackOrganizer] = useState("");
+  const [newHackDesc, setNewHackDesc] = useState("");
+  const [newHackWebsite, setNewHackWebsite] = useState("");
+  const [creatingHack, setCreatingHack] = useState(false);
+  const [hackModalError, setHackModalError] = useState<string | null>(null);
+  const [generatedDynamicLink, setGeneratedDynamicLink] = useState<string | null>(null);
+  const [copiedInvite, setCopiedInvite] = useState(false);
 
   // Step 1: Pitch Reel (YouTube link, Upload file, or Sample video)
   const [videoSourceMode, setVideoSourceMode] = useState<"youtube" | "upload" | "sample">("youtube");
@@ -115,6 +134,67 @@ export function CreatePostForm() {
   const [activeTryPost, setActiveTryPost] = useState<Post | null>(null);
   const [activeSharePost, setActiveSharePost] = useState<Post | null>(null);
   const [draftSavedNotice, setDraftSavedNotice] = useState(false);
+
+  // Load hackathons list and auto-select if query param provided
+  useEffect(() => {
+    fetch("/api/hackathons")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data.hackathons)) {
+          setHackathons(data.hackathons);
+          if (hackathonParam) {
+            const found = data.hackathons.find(
+              (h: Hackathon) =>
+                h.slug === hackathonParam ||
+                h.id === hackathonParam ||
+                h.tag === hackathonParam
+            );
+            if (found) setSelectedHackathon(found);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [hackathonParam]);
+
+  async function handleCreateHackathonSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newHackName.trim() || creatingHack) return;
+    setCreatingHack(true);
+    setHackModalError(null);
+    try {
+      const res = await fetch("/api/hackathons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newHackName.trim(),
+          tag: newHackTag.trim() || undefined,
+          organizerName: newHackOrganizer.trim() || undefined,
+          description: newHackDesc.trim() || undefined,
+          websiteUrl: newHackWebsite.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.hackathon) {
+        setHackModalError(data.error || "Failed to create hackathon");
+        return;
+      }
+      const created: Hackathon = data.hackathon;
+      setHackathons((prev) => [created, ...prev]);
+      setSelectedHackathon(created);
+      setGeneratedDynamicLink(data.inviteUrl || `${window.location.origin}/create?hackathon=${created.slug}`);
+    } catch {
+      setHackModalError("Network error creating hackathon");
+    } finally {
+      setCreatingHack(false);
+    }
+  }
+
+  function handleCopyInviteLink() {
+    if (!generatedDynamicLink) return;
+    navigator.clipboard.writeText(generatedDynamicLink).catch(() => {});
+    setCopiedInvite(true);
+    setTimeout(() => setCopiedInvite(false), 2400);
+  }
 
   // Restore saved draft on mount
   useEffect(() => {
@@ -239,6 +319,14 @@ export function CreatePostForm() {
         .map((t) => t.trim().toLowerCase().replace(/^#/, ""))
         .filter(Boolean);
 
+      if (selectedHackathon) {
+        const slugTag = `built-at-${selectedHackathon.slug}`;
+        if (!tags.includes(slugTag)) tags.push(slugTag);
+        if (selectedHackathon.tag && !tags.includes(selectedHackathon.tag)) {
+          tags.push(selectedHackathon.tag);
+        }
+      }
+
       let normalizedTarget = demoTarget.trim() || "https://example.com";
       if (
         demoMode === "web" &&
@@ -269,6 +357,8 @@ export function CreatePostForm() {
             formSchema,
           },
           tags: tags.length > 0 ? tags : ["devtools", "utility"],
+          hackathonId: selectedHackathon?.id,
+          hackathonName: selectedHackathon?.name,
         }),
       });
 
@@ -340,6 +430,8 @@ export function CreatePostForm() {
       verifiedUtility: true,
     },
     postScore: 48.0,
+    hackathonId: selectedHackathon?.id,
+    hackathonName: selectedHackathon?.name,
     createdAt: new Date().toISOString(),
   };
 
@@ -483,6 +575,250 @@ export function CreatePostForm() {
           {draftSavedNotice ? "✓ Draft Saved" : "Save Draft"}
         </button>
       </div>
+
+      {/* Hackathon Selection & Dynamic Link Creator Toolbar */}
+      <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 place-items-center rounded-xl bg-amber-500/15 text-amber-700 text-lg shrink-0">
+            🏆
+          </span>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-bold text-ink">
+                {selectedHackathon
+                  ? `Publishing to: ${selectedHackathon.name}`
+                  : "Publishing to a Hackathon?"}
+              </span>
+              {selectedHackathon && (
+                <span className="rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                  Tag: #{selectedHackathon.tag}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted mt-0.5">
+              {selectedHackathon
+                ? `Build will be marked with 'Built at ${selectedHackathon.name}' and showcased in event standings.`
+                : "Organizers can generate dynamic submission links, or participants can link their event build."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {selectedHackathon ? (
+            <button
+              type="button"
+              onClick={() => setSelectedHackathon(null)}
+              className="rounded-xl border border-border bg-dune px-3 py-2 text-xs font-semibold text-ink hover:bg-border/40 transition-colors"
+            >
+              Clear Hackathon
+            </button>
+          ) : (
+            <select
+              aria-label="Select Hackathon"
+              value=""
+              onChange={(e) => {
+                const found = hackathons.find(
+                  (h) => h.id === e.target.value || h.slug === e.target.value
+                );
+                if (found) setSelectedHackathon(found);
+              }}
+              className="rounded-xl border border-border bg-dune px-3 py-2 text-xs font-semibold text-ink focus:border-accent focus:outline-none"
+            >
+              <option value="">Select Hackathon...</option>
+              {hackathons.map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setHackModalError(null);
+              setGeneratedDynamicLink(null);
+              setCreateHackModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-3.5 py-2 text-xs font-semibold text-dune hover:bg-ink/90 transition-colors shadow-xs"
+          >
+            <span>+ Create Hackathon Space</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Create Hackathon Modal Dialog */}
+      {createHackModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-hackathon-title"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-ink/70 backdrop-blur-xs p-4"
+        >
+          <div className="w-full max-w-[520px] rounded-2xl border border-border bg-surface p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🏆</span>
+                <h2 id="create-hackathon-title" className="font-display text-lg font-bold text-ink">
+                  Create New Hackathon Space
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCreateHackModalOpen(false)}
+                className="rounded-lg p-1.5 text-muted hover:text-ink text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {generatedDynamicLink ? (
+              <div className="space-y-4">
+                <div className="rounded-xl bg-sage-soft/60 border border-sage/40 p-4 space-y-2">
+                  <span className="block text-xs font-bold text-sage">
+                    ✓ Hackathon Space Ready & Mapped!
+                  </span>
+                  <p className="text-xs text-ink">
+                    Give this dynamic link to your participants. Any tool published through this link will automatically receive the <strong>Built at {selectedHackathon?.name}</strong> badge and appear in your event showcase.
+                  </p>
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={generatedDynamicLink}
+                      className="flex-1 rounded-lg border border-border bg-surface px-3 py-1.5 font-mono text-xs text-ink"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyInviteLink}
+                      className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-accent-hover transition-colors shrink-0"
+                    >
+                      {copiedInvite ? "✓ Copied!" : "Copy Link"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCreateHackModalOpen(false)}
+                    className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-dune hover:bg-ink/90 transition-colors"
+                  >
+                    Continue Submission →
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateHackathonSubmit} className="space-y-3.5">
+                <div className="space-y-1">
+                  <label htmlFor="hack-name" className="text-xs font-bold text-ink">
+                    Hackathon Name *
+                  </label>
+                  <input
+                    id="hack-name"
+                    type="text"
+                    required
+                    placeholder="e.g. Berkeley AI Hackathon 2026"
+                    value={newHackName}
+                    onChange={(e) => {
+                      setNewHackName(e.target.value);
+                      if (!newHackTag) {
+                        setNewHackTag(
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/^-|-$/g, "")
+                            .slice(0, 32)
+                        );
+                      }
+                    }}
+                    className="w-full rounded-xl border border-border bg-dune/40 px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label htmlFor="hack-tag" className="text-xs font-bold text-ink">
+                      Project Tag Identifier
+                    </label>
+                    <input
+                      id="hack-tag"
+                      type="text"
+                      placeholder="e.g. berkeley-ai-2026"
+                      value={newHackTag}
+                      onChange={(e) => setNewHackTag(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-dune/40 px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label htmlFor="hack-organizer" className="text-xs font-bold text-ink">
+                      Organizer / Organization
+                    </label>
+                    <input
+                      id="hack-organizer"
+                      type="text"
+                      placeholder="e.g. Cal AI Club"
+                      value={newHackOrganizer}
+                      onChange={(e) => setNewHackOrganizer(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-dune/40 px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label htmlFor="hack-desc" className="text-xs font-bold text-ink">
+                    Event Description
+                  </label>
+                  <textarea
+                    id="hack-desc"
+                    rows={2}
+                    placeholder="Short summary of hackathon theme or criteria..."
+                    value={newHackDesc}
+                    onChange={(e) => setNewHackDesc(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-dune/40 px-3 py-2 text-xs text-ink focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label htmlFor="hack-website" className="text-xs font-bold text-ink">
+                    Website or Registration URL (Optional)
+                  </label>
+                  <input
+                    id="hack-website"
+                    type="url"
+                    placeholder="https://hackathon.org"
+                    value={newHackWebsite}
+                    onChange={(e) => setNewHackWebsite(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-dune/40 px-3 py-2 text-xs text-ink focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                {hackModalError && (
+                  <p className="text-xs font-semibold text-crimson">{hackModalError}</p>
+                )}
+
+                <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => setCreateHackModalOpen(false)}
+                    className="rounded-xl border border-border bg-dune px-4 py-2 text-xs font-semibold text-ink"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingHack || !newHackName.trim()}
+                    className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2 text-xs font-semibold text-white hover:bg-accent-hover disabled:opacity-50 transition-colors shadow-xs"
+                  >
+                    <span>{creatingHack ? "Generating Space..." : "Generate Dynamic Link"}</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stepper Bar */}
       <ol className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -1104,6 +1440,11 @@ export function CreatePostForm() {
                   <span className="rounded-md bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent capitalize">
                     {demoMode} Demo
                   </span>
+                  {selectedHackathon && (
+                    <span className="rounded-md bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 text-xs font-bold text-amber-800">
+                      🏆 Built at {selectedHackathon.name}
+                    </span>
+                  )}
                   <span className="rounded-md bg-surface px-2.5 py-0.5 font-mono text-xs text-muted border border-border">
                     {normalizedPreviewTarget}
                   </span>

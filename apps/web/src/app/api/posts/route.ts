@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
       durationSec: body.durationSec ?? 60,
       demo: body.demo,
       tags: Array.isArray(body.tags) ? body.tags : ["utility", "indie"],
+      hackathonId: body.hackathonId,
+      hackathonName: body.hackathonName,
     });
 
     let deduplicated = false;

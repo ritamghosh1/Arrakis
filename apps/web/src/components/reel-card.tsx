@@ -325,6 +325,17 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
               )}
             </div>
 
+            {post.hackathonName && (
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <Link
+                  href="/hackathons"
+                  className="inline-flex items-center gap-1 rounded-md bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold text-amber-200 hover:bg-amber-500/30 transition-colors"
+                >
+                  <span>🏆 Built at {post.hackathonName}</span>
+                </Link>
+              </div>
+            )}
+
             <Link
               href={`/p/${post.id}`}
               className="block font-display text-sm sm:text-[17px] leading-snug font-bold text-dune hover:text-accent-soft transition-colors text-balance line-clamp-2"
