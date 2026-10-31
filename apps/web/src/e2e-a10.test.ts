@@ -192,11 +192,42 @@ describe("A10 — Quality, Accessibility, Motion Performance & E2E Judge Loop", 
       }),
     });
     assert.equal(createRes.status, 201);
-    const { post } = (await createRes.json()) as {
+    const { post, deduplication } = (await createRes.json()) as {
       post: { id: string; thumbUrl: string; videoUrl: string };
+      deduplication?: { status: string; contentHash: string; simHash: string };
     };
     assert.ok(post.id.startsWith("post_"));
     assert.equal(post.thumbUrl, "https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg");
+    assert.ok(deduplication?.contentHash, "POST /api/posts must return write-time ContentHash");
+
+    // Re-publish identical build to verify write-time deduplication reuses canonical post ID
+    const dupRes = await fetch(`${BASE_URL}/api/posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        authorId: "usr_ritam",
+        title: "EnvGuard CLI — Catch Missing .env Keys Before Deploy",
+        problemStatement:
+          "Scans monorepo .env.example files and CI secrets to prevent missing environment variable crashes in production.",
+        category: "Developer Tools",
+        videoUrl: "https://www.youtube.com/watch?v=M7lc1UVf-VE",
+        durationSec: 55,
+        demo: {
+          mode: "container",
+          target: "ghcr.io/ritamghosh1/envguard:latest",
+          formSchema: [],
+        },
+        tags: ["cli", "env", "devops"],
+      }),
+    });
+    assert.equal(dupRes.status, 201);
+    const dupJson = (await dupRes.json()) as {
+      post: { id: string };
+      deduplicated: boolean;
+      deduplication: { status: string; matchedPostId: string | null };
+    };
+    assert.equal(dupJson.post.id, post.id, "Duplicate publish must reuse the canonical post ID");
+    assert.equal(dupJson.deduplicated, true, "Duplicate publish must return deduplicated: true");
 
     // Verify the newly published post renders on its deep-link page with YouTube embed & JSON-LD
     const detailRes = await fetch(`${BASE_URL}/p/${encodeURIComponent(post.id)}`);
@@ -205,6 +236,12 @@ describe("A10 — Quality, Accessibility, Motion Performance & E2E Judge Loop", 
     assert.ok(detailHtml.includes("EnvGuard CLI"));
     assert.ok(detailHtml.includes("youtube-nocookie.com/embed/M7lc1UVf-VE"));
     assert.ok(detailHtml.includes('"@type":"SoftwareApplication"'));
+
+    // Verify the published post is shown on the author's Profile (/u/ritam)
+    const profileRes = await fetch(`${BASE_URL}/u/ritam`);
+    assert.equal(profileRes.status, 200);
+    const profileHtml = await profileRes.text();
+    assert.ok(profileHtml.includes("EnvGuard CLI"), "Published build must appear on /u/ritam profile");
   });
 
   it("5. Recommender System E2E: Auto-Embedding (16-d pgvector), Following Feed, Follow Toggle, 80/20 Cold-Start Quota, and Hybrid Global Search", async () => {

@@ -5,8 +5,11 @@ import {
   classifyTelemetryRunTier,
   computeContentHash,
   computeIntentEmbedding,
+  computeSimHash64,
   deduplicatePosts,
+  extractTitleStem,
   getQuickFeedbackTagDelta,
+  hammingDistance64,
   updateEmaVector,
   type DemoMode,
   type LeaderboardPeriod,
@@ -18,6 +21,8 @@ import {
   type TelemetryPayload,
   type User,
 } from "@arrakis/contracts";
+
+const SEED_POST_ID_LIST = SEED_POSTS.map((p) => p.id);
 
 /** Postgres-backed persistence (enabled by default unless USE_DB=0). */
 export const USE_DB = process.env.USE_DB !== "0";
@@ -126,7 +131,66 @@ export async function dbPostById(id: string): Promise<Post | null> {
   return rows[0] ? rowToPost(rows[0]) : null;
 }
 
-export async function dbInsertPost(post: Post): Promise<void> {
+export interface DbInsertPostResult {
+  post: Post;
+  deduplicated: boolean;
+  matchedPostId?: string;
+  contentHash: string;
+  simHash: string;
+}
+
+export async function dbInsertPost(post: Post): Promise<DbInsertPostResult> {
+  const newContentHash = computeContentHash(post);
+  const newSimHash = computeSimHash64(post);
+  const newStem = extractTitleStem(post.title);
+
+  // Check existing posts in Postgres for exact contentHash, canonical title stem, or LSH SimHash near-duplicate
+  const { rows: existingRows } = await pool().query(
+    `SELECT id, author_id, title, problem_statement, category, tags
+     FROM posts
+     ORDER BY created_at DESC
+     LIMIT 200`,
+  );
+
+  const matchingRows = existingRows.filter((r) => {
+    const rowHash = computeContentHash({
+      title: String(r.title ?? ""),
+      problemStatement: String(r.problem_statement ?? ""),
+    });
+    if (rowHash === newContentHash) return true;
+    const rowStem = extractTitleStem(String(r.title ?? ""));
+    if (newStem.length >= 4 && rowStem === newStem && r.author_id === post.authorId) return true;
+    if (r.author_id === post.authorId) {
+      const rowSim = computeSimHash64({
+        title: String(r.title ?? ""),
+        problemStatement: String(r.problem_statement ?? ""),
+        category: String(r.category ?? ""),
+        tags: Array.isArray(r.tags) ? r.tags : [],
+      });
+      if (hammingDistance64(rowSim, newSimHash) <= 3) return true;
+    }
+    return false;
+  });
+
+  let deduplicated = false;
+  let matchedPostId: string | undefined;
+
+  if (matchingRows.length > 0) {
+    deduplicated = true;
+    const canonicalId = String(matchingRows[0]!.id);
+    matchedPostId = canonicalId;
+    post.id = canonicalId;
+
+    // Clean up any extra duplicate rows beyond the canonical record
+    const duplicateIdsToDelete = matchingRows
+      .slice(1)
+      .map((r) => String(r.id))
+      .filter((id) => !SEED_POST_ID_LIST.includes(id));
+    if (duplicateIdsToDelete.length > 0) {
+      await pool().query(`DELETE FROM posts WHERE id = ANY($1::text[])`, [duplicateIdsToDelete]);
+    }
+  }
+
   const embedding = computeIntentEmbedding({
     title: post.title,
     problemStatement: post.problemStatement,
@@ -143,16 +207,29 @@ export async function dbInsertPost(post: Post): Promise<void> {
       impressions, tries_count, upvotes_count, trial_upvotes_count, comments_count,
       uptime_pct, p50_latency_ms, p95_latency_ms, crash_rate, post_score,
       project_type, proxy_success_rate, popularity_score, usability_score, daily_leaderboard_score,
-      intent_embedding
+      intent_embedding, created_at
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7,
       $8, $9, $10, $11::jsonb, $12::jsonb, $13,
       $14, $15, $16, $17, $18,
       $19, $20, $21, $22, $23,
       $24, $25, $26, $27, $28,
-      $29::vector
+      $29::vector, NOW()
     ) ON CONFLICT (id) DO UPDATE SET
-      intent_embedding = EXCLUDED.intent_embedding`,
+      title = EXCLUDED.title,
+      problem_statement = EXCLUDED.problem_statement,
+      category = EXCLUDED.category,
+      video_url = EXCLUDED.video_url,
+      thumb_url = EXCLUDED.thumb_url,
+      duration_sec = EXCLUDED.duration_sec,
+      demo_mode = EXCLUDED.demo_mode,
+      demo_target = EXCLUDED.demo_target,
+      form_schema = EXCLUDED.form_schema,
+      tags = EXCLUDED.tags,
+      project_type = EXCLUDED.project_type,
+      intent_embedding = EXCLUDED.intent_embedding,
+      daily_leaderboard_score = GREATEST(posts.daily_leaderboard_score, EXCLUDED.daily_leaderboard_score),
+      created_at = NOW()`,
     [
       post.id,
       post.authorId,
@@ -181,26 +258,59 @@ export async function dbInsertPost(post: Post): Promise<void> {
       0.99,
       post.postScore,
       2.15,
-      0.065,
+      1.65,
       vecStr,
-    ]
+    ],
   );
 
   await pool().query(
     `INSERT INTO post_embeddings (post_id, embedding) VALUES ($1, $2::vector)
      ON CONFLICT (post_id) DO UPDATE SET embedding = EXCLUDED.embedding, updated_at = NOW()`,
-    [post.id, vecStr]
+    [post.id, vecStr],
   );
+
+  return {
+    post,
+    deduplicated,
+    matchedPostId,
+    contentHash: newContentHash,
+    simHash: newSimHash.toString(16).padStart(16, "0"),
+  };
 }
 
 export const dbCreatePost = dbInsertPost;
+
+export async function dbGetPostsByAuthor(authorId: string): Promise<Post[]> {
+  const { rows } = await pool().query(
+    `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
+     WHERE p.author_id = $1
+     ORDER BY p.created_at DESC`,
+    [authorId],
+  );
+  return deduplicatePosts(rows.map(rowToPost));
+}
+
+export async function dbGetRecentUserPublishedPosts(limit = 5): Promise<Post[]> {
+  const { rows } = await pool().query(
+    `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
+     WHERE p.id <> ALL($1::text[])
+     ORDER BY p.created_at DESC
+     LIMIT $2`,
+    [SEED_POST_ID_LIST, limit * 3],
+  );
+  return deduplicatePosts(rows.map(rowToPost)).slice(0, limit);
+}
+
 export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Post[]> {
   const userVec = await dbGetUserVector(userId);
   const fetchCount = Math.max(limit * 6, 60);
-  const { rows: ranked } = await pool().query(
-    "SELECT id FROM get_personalized_feed($1, $2::vector, $3)",
-    [userId, userVec ? toVec(userVec) : null, fetchCount],
-  );
+  const [recentPublished, { rows: ranked }] = await Promise.all([
+    dbGetRecentUserPublishedPosts(3),
+    pool().query(
+      "SELECT id FROM get_personalized_feed($1, $2::vector, $3)",
+      [userId, userVec ? toVec(userVec) : null, fetchCount],
+    ),
+  ]);
   const ids: string[] = ranked.map((r) => r.id);
 
   if (ids.length < fetchCount) {
@@ -211,14 +321,17 @@ export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Po
     );
     ids.push(...fill.map((r) => r.id));
   }
-  if (ids.length === 0) return [];
+  if (ids.length === 0 && recentPublished.length === 0) return [];
 
   const { rows } = await pool().query(
     `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = ANY($1::text[])`,
     [ids],
   );
   const byId = new Map(rows.map((r) => [r.id, rowToPost(r)]));
-  const orderedCandidates = ids.map((id) => byId.get(id)!).filter(Boolean);
+  const orderedCandidates = [
+    ...recentPublished,
+    ...ids.map((id) => byId.get(id)!).filter(Boolean),
+  ];
 
   // Deduplicate by exact ID, canonical title stem, 64-bit contentHash, and 64-bit LSH SimHash
   let deduped = deduplicatePosts(orderedCandidates);
@@ -395,7 +508,7 @@ export async function dbSearchGlobalFeed(params: {
       `SELECT ${POST_SELECT}
        FROM posts p JOIN users u ON u.id = p.author_id
        WHERE ${conds.join(" AND ")}
-       ORDER BY p.daily_leaderboard_score DESC, p.post_score DESC
+       ORDER BY p.daily_leaderboard_score DESC, p.created_at DESC, p.post_score DESC
        LIMIT $${args.length}`,
       args,
     );

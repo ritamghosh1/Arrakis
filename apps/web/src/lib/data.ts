@@ -8,13 +8,16 @@ import {
   classifyTelemetryRunTier,
   computeContentHash,
   computeIntentEmbedding,
+  computeSimHash64,
   cosineSim,
   deduplicatePosts,
+  extractTitleStem,
   getMockGlobalFeed,
   getMockHomeFeed,
   getMockLeaderboard,
   getMockProfile,
   getQuickFeedbackTagDelta,
+  hammingDistance64,
   updateEmaVector,
   type DemoMode,
   type FeedItem,
@@ -32,10 +35,11 @@ import {
 } from "@arrakis/contracts";
 import {
   USE_DB,
-  dbCreatePost,
   dbFollowingFeed,
   dbGetFollowersIds,
   dbGetFollowingIds,
+  dbGetPostsByAuthor,
+  dbGetRecentUserPublishedPosts,
   dbInsertPost,
   dbLeaderboard,
   dbGetUserVector,
@@ -194,23 +198,26 @@ export function createRuntimePost(input: UploadPostInput): Post {
     dailyLeaderboardScore: 0.89,
     createdAt: new Date().toISOString(),
   };
+  const newHash = computeContentHash(post);
+  const newSim = computeSimHash64(post);
+  const newStem = extractTitleStem(post.title);
+  const existingIdx = runtimePosts.findIndex(
+    (p) =>
+      computeContentHash(p) === newHash ||
+      (newStem.length >= 4 && extractTitleStem(p.title) === newStem && p.authorId === post.authorId) ||
+      (p.authorId === post.authorId && hammingDistance64(computeSimHash64(p), newSim) <= 3)
+  );
+  if (existingIdx >= 0) {
+    post.id = runtimePosts[existingIdx]!.id;
+    runtimePosts.splice(existingIdx, 1);
+  }
   SEED_POST_VECTORS[post.id] = computeIntentEmbedding({
     title: post.title,
     problemStatement: post.problemStatement,
     category: post.category,
     tags: post.tags,
   });
-  const newHash = computeContentHash(post);
-  const existingIdx = runtimePosts.findIndex((p) => computeContentHash(p) === newHash);
-  if (existingIdx >= 0) {
-    runtimePosts.splice(existingIdx, 1);
-  }
   runtimePosts.unshift(post);
-  if (USE_DB) {
-    void dbCreatePost(post).catch(() => {
-      // Fallback to in-memory runtimePosts if Postgres is offline
-    });
-  }
   return post;
 }
 
@@ -489,6 +496,7 @@ export async function fetchHomeFeed(
         const posts = await dbPersonalizedFeed(userId, 10);
         if (posts.length > 0) {
           const userVec = await dbGetUserVector(userId);
+          const seedIdSet = new Set(SEED_POSTS.map((s) => s.id));
           const items: FeedItem[] = posts.map((post, idx) => {
             const sim =
               userVec && SEED_POST_VECTORS[post.id]
@@ -496,33 +504,40 @@ export async function fetchHomeFeed(
                 : 0;
             const authorSeed = SEED_USERS.find((u) => u.id === post.authorId);
             const isColdSlot = idx === 2 || idx === 7 || (authorSeed && authorSeed.followersCount === 0);
-            const reason: FeedItem["reason"] = isColdSlot
+            const isNewlyPublished = !seedIdSet.has(post.id) && idx !== 2 && idx !== 7;
+            const reason: FeedItem["reason"] = isNewlyPublished
               ? {
-                  kind: "coldstart",
-                  text: `Fresh builder · 20% Cold-Start Spotlight (@${post.author.handle})`,
+                  kind: "followed",
+                  via: post.author,
+                  text: `Just launched by @${post.author.handle} · AI Problem Indexed`,
                 }
-              : followed.has(post.authorId)
+              : isColdSlot
                 ? {
-                    kind: "followed",
-                    via: post.author,
-                    text: `Recommended because you follow @${post.author.handle}`,
+                    kind: "coldstart",
+                    text: `Fresh builder · 20% Cold-Start Spotlight (@${post.author.handle})`,
                   }
-                : sim >= 0.78
+                : followed.has(post.authorId)
                   ? {
-                      kind: "taste",
-                      matchedTopic: post.category,
-                      similarity: Number(sim.toFixed(2)),
-                      text: `Matches tools you tried in ${post.category} (${Math.round(sim * 100)}% match)`,
+                      kind: "followed",
+                      via: post.author,
+                      text: `Recommended because you follow @${post.author.handle}`,
                     }
-                  : {
-                      kind: "trending",
-                      text: `High Proof-of-Trial velocity (${post.stats.trialUpvotes} verified sandbox tries)`,
-                    };
+                  : sim >= 0.78
+                    ? {
+                        kind: "taste",
+                        matchedTopic: post.category,
+                        similarity: Number(sim.toFixed(2)),
+                        text: `Matches tools you tried in ${post.category} (${Math.round(sim * 100)}% match)`,
+                      }
+                    : {
+                        kind: "trending",
+                        text: `High Proof-of-Trial velocity (${post.stats.trialUpvotes} verified sandbox tries)`,
+                      };
             return {
               post,
               reason,
               viewerState: {
-                upvoted: false,
+                upvoted: isNewlyPublished,
                 tried: false,
                 saved: false,
                 followingAuthor: followed.has(post.authorId),
@@ -682,10 +697,17 @@ export async function fetchProfile(handleOrId: string, viewerId = "usr_ritam"): 
   const updatedUser = getUserByHandleOrId(base.user.id) ?? base.user;
   let followerIds = getFollowersForUser(updatedUser.id).map((u) => u.id);
   let followingIds = getFollowingForUser(updatedUser.id).map((u) => u.id);
+  let dbAuthorPosts: Post[] = [];
   if (USE_DB) {
     try {
-      followerIds = await dbGetFollowersIds(updatedUser.id);
-      followingIds = await dbGetFollowingIds(updatedUser.id);
+      const [fIds, gIds, authorPosts] = await Promise.all([
+        dbGetFollowersIds(updatedUser.id),
+        dbGetFollowingIds(updatedUser.id),
+        dbGetPostsByAuthor(updatedUser.id),
+      ]);
+      followerIds = fIds;
+      followingIds = gIds;
+      dbAuthorPosts = authorPosts;
     } catch {
       // Fallback to in-memory graph
     }
@@ -700,14 +722,28 @@ export async function fetchProfile(handleOrId: string, viewerId = "usr_ritam"): 
       followingCount: followingIds.length || updatedUser.followingCount,
     },
     isFollowing: followerIds.includes(viewerId),
-    projects: deduplicatePosts([...userRuntimePosts, ...base.projects]),
+    projects: deduplicatePosts([...dbAuthorPosts, ...userRuntimePosts, ...base.projects]),
     recentReviews: [...userRuntimeReviews, ...base.recentReviews],
   };
 }
 
-/** Posts from builders with zero followers — the "Fresh Builds" rail. */
+/** Posts from builders with zero followers + newly published builds — the "Fresh Builds" rail. */
 export function getFreshBuilds(limit = 10): Post[] {
   const cold = new Set(SEED_USERS.filter((u) => u.followersCount === 0).map((u) => u.id));
   const coldPosts = SEED_POSTS.filter((p) => cold.has(p.authorId));
   return deduplicatePosts([...runtimePosts, ...coldPosts]).slice(0, limit);
+}
+
+export async function fetchFreshBuilds(limit = 10): Promise<Post[]> {
+  if (USE_DB) {
+    try {
+      const recentDb = await dbGetRecentUserPublishedPosts(5);
+      const cold = new Set(SEED_USERS.filter((u) => u.followersCount === 0).map((u) => u.id));
+      const coldPosts = SEED_POSTS.filter((p) => cold.has(p.authorId));
+      return deduplicatePosts([...recentDb, ...runtimePosts, ...coldPosts]).slice(0, limit);
+    } catch {
+      // Fallback below
+    }
+  }
+  return getFreshBuilds(limit);
 }

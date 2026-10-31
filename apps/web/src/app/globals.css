@@ -157,6 +157,7 @@ textarea:user-valid {
   scroll-snap-type: y mandatory;
   overscroll-behavior-y: contain;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .feed-scroller::-webkit-scrollbar {
   display: none;
@@ -164,6 +165,9 @@ textarea:user-valid {
 .feed-item {
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  height: 100%;
+  min-height: 100%;
+  max-height: 100%;
 }
 
 /* Deferred offscreen rendering for long card lists (performance guide) */

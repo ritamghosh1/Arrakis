@@ -62,23 +62,34 @@ export function computeSimHash64(post: {
   category?: string;
   tags?: string[];
 }): bigint {
-  const text = normalizeCanonicalText(
-    `${post.title} ${post.problemStatement} ${post.category ?? ""} ${(post.tags ?? []).join(" ")}`,
+  const stem = extractTitleStem(post.title);
+  const titleText = normalizeCanonicalText(post.title);
+  const bodyText = normalizeCanonicalText(
+    `${post.problemStatement} ${post.category ?? ""} ${(post.tags ?? []).join(" ")}`,
   );
-  const tokens = text.split(" ").filter((t) => t.length >= 2);
-  if (tokens.length === 0) return 0n;
+  const titleTokens = `${stem} ${titleText}`.split(" ").filter((t) => t.length >= 2);
+  const bodyTokens = bodyText.split(" ").filter((t) => t.length >= 2);
+  if (titleTokens.length === 0 && bodyTokens.length === 0) return 0n;
 
   const weights = new Int32Array(64);
-  for (let i = 0; i < tokens.length; i++) {
-    const shingle = i + 1 < tokens.length ? `${tokens[i]}_${tokens[i + 1]}` : tokens[i]!;
+  const addShingle = (shingle: string, weight: number) => {
     const h = fnv1a64(shingle);
     for (let bit = 0; bit < 64; bit++) {
       if ((h >> BigInt(bit)) & 1n) {
-        weights[bit]! += 1;
+        weights[bit]! += weight;
       } else {
-        weights[bit]! -= 1;
+        weights[bit]! -= weight;
       }
     }
+  };
+
+  for (let i = 0; i < titleTokens.length; i++) {
+    const shingle = i + 1 < titleTokens.length ? `t:${titleTokens[i]}_${titleTokens[i + 1]}` : `t:${titleTokens[i]!}`;
+    addShingle(shingle, 4);
+  }
+  for (let i = 0; i < bodyTokens.length; i++) {
+    const shingle = i + 1 < bodyTokens.length ? `b:${bodyTokens[i]}_${bodyTokens[i + 1]}` : `b:${bodyTokens[i]!}`;
+    addShingle(shingle, 1);
   }
 
   let simhash = 0n;

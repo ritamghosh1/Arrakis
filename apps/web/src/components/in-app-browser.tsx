@@ -653,8 +653,8 @@ export function InAppBrowser({
     }
   }, [post, onPreflightResult]);
 
-  function handleNavigateUrl(e: React.FormEvent) {
-    e.preventDefault();
+  function handleNavigateUrl(e?: React.SyntheticEvent) {
+    e?.preventDefault();
     onInteract?.();
     let target = addressInput.trim();
     if (!target) return;
@@ -756,8 +756,8 @@ export function InAppBrowser({
           </button>
         </div>
 
-        {/* Editable URL Bar */}
-        <form onSubmit={handleNavigateUrl} className="flex-1 min-w-[200px] flex items-center gap-1.5">
+        {/* Editable URL Bar (uses div role="group" so it never nests <form> inside CreatePostForm) */}
+        <div role="group" aria-label="Browser address bar" className="flex-1 min-w-[200px] flex items-center gap-1.5">
           <div className="flex-1 flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs">
             <span
               className={cn(
@@ -771,6 +771,12 @@ export function InAppBrowser({
               aria-label="In-app browser URL"
               value={addressInput}
               onChange={(e) => setAddressInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleNavigateUrl(e);
+                }
+              }}
               className="w-full bg-transparent font-mono text-xs text-ink focus:outline-none"
             />
             <span className="font-mono text-[10px] text-muted shrink-0 tabular-nums">
@@ -778,12 +784,13 @@ export function InAppBrowser({
             </span>
           </div>
           <button
-            type="submit"
+            type="button"
+            onClick={(e) => handleNavigateUrl(e)}
             className="rounded-xl bg-ink px-3 py-1.5 text-xs font-semibold text-dune hover:bg-ink/90 transition-colors shrink-0"
           >
             Go
           </button>
-        </form>
+        </div>
 
         {/* Viewport Mode + External Link */}
         <div className="flex items-center gap-1.5">

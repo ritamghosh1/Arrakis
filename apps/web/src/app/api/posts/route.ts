@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import type { UploadPostInput } from "@arrakis/contracts";
+import {
+  computeContentHash,
+  computeSimHash64,
+  type UploadPostInput,
+} from "@arrakis/contracts";
 import { createRuntimePost } from "@/lib/data";
 import { USE_DB, dbInsertPost } from "@/lib/db";
 
@@ -27,15 +31,38 @@ export async function POST(req: NextRequest) {
       demo: body.demo,
       tags: Array.isArray(body.tags) ? body.tags : ["utility", "indie"],
     });
+
+    let deduplicated = false;
+    let matchedPostId: string | undefined;
+    let contentHash = computeContentHash(created);
+    let simHash = computeSimHash64(created).toString(16).padStart(16, "0");
+
     if (USE_DB) {
       try {
-        await dbInsertPost(created);
+        const dbRes = await dbInsertPost(created);
+        deduplicated = dbRes.deduplicated;
+        matchedPostId = dbRes.matchedPostId;
+        contentHash = dbRes.contentHash;
+        simHash = dbRes.simHash;
       } catch {
         // Fallback to in-memory runtime store if Postgres is offline
       }
     }
 
-    return NextResponse.json({ ...created, post: created }, { status: 201 });
+    return NextResponse.json(
+      {
+        ...created,
+        post: created,
+        deduplicated,
+        deduplication: {
+          status: deduplicated ? "merged_existing" : "unique_new",
+          matchedPostId,
+          contentHash,
+          simHash,
+        },
+      },
+      { status: 201 }
+    );
   } catch {
     return NextResponse.json({ error: "invalid_post_payload" }, { status: 400 });
   }

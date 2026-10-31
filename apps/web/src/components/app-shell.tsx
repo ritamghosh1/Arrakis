@@ -26,7 +26,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isHomeFeed = pathname === "/";
 
   return (
-    <div className="min-h-dvh bg-dune text-ink flex flex-col lg:flex-row">
+    <div
+      className={cn(
+        "bg-dune text-ink flex flex-col lg:flex-row",
+        isHomeFeed ? "h-dvh max-h-dvh overflow-hidden" : "min-h-dvh"
+      )}
+    >
       {/* Desktop Left Rail (>= 1024px) */}
       <aside
         aria-label="Primary navigation"
@@ -131,7 +136,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className={cn(
           "flex-1 min-w-0",
           isHomeFeed
-            ? "h-[calc(100dvh-3.75rem)] lg:h-dvh overflow-hidden flex flex-col"
+            ? "min-h-0 h-full lg:h-dvh overflow-hidden flex flex-col"
             : "pb-20 lg:pb-0"
         )}
       >
@@ -141,7 +146,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile Bottom Navigation (< 1024px) */}
       <nav
         aria-label="Mobile bottom navigation"
-        className="fixed inset-x-0 bottom-0 z-nav flex items-center justify-around border-t border-border bg-surface/95 backdrop-blur-md px-2 py-1.5 pb-safe lg:hidden"
+        className={cn(
+          "z-nav flex items-center justify-around border-t border-border bg-surface/95 backdrop-blur-md px-2 py-1.5 pb-safe lg:hidden",
+          isHomeFeed ? "shrink-0 w-full" : "fixed inset-x-0 bottom-0"
+        )}
       >
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active =

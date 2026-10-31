@@ -144,18 +144,18 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-[1140px] min-h-0 flex-col sm:px-6">
+    <div className="mx-auto flex flex-1 h-full w-full max-w-[1140px] min-h-0 flex-col sm:px-6 overflow-hidden">
       {/* Top Feed Bar (Zero horizontal divider lines across the screen) */}
-      <header className="pt-safe z-feed flex shrink-0 items-center justify-between gap-3 bg-dune px-3.5 py-2.5 sm:px-2">
+      <header className="pt-safe z-feed flex shrink-0 items-center justify-between gap-2 bg-dune px-3 py-2 sm:px-2 sm:py-2.5">
         {/* Mobile App Logo (shown below lg where left rail is hidden) */}
         <Link
           href="/"
           className="flex lg:hidden items-center gap-2 focus-visible:outline-none"
         >
-          <span className="flex size-8 items-center justify-center rounded-xl bg-ink text-dune font-display text-sm font-bold tracking-tight">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-ink text-dune font-display text-xs font-bold tracking-tight">
             A
           </span>
-          <span className="font-display text-lg font-bold tracking-tight text-ink">
+          <span className="font-display text-base font-bold tracking-tight text-ink">
             Arrakis
           </span>
         </Link>
@@ -168,14 +168,14 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
         <div
           role="group"
           aria-label="Feed mode"
-          className="flex items-center gap-1 rounded-full bg-surface p-1 shadow-xs"
+          className="flex items-center gap-1 rounded-full bg-surface p-0.5 sm:p-1 shadow-xs"
         >
           <button
             type="button"
             onClick={() => handleSwitchMode("for_you")}
             aria-pressed={mode === "for_you"}
             className={cn(
-              "rounded-full px-3.5 sm:px-4 py-1 text-xs font-semibold transition-colors",
+              "rounded-full px-3 sm:px-4 py-1 text-xs font-semibold transition-colors",
               mode === "for_you" ? "bg-ink text-dune" : "text-muted hover:text-ink"
             )}
           >
@@ -186,7 +186,7 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
             onClick={() => handleSwitchMode("following")}
             aria-pressed={mode === "following"}
             className={cn(
-              "rounded-full px-3.5 sm:px-4 py-1 text-xs font-semibold transition-colors",
+              "rounded-full px-3 sm:px-4 py-1 text-xs font-semibold transition-colors",
               mode === "following" ? "bg-ink text-dune" : "text-muted hover:text-ink"
             )}
           >
@@ -203,11 +203,11 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
       </header>
 
       {/* Main Viewport: Full-Screen Snap Reel Scroller (1 demo at a time) + Desktop Context Rail */}
-      <div className="flex flex-1 min-h-0 gap-7 items-stretch">
+      <div className="flex flex-1 min-h-0 h-full gap-7 items-stretch overflow-hidden">
         {/* Full-Height Vertical Snap Reel Scroller */}
         <div
           ref={scrollerRef}
-          className="feed-scroller flex-1 min-h-0 h-full overflow-y-auto"
+          className="feed-scroller flex-1 min-h-0 h-full w-full overflow-y-auto"
           tabIndex={-1}
         >
           {items.length === 0 ? (
