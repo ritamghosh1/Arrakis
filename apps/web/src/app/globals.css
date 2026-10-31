@@ -24,10 +24,10 @@
   --color-alert: #b42318;
   --color-crimson: #b42318;
 
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --radius-card: 1rem;
 }
