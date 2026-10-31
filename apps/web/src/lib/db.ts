@@ -29,8 +29,8 @@ export function pool(): pg.Pool {
     globalForPg.__arrakisPool = new pg.Pool({
       connectionString:
         process.env.DATABASE_URL ?? "postgresql://arrakis:arrakis_dev@localhost:5432/arrakis",
-      max: 5,
-      connectionTimeoutMillis: 800,
+      max: 10,
+      connectionTimeoutMillis: 5000,
     });
   }
   return globalForPg.__arrakisPool;

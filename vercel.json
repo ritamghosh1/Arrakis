@@ -1,0 +1,28 @@
+{
+  "services": {
+    "web": {
+      "root": "apps/web",
+      "framework": "nextjs"
+    },
+    "recommender": {
+      "root": "services/recommender",
+      "entrypoint": "app.main:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/recommender(/.*)?",
+      "destination": {
+        "type": "service",
+        "service": "recommender"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "web"
+      }
+    }
+  ]
+}

@@ -9,19 +9,25 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   const { id: runId } = await ctx.params;
   const postId = req.nextUrl.searchParams.get("postId") ?? "post_resume_json";
 
-  if (process.env.MOCK === "0") {
-    const url = process.env.NEXT_PUBLIC_SANDBOX_URL ?? "http://localhost:4002";
-    const upstream = await fetch(
-      `${url}/try/${encodeURIComponent(runId)}/stream?postId=${encodeURIComponent(postId)}`,
-    );
-    return new Response(upstream.body, {
-      status: upstream.status,
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache, no-transform",
-        Connection: "keep-alive",
-      },
-    });
+  const sandboxUrl = process.env.NEXT_PUBLIC_SANDBOX_URL;
+  if (sandboxUrl) {
+    try {
+      const upstream = await fetch(
+        `${sandboxUrl}/try/${encodeURIComponent(runId)}/stream?postId=${encodeURIComponent(postId)}`,
+      );
+      if (upstream.ok && upstream.body) {
+        return new Response(upstream.body, {
+          status: upstream.status,
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+          },
+        });
+      }
+    } catch {
+      // Fallback to built-in SSE stream
+    }
   }
 
   const events = getMockTrialStreamEvents(runId, postId);

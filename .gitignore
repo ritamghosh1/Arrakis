@@ -29,3 +29,5 @@ out/
 npm-debug.log*
 pnpm-debug.log*
 tmp/
+.vercel
+.env*

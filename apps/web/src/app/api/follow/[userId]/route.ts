@@ -7,14 +7,18 @@ type Ctx = { params: Promise<{ userId: string }> };
 
 async function forward(method: "POST" | "DELETE", userId: string, followerId: string) {
   const result = await toggleFollow(followerId, userId, method === "POST");
-  if (process.env.MOCK !== "0") {
-    return NextResponse.json(result);
+  const recommenderUrl = process.env.NEXT_PUBLIC_RECOMMENDER_URL;
+  if (recommenderUrl) {
+    try {
+      await fetch(
+        `${recommenderUrl}/follow/${encodeURIComponent(userId)}?followerId=${encodeURIComponent(followerId)}`,
+        { method },
+      );
+    } catch {
+      // Background sync best effort
+    }
   }
-  const url = process.env.NEXT_PUBLIC_RECOMMENDER_URL ?? "http://localhost:4001";
-  const res = await fetch(`${url}/follow/${encodeURIComponent(userId)}?followerId=${encodeURIComponent(followerId)}`, {
-    method,
-  });
-  return NextResponse.json(await res.json(), { status: res.status });
+  return NextResponse.json(result);
 }
 
 const viewer = (req: NextRequest) =>

@@ -7,12 +7,16 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function POST(_req: NextRequest, ctx: Ctx) {
   const { id: postId } = await ctx.params;
-  if (process.env.MOCK !== "0") {
-    const run = createMockTrialRun("usr_ritam", postId, "");
-    run.streamUrl = `/api/try/${encodeURIComponent(run.id)}/stream?postId=${encodeURIComponent(run.postId)}`;
-    return NextResponse.json(run, { status: 201 });
+  const sandboxUrl = process.env.NEXT_PUBLIC_SANDBOX_URL;
+  if (sandboxUrl) {
+    try {
+      const res = await fetch(`${sandboxUrl}/try/${encodeURIComponent(postId)}`, { method: "POST" });
+      if (res.ok) return NextResponse.json(await res.json(), { status: res.status });
+    } catch {
+      // Fallback to built-in trial runner
+    }
   }
-  const url = process.env.NEXT_PUBLIC_SANDBOX_URL ?? "http://localhost:4002";
-  const res = await fetch(`${url}/try/${encodeURIComponent(postId)}`, { method: "POST" });
-  return NextResponse.json(await res.json(), { status: res.status });
+  const run = createMockTrialRun("usr_ritam", postId, "");
+  run.streamUrl = `/api/try/${encodeURIComponent(run.id)}/stream?postId=${encodeURIComponent(run.postId)}`;
+  return NextResponse.json(run, { status: 201 });
 }

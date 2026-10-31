@@ -654,49 +654,55 @@ export async function fetchLeaderboard(
       // Fallback to in-memory store
     }
   }
-  if (MOCK) {
-    return getMockLeaderboard(type, period, viewerId, getAllPosts());
+  if (process.env.NEXT_PUBLIC_SCORING_URL) {
+    try {
+      const qs = new URLSearchParams({ type, period, userId: viewerId });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SCORING_URL}/leaderboard?${qs}`, { cache: "no-store" });
+      if (res.ok) return (await res.json()) as LeaderboardResponse;
+    } catch {
+      // Fallback below
+    }
   }
-  const qs = new URLSearchParams({ type, period, userId: viewerId });
-  const res = await fetch(`${SCORING_URL}/leaderboard?${qs}`, { cache: "no-store" });
-  if (!res.ok) throw new Error(`scoring ${res.status}`);
-  return (await res.json()) as LeaderboardResponse;
+  return getMockLeaderboard(type, period, viewerId, getAllPosts());
 }
 
 export async function fetchProfile(handleOrId: string, viewerId = "usr_ritam"): Promise<ProfileResponse> {
-  if (MOCK) {
-    const base = getMockProfile(handleOrId, viewerId);
-    const updatedUser = getUserByHandleOrId(base.user.id) ?? base.user;
-    let followerIds = getFollowersForUser(updatedUser.id).map((u) => u.id);
-    let followingIds = getFollowingForUser(updatedUser.id).map((u) => u.id);
-    if (USE_DB) {
-      try {
-        followerIds = await dbGetFollowersIds(updatedUser.id);
-        followingIds = await dbGetFollowingIds(updatedUser.id);
-      } catch {
-        // Fallback to in-memory graph
-      }
+  if (process.env.NEXT_PUBLIC_SCORING_URL) {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SCORING_URL}/users/${encodeURIComponent(handleOrId)}/profile?viewerId=${encodeURIComponent(viewerId)}`,
+        { cache: "no-store" },
+      );
+      if (res.ok) return (await res.json()) as ProfileResponse;
+    } catch {
+      // Fallback below
     }
-    const userRuntimePosts = runtimePosts.filter((p) => p.authorId === updatedUser.id);
-    const userRuntimeReviews = runtimeReviews.filter((r) => r.userId === updatedUser.id);
-    return {
-      ...base,
-      user: {
-        ...updatedUser,
-        followersCount: followerIds.length || updatedUser.followersCount,
-        followingCount: followingIds.length || updatedUser.followingCount,
-      },
-      isFollowing: followerIds.includes(viewerId),
-      projects: deduplicatePosts([...userRuntimePosts, ...base.projects]),
-      recentReviews: [...userRuntimeReviews, ...base.recentReviews],
-    };
   }
-  const res = await fetch(
-    `${SCORING_URL}/users/${encodeURIComponent(handleOrId)}/profile?viewerId=${encodeURIComponent(viewerId)}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error(`profile ${res.status}`);
-  return (await res.json()) as ProfileResponse;
+  const base = getMockProfile(handleOrId, viewerId);
+  const updatedUser = getUserByHandleOrId(base.user.id) ?? base.user;
+  let followerIds = getFollowersForUser(updatedUser.id).map((u) => u.id);
+  let followingIds = getFollowingForUser(updatedUser.id).map((u) => u.id);
+  if (USE_DB) {
+    try {
+      followerIds = await dbGetFollowersIds(updatedUser.id);
+      followingIds = await dbGetFollowingIds(updatedUser.id);
+    } catch {
+      // Fallback to in-memory graph
+    }
+  }
+  const userRuntimePosts = runtimePosts.filter((p) => p.authorId === updatedUser.id);
+  const userRuntimeReviews = runtimeReviews.filter((r) => r.userId === updatedUser.id);
+  return {
+    ...base,
+    user: {
+      ...updatedUser,
+      followersCount: followerIds.length || updatedUser.followersCount,
+      followingCount: followingIds.length || updatedUser.followingCount,
+    },
+    isFollowing: followerIds.includes(viewerId),
+    projects: deduplicatePosts([...userRuntimePosts, ...base.projects]),
+    recentReviews: [...userRuntimeReviews, ...base.recentReviews],
+  };
 }
 
 /** Posts from builders with zero followers — the "Fresh Builds" rail. */
