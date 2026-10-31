@@ -10,6 +10,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm --workspace @arrakis/web run dev",
     "dev:web": "npm --workspace @arrakis/web run dev",
     "dev:sandbox": "npm --workspace @arrakis/sandbox run dev",
     "dev:scoring": "npm --workspace @arrakis/scoring run dev",

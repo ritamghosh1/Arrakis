@@ -7,8 +7,6 @@ import { track } from "@/lib/events";
 import { MODE_LABEL } from "./reel-card";
 import { IconBolt, IconClose } from "./icons";
 
-const SANDBOX_URL = process.env.NEXT_PUBLIC_SANDBOX_URL ?? "http://localhost:4002";
-
 type Phase = "idle" | "starting" | "running" | "done" | "error";
 type Line = { id: number; stream: SseStreamEvent["stream"]; text: string };
 
@@ -111,7 +109,7 @@ export function TrySheet({ post, onClose }: { post: Post | null; onClose: () => 
     track("try", post.id, 0.6);
     const payload = Object.fromEntries(new FormData(form).entries());
     try {
-      const res = await fetch(`${SANDBOX_URL}/try/${encodeURIComponent(post.id)}`, {
+      const res = await fetch(`/api/try/${encodeURIComponent(post.id)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ payload }),
