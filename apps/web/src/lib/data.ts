@@ -34,6 +34,7 @@ import {
   dbPostById,
   dbRecordTelemetry,
 } from "./db";
+import { getYouTubeThumbnailUrl } from "./utils";
 
 /**
  * Runtime store overlaying deterministic seed data so newly uploaded posts,
@@ -123,7 +124,10 @@ export function createRuntimePost(input: UploadPostInput): Post {
     videoUrl:
       input.videoUrl.trim() ||
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
-    thumbUrl: input.thumbUrl?.trim() || `https://picsum.photos/seed/${encodeURIComponent(id)}/720/1280`,
+    thumbUrl:
+      input.thumbUrl?.trim() ||
+      getYouTubeThumbnailUrl(input.videoUrl) ||
+      `https://picsum.photos/seed/${encodeURIComponent(id)}/720/1280`,
     durationSec: input.durationSec || 60,
     demo: input.demo,
     tags: input.tags.length > 0 ? input.tags : ["utility", "indie"],

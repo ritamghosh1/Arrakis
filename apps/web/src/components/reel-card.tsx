@@ -1,333 +1,366 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import type { FeedItem } from "@arrakis/contracts";
-import { cn, compact } from "@/lib/utils";
-import { track } from "@/lib/events";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowUpIcon,
+  BookmarkIcon,
+  MessageIcon,
+  PlayIcon,
+  ShareIcon,
+  TerminalIcon,
+  VerifiedIcon,
+} from "./icons";
 import { ReasonChip } from "./reason-chip";
-import { IconArrowUp, IconBolt, IconBookmark, IconChat, IconCheck, IconShare } from "./icons";
+import { queueEvent } from "@/lib/events";
+import { cn, compact, getYouTubeEmbedUrl } from "@/lib/utils";
 
-export const MODE_LABEL = {
-  container: "Container Sandbox",
-  api: "Live API Proxy",
-  web: "Web Sandbox",
-  handoff: "Desktop Handoff",
-} as const;
-
-type Props = {
+interface ReelCardProps {
   item: FeedItem;
-  active: boolean;
-  upvoted: boolean;
-  tried: boolean;
-  saved: boolean;
-  following: boolean;
-  onUpvote: () => void;
-  onSave: () => void;
-  onFollow: () => void;
-  onTry: () => void;
-  onShare: () => void;
-};
-
-function ActionButton({
-  label,
-  count,
-  badge,
-  pressed,
-  onClick,
-  href,
-  children,
-}: {
-  label: string;
-  count?: number;
-  badge?: string;
-  pressed?: boolean;
-  onClick?: () => void;
-  href?: string;
-  children: React.ReactNode;
-}) {
-  const cls = cn(
-    "border-paper/20 bg-ink/85 text-paper relative grid size-11 place-items-center rounded-full border shadow-sm transition-transform active:scale-95",
-    pressed && "border-primary bg-paper-raised text-primary",
-  );
-  return (
-    <div className="flex flex-col items-center gap-1">
-      {href ? (
-        <Link href={href} aria-label={label} className={cls}>
-          {children}
-        </Link>
-      ) : (
-        <button type="button" aria-label={label} aria-pressed={pressed} onClick={onClick} className={cls}>
-          {children}
-          {badge && (
-            <span className="bg-sage text-primary-ink absolute -top-1.5 -right-1.5 rounded-full px-1.5 py-0.2 font-mono text-[9px] font-bold">
-              {badge}
-            </span>
-          )}
-        </button>
-      )}
-      {count !== undefined && (
-        <span className="bg-ink/85 text-paper rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold tabular-nums">
-          {compact(count)}
-        </span>
-      )}
-    </div>
-  );
+  isActive: boolean;
+  onTry: (item: FeedItem) => void;
+  onShare: (item: FeedItem) => void;
 }
 
-export function ReelCard({
-  item,
-  active,
-  upvoted,
-  tried,
-  saved,
-  following,
-  onUpvote,
-  onSave,
-  onFollow,
-  onTry,
-  onShare,
-}: Props) {
+export const MODE_LABEL: Record<string, string> = {
+  container: "Live Container",
+  api: "Interactive API",
+  web: "Web App",
+  handoff: "Desktop App",
+};
+
+const MODE_LABELS = MODE_LABEL;
+
+export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
   const { post, reason } = item;
-  const ref = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [near, setNear] = useState(false);
-  const [videoFailed, setVideoFailed] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const activeSince = useRef<number | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const ytEmbedUrl = getYouTubeEmbedUrl(post.videoUrl);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setNear(Boolean(e?.isIntersecting)), {
-      rootMargin: "100% 0px",
-    });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const [upvoted, setUpvoted] = useState(Boolean(item.viewerState?.upvoted));
+  const [upvoteCount, setUpvoteCount] = useState(post.stats.upvotes);
+  const [saved, setSaved] = useState(Boolean(item.viewerState?.saved));
+  const [following, setFollowing] = useState(Boolean(item.viewerState?.followingAuthor));
+  const [muted, setMuted] = useState(true);
+  const [paused, setPaused] = useState(false);
 
+  // Poster-first lazy media lifecycle for native videos
   useEffect(() => {
-    const v = videoRef.current;
-    if (active) {
-      activeSince.current = performance.now();
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (v && !reduce) void v.play().catch(() => undefined);
+    if (ytEmbedUrl) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isActive) {
+      setPaused(false);
+      video.play().catch(() => {
+        setPaused(true);
+      });
     } else {
-      v?.pause();
-      if (activeSince.current !== null) {
-        const sec = (performance.now() - activeSince.current) / 1000;
-        activeSince.current = null;
-        if (sec >= 1) track("view", post.id, Number(sec.toFixed(1)));
-      }
+      video.pause();
+      video.currentTime = 0;
     }
-  }, [active, post.id]);
+  }, [isActive, ytEmbedUrl]);
 
+  // Dwell telemetry
   useEffect(() => {
-    if (!near && videoRef.current) {
-      videoRef.current.removeAttribute("src");
-      videoRef.current.load();
+    if (!isActive) return;
+    const started = Date.now();
+    return () => {
+      const dwellSec = Math.round((Date.now() - started) / 1000);
+      if (dwellSec >= 2) {
+        queueEvent({ type: "view", postId: post.id, value: dwellSec });
+      }
+    };
+  }, [isActive, post.id]);
+
+  function handleToggleUpvote() {
+    const next = !upvoted;
+    setUpvoted(next);
+    setUpvoteCount((c) => (next ? c + 1 : Math.max(0, c - 1)));
+    if (next) {
+      queueEvent({ type: "upvote", postId: post.id, value: item.viewerState?.tried ? 3 : 1 });
     }
-  }, [near]);
+  }
+
+  async function handleToggleFollow() {
+    const next = !following;
+    setFollowing(next);
+    try {
+      await fetch(`/api/follow/${encodeURIComponent(post.author.id)}`, {
+        method: next ? "POST" : "DELETE",
+      });
+    } catch {
+      setFollowing(!next);
+    }
+  }
+
+  function handleVideoClick() {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play().catch(() => {});
+      setPaused(false);
+    } else {
+      video.pause();
+      setPaused(true);
+    }
+  }
 
   return (
     <article
-      ref={ref}
-      aria-label={post.title}
-      className="feed-item h-full p-2 sm:py-3"
-      data-post-id={post.id}
+      aria-label={`${post.title} by @${post.author.handle}`}
+      className="relative w-full max-w-[660px] mx-auto rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-shadow hover:shadow-md"
     >
-      <div className="border-line bg-ink relative mx-auto h-full max-w-[27.5rem] overflow-hidden rounded-[var(--radius-card)] border shadow-md">
-        {/* Media */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={post.thumbUrl}
-          alt=""
-          className="absolute inset-0 size-full object-cover opacity-90"
-          loading={active ? "eager" : "lazy"}
-          decoding="async"
-        />
-        {!videoFailed && (
-          <video
-            ref={videoRef}
-            className="absolute inset-0 size-full object-cover opacity-90"
-            src={near ? post.videoUrl : undefined}
-            poster={post.thumbUrl}
-            muted
-            loop
-            playsInline
-            preload="none"
-            aria-label={`Demo reel: ${post.title}`}
-            onError={() => setVideoFailed(true)}
-          />
-        )}
-
-        {/* Top: Reason attribution chip + Mode & Live Telemetry */}
-        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-          <ReasonChip reason={reason} />
-          <div className="flex flex-col items-end gap-1">
-            <span className="border-paper/20 bg-ink/85 text-paper rounded-full border px-2.5 py-1 font-mono text-[10px] font-semibold whitespace-nowrap">
-              {MODE_LABEL[post.demo.mode]}
+      {/* Top Attribution & Category Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-border bg-surface">
+        <ReasonChip reason={reason} />
+        <div className="flex items-center gap-2 text-xs text-muted">
+          <span className="rounded-md bg-dune px-2.5 py-0.5 font-medium text-ink border border-border">
+            {post.category}
+          </span>
+          {post.health.verifiedUtility && (
+            <span className="inline-flex items-center gap-1 rounded-md bg-sage-soft px-2.5 py-0.5 font-semibold text-sage">
+              <span className="size-1.5 rounded-full bg-sage" />
+              Verified Demo
             </span>
-            <span className="bg-ink/85 text-paper flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-[10px] tabular-nums">
-              <span className="bg-sage size-1.5 rounded-full" />
-              {post.health.uptimePct}% · {post.health.p50LatencyMs}ms
-            </span>
-            <span
-              className="border-paper/20 bg-ink/85 text-paper flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums"
-              title="Bayesian Usability Score (S_use) and Popularity Score (S_pop)"
-            >
-              <span className="text-sage">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
-              <span className="text-paper/45">·</span>
-              <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Action rail */}
-        <div className="absolute right-3 bottom-44 flex flex-col items-center gap-3">
-          <ActionButton
-            label={
-              upvoted
-                ? tried
-                  ? "Remove 3x Proof-of-Trial upvote"
-                  : "Remove upvote"
-                : tried
-                  ? "Upvote with 3x Proof-of-Trial weight"
-                  : "Upvote"
-            }
-            count={post.stats.upvotes + (upvoted ? (tried ? 3 : 1) : 0)}
-            badge={tried ? "3×" : undefined}
-            pressed={upvoted}
-            onClick={onUpvote}
+          )}
+          <span
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-dune px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink tabular-nums"
+            title="Bayesian Usability Score (S_use) and Popularity Score (S_pop)"
           >
-            <IconArrowUp className="size-5" />
-          </ActionButton>
-          <ActionButton
-            label="Reviews and comments"
-            count={post.stats.comments}
-            href={`/p/${post.id}#comments`}
-          >
-            <IconChat className="size-5" />
-          </ActionButton>
-          <ActionButton label={saved ? "Unsave" : "Save"} pressed={saved} onClick={onSave}>
-            <IconBookmark className="size-5" />
-          </ActionButton>
-          <ActionButton label="Share tool" onClick={onShare}>
-            <IconShare className="size-5" />
-          </ActionButton>
+            <span className="text-sage">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
+            <span className="text-muted">·</span>
+            <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
+          </span>
         </div>
+      </div>
 
-        {/* Bottom: Author, Problem-Statement Card, and 1-Tap Try It Dock */}
-        <div className="absolute inset-x-3 bottom-3 flex flex-col gap-2.5 pr-14">
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/u/${post.author.handle}`}
-              className="bg-ink/85 border-paper/15 flex min-w-0 items-center gap-2 rounded-full border py-1 pr-3 pl-1"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.author.avatarUrl}
-                alt=""
-                className="bg-paper size-7 shrink-0 rounded-full"
-                width={28}
-                height={28}
-              />
-              <span className="text-paper truncate text-xs font-bold">@{post.author.handle}</span>
-              {post.health.verifiedUtility && (
-                <span
-                  className="bg-sage text-primary-ink grid size-4 shrink-0 place-items-center rounded-full"
-                  title="Verified Utility: over 85% live demo uptime"
-                >
-                  <IconCheck className="size-2.5" strokeWidth={3} />
-                  <span className="sr-only">Verified Utility</span>
-                </span>
-              )}
-            </Link>
+      {/* Main Reel Body */}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_72px]">
+        <div className="flex flex-col">
+          {/* Video Pitch or YouTube Stage */}
+          <div className="relative aspect-[16/10] w-full bg-ink overflow-hidden group">
+            {ytEmbedUrl ? (
+              isActive ? (
+                <iframe
+                  title={post.title}
+                  src={ytEmbedUrl}
+                  className="h-full w-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="relative h-full w-full">
+                  <img
+                    src={post.thumbUrl}
+                    alt={post.title}
+                    className="h-full w-full object-cover opacity-90"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-ink/30">
+                    <span className="flex size-14 items-center justify-center rounded-full bg-surface/95 text-ink shadow-md">
+                      <PlayIcon className="size-6 translate-x-0.5" />
+                    </span>
+                  </div>
+                </div>
+              )
+            ) : (
+              <>
+                <video
+                  ref={videoRef}
+                  poster={post.thumbUrl}
+                  src={ isActive ? post.videoUrl : undefined }
+                  preload={isActive ? "metadata" : "none"}
+                  loop
+                  muted={muted}
+                  playsInline
+                  onClick={handleVideoClick}
+                  className="h-full w-full object-cover cursor-pointer"
+                />
 
-            <button
-              type="button"
-              onClick={onFollow}
-              aria-pressed={following}
-              className={cn(
-                "ml-auto shrink-0 rounded-full border px-3 py-1 text-xs font-bold transition-transform active:scale-95",
-                following
-                  ? "border-paper/60 bg-ink/80 text-paper"
-                  : "border-paper bg-paper text-ink",
-              )}
-            >
-              {following ? "Following" : "+ Follow"}
-              <span className="sr-only"> @{post.author.handle}</span>
-            </button>
-          </div>
+                {/* Top-right Controls */}
+                <div className="absolute top-3 right-3 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMuted((m) => !m);
+                    }}
+                    aria-label={muted ? "Unmute pitch video" : "Mute pitch video"}
+                    className="rounded-lg bg-ink/80 px-2.5 py-1 text-xs font-medium text-dune hover:bg-ink transition-colors"
+                  >
+                    {muted ? "Muted" : "Sound On"}
+                  </button>
+                </div>
 
-          <div className="border-paper/15 bg-ink/90 text-paper rounded-2xl border p-3.5 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-paper/70 font-mono text-[10px] font-semibold uppercase">
-                {post.category}
+                {/* Play state indicator */}
+                {paused && (
+                  <button
+                    type="button"
+                    onClick={handleVideoClick}
+                    aria-label="Play pitch video"
+                    className="absolute inset-0 flex items-center justify-center bg-ink/30"
+                  >
+                    <span className="flex size-14 items-center justify-center rounded-full bg-surface/95 text-ink shadow-md">
+                      <PlayIcon className="size-6 translate-x-0.5" />
+                    </span>
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Mode Pill */}
+            <div className="absolute bottom-3 left-3 flex items-center gap-2 pointer-events-none">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-ink/85 px-2.5 py-1 text-[11px] font-medium text-dune">
+                <span className="size-1.5 rounded-full bg-sage" />
+                {MODE_LABELS[post.demo.mode] ?? "Live Demo"}
               </span>
+            </div>
+          </div>
+
+          {/* Problem-First Editorial Card */}
+          <div className="p-4 sm:p-5 space-y-4">
+            <div className="rounded-xl border border-border bg-dune/70 p-3.5">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
+                  Problem Solved
+                </span>
+                {item.viewerState?.tried && (
+                  <span className="rounded-md bg-sage-soft px-2 py-0.5 text-[11px] font-semibold text-sage">
+                    Tested by you
+                  </span>
+                )}
+              </div>
+              <p className="text-sm sm:text-[15px] font-medium text-ink leading-snug text-pretty">
+                {post.problemStatement}
+              </p>
+            </div>
+
+            {/* Title & Tags */}
+            <div className="space-y-2">
               <Link
                 href={`/p/${post.id}`}
-                className="text-paper/75 font-mono text-[10px] font-semibold underline"
+                className="block font-display text-lg sm:text-xl font-bold tracking-tight text-ink hover:text-accent transition-colors text-balance"
               >
-                Full telemetry ↗
+                {post.title}
               </Link>
-            </div>
-            <h2 className="font-display mt-0.5 text-[17px] leading-5 font-bold text-balance">
-              {post.title}
-            </h2>
-            <p
-              className={cn(
-                "text-paper/90 mt-1 text-[13px] leading-[18px] text-pretty",
-                !expanded && "line-clamp-2",
-              )}
-            >
-              <span className="text-paper font-semibold">Problem solved: </span>
-              {post.problemStatement}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5">
-              <div className="flex flex-wrap gap-1">
-                {post.tags.slice(0, 3).map((tag) => (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {post.tags.map((tag) => (
                   <Link
                     key={tag}
                     href={`/explore?q=${encodeURIComponent(tag)}`}
-                    className="bg-paper/15 text-paper/90 rounded-md px-1.5 py-0.5 font-mono text-[10px]"
+                    className="rounded-md bg-dune px-2 py-0.5 text-xs text-muted hover:text-ink transition-colors"
                   >
                     #{tag}
                   </Link>
                 ))}
               </div>
+            </div>
+
+            {/* Author & Follow Row */}
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-border">
+              <Link href={`/u/${post.author.handle}`} className="flex items-center gap-2.5 min-w-0 group">
+                <img
+                  src={post.author.avatarUrl}
+                  alt={post.author.displayName}
+                  className="size-9 rounded-full border border-border bg-dune object-cover shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-semibold text-ink group-hover:text-accent transition-colors truncate">
+                      {post.author.displayName}
+                    </span>
+                    {post.author.verifiedUtility && (
+                      <VerifiedIcon className="size-4 text-sage shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted truncate">@{post.author.handle}</p>
+                </div>
+              </Link>
+
               <button
                 type="button"
-                onClick={() => setExpanded((v) => !v)}
-                aria-expanded={expanded}
-                className="text-paper/80 text-[11px] font-semibold underline"
+                onClick={handleToggleFollow}
+                aria-pressed={following}
+                className={cn(
+                  "rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                  following
+                    ? "border border-border bg-dune text-ink hover:bg-border/40"
+                    : "bg-ink text-dune hover:bg-ink/90"
+                )}
               >
-                {expanded ? "Less" : "More"}
+                {following ? "Following" : "Follow"}
+              </button>
+            </div>
+
+            {/* Clean Try Live Demo Dock */}
+            <div className="pt-1 flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => onTry(item)}
+                className="flex-1 flex items-center justify-between gap-3 rounded-xl bg-accent px-4 py-3 text-white font-semibold text-sm hover:bg-accent-hover active:scale-[0.99] transition-all shadow-sm"
+              >
+                <span className="flex items-center gap-2.5">
+                  <TerminalIcon className="size-4 shrink-0" />
+                  <span>Try Live Demo</span>
+                </span>
+                <span className="rounded-lg bg-ink/20 px-2.5 py-0.5 text-xs font-medium">
+                  Launch →
+                </span>
               </button>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={onTry}
-              className="bg-primary text-primary-ink flex h-12 flex-1 items-center justify-center gap-2 rounded-full text-sm font-bold shadow-md transition-transform active:scale-[0.98]"
-            >
-              <IconBolt className="size-5" />
-              <span>Try it in 1 Tap</span>
-              {tried && (
-                <span className="bg-primary-ink/20 rounded-full px-2 py-0.5 font-mono text-[10px]">
-                  Verified ✓
-                </span>
-              )}
-            </button>
-            <div className="bg-ink/85 border-paper/15 text-paper rounded-2xl border px-3 py-1.5 font-mono text-[11px] leading-4 tabular-nums">
-              <span className="block font-bold">{compact(post.stats.tries)} tries</span>
-              <span className="text-paper/75 block text-[10px]">
-                {post.stats.trialUpvotes} 3× votes
-              </span>
-            </div>
-          </div>
+        {/* Right Action Rail */}
+        <div className="flex md:flex-col items-center justify-around md:justify-start gap-2 border-t md:border-t-0 md:border-l border-border bg-dune/40 p-2.5 md:py-4">
+          <button
+            type="button"
+            onClick={handleToggleUpvote}
+            aria-label={upvoted ? "Remove upvote" : "Upvote project"}
+            aria-pressed={upvoted}
+            className={cn(
+              "flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-semibold transition-colors",
+              upvoted
+                ? "bg-accent-soft text-accent"
+                : "text-muted hover:bg-surface hover:text-ink"
+            )}
+          >
+            <ArrowUpIcon className="size-5" />
+            <span className="tabular-nums">{compact(upvoteCount)}</span>
+          </button>
+
+          <Link
+            href={`/p/${post.id}`}
+            aria-label="View project details and discussion"
+            className="flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-medium text-muted hover:bg-surface hover:text-ink transition-colors"
+          >
+            <MessageIcon className="size-5" />
+            <span className="tabular-nums">{compact(post.stats.comments)}</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setSaved((s) => !s)}
+            aria-label={saved ? "Remove bookmark" : "Bookmark project"}
+            aria-pressed={saved}
+            className={cn(
+              "flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-medium transition-colors",
+              saved ? "bg-amber-soft text-amber" : "text-muted hover:bg-surface hover:text-ink"
+            )}
+          >
+            <BookmarkIcon className="size-5" />
+            <span>{saved ? "Saved" : "Save"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onShare(item)}
+            aria-label="Share project"
+            className="flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-medium text-muted hover:bg-surface hover:text-ink transition-colors"
+          >
+            <ShareIcon className="size-5" />
+            <span>Share</span>
+          </button>
         </div>
       </div>
     </article>

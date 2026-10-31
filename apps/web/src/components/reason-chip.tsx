@@ -1,37 +1,51 @@
 "use client";
 
-import Link from "next/link";
 import type { Reason } from "@arrakis/contracts";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { IconBolt, IconSpark, IconUser } from "./icons";
+import { cn } from "@/lib/utils";
 
-const KIND_LABEL: Record<Reason["kind"], string> = {
-  followed: "From your circle",
-  taste: "Matches your taste",
-  coldstart: "Fresh builder",
-  trending: "Proof-of-Trial pick",
-  search: "Problem match",
-};
+function formatCleanReasonText(reason: Reason): string {
+  if (reason.kind === "followed" && reason.via) {
+    return `Recommended via @${reason.via.handle}`;
+  }
+  if (reason.kind === "coldstart") {
+    return "Fresh Builder Spotlight";
+  }
+  if (reason.kind === "taste") {
+    return reason.matchedTopic
+      ? `Matches your interest in ${reason.matchedTopic}`
+      : "Recommended for your interests";
+  }
+  if (reason.kind === "search") {
+    return reason.matchedTopic ? `Solves "${reason.matchedTopic}"` : "Relevant build";
+  }
+  return "Community Pick";
+}
 
-/** Always-visible explanation of why a post is in the feed (flagship attribution UI). */
 export function ReasonChip({ reason, className }: { reason: Reason; className?: string }) {
-  const Icon = reason.kind === "followed" ? IconUser : reason.kind === "coldstart" ? IconSpark : IconBolt;
+  const Icon =
+    reason.kind === "followed" ? IconUser : reason.kind === "coldstart" ? IconSpark : IconBolt;
+  const cleanText = formatCleanReasonText(reason);
+
   const body = (
     <>
-      <Icon className="size-4 shrink-0" />
-      <span className="min-w-0">
-        <span className="sr-only">{KIND_LABEL[reason.kind]}: </span>
-        <span className="line-clamp-2 text-[12px] leading-4 font-medium text-pretty">{reason.text}</span>
-      </span>
+      <Icon className="size-3.5 shrink-0 text-accent" />
+      <span className="truncate text-xs font-medium text-ink">{cleanText}</span>
     </>
   );
+
   const base = cn(
-    "bg-paper-raised/95 text-ink flex max-w-[16rem] items-start gap-1.5 rounded-2xl px-3 py-1.5 shadow-sm",
-    className,
+    "inline-flex max-w-full items-center gap-1.5 rounded-lg border border-border bg-dune/80 px-2.5 py-1",
+    className
   );
+
   if (reason.via) {
     return (
-      <Link href={`/u/${reason.via.handle}`} className={cn(base, "hover:bg-paper-raised")}>
+      <Link
+        href={`/u/${reason.via.handle}`}
+        className={cn(base, "hover:border-ink/40 transition-colors")}
+      >
         {body}
       </Link>
     );

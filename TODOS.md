@@ -82,11 +82,11 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 
 ### A9. Ranking & Leaderboard (`services/scoring`)
 - [x] Implement `PostScore` (weighted votes 3×, trialRate, quality, decay) + unit tests (golden cases)
-- [ ] Anti-gaming: ignore self-events, one vote/user/post, require completed run for reviews, IP/device clustering discount, mutual-vote ring dampening
+- [x] Anti-gaming: ignore self-events, one vote/user/post, require completed run for reviews, IP/device clustering discount, mutual-vote ring dampening
 - [x] Builder score + Verified Utility badge (>85% uptime, ≥20 runs)
 - [x] Tester XP engine (try +10, review +25, first-25 +100, bug confirmed +50), levels, badges
-- [ ] Event consumer (Redis stream/poll) with idempotent incremental updates + `rebuild-from-events`
-- [ ] Redis ZSET leaderboards (builders/testers/trending × periods) + daily snapshot for ▲▼ deltas
+- [x] Event consumer (Redis stream/poll) with idempotent incremental updates + `rebuild-from-events`
+- [x] Redis ZSET leaderboards (builders/testers/trending × periods) + daily snapshot for ▲▼ deltas
 - [x] `GET /leaderboard`, `GET /users/:id/profile` (rank, XP, badges)
 - [x] Leaderboard UI: tabs, period filter, podium, rows with delta, "why this rank" popover, pinned "You" row, `aria-live`
 - [x] Badge gallery component + XP/level-up toast

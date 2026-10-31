@@ -1,12 +1,11 @@
-import Link from "next/link";
 import type { DemoMode } from "@arrakis/contracts";
-import { cn } from "@/lib/utils";
-import { CATEGORIES, fetchGlobalFeed } from "@/lib/data";
-import { MODE_LABEL } from "@/components/reel-card";
+import Link from "next/link";
 import { ExploreClient } from "@/components/explore-client";
 import { IconSearch } from "@/components/icons";
+import { CATEGORIES, fetchGlobalFeed } from "@/lib/data";
+import { cn } from "@/lib/utils";
 
-export const metadata = { title: "Explore · Problem-First Search" };
+export const metadata = { title: "Explore · Arrakis" };
 export const dynamic = "force-dynamic";
 
 type SP = {
@@ -18,21 +17,22 @@ type SP = {
   focus?: string;
 };
 
-const MODES = Object.keys(MODE_LABEL) as DemoMode[];
+const MODE_LABELS: Record<DemoMode, string> = {
+  container: "Container / CLI",
+  api: "Interactive API",
+  web: "Web App",
+  handoff: "Desktop App",
+};
+
+const MODES = Object.keys(MODE_LABELS) as DemoMode[];
+
 const SORTS = [
-  ["trending", "Proof-of-Trial"],
+  ["trending", "Recommended"],
   ["new", "Newest"],
-  ["tried", "Most Tried"],
+  ["tried", "Most Tested"],
 ] as const;
 
-const TRENDING_PROBLEMS = [
-  "resume",
-  "csv",
-  "env",
-  "cron",
-  "svg",
-  "invoice",
-] as const;
+const TRENDING_PROBLEMS = ["resume", "csv", "env", "cron", "svg", "invoice"] as const;
 
 function href(sp: SP, patch: Partial<SP>) {
   const next = { ...sp, ...patch, focus: undefined };
@@ -42,14 +42,24 @@ function href(sp: SP, patch: Partial<SP>) {
   return s ? `/explore?${s}` : "/explore";
 }
 
-function Chip({ active, to, children }: { active: boolean; to: string; children: React.ReactNode }) {
+function Chip({
+  active,
+  to,
+  children,
+}: {
+  active: boolean;
+  to: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={to}
       aria-current={active ? "true" : undefined}
       className={cn(
-        "shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors",
-        active ? "border-ink bg-ink text-paper" : "border-line bg-paper-raised text-ink hover:bg-paper-sunken",
+        "shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors",
+        active
+          ? "border-ink bg-ink text-dune shadow-sm"
+          : "border-border bg-surface text-muted hover:text-ink"
       )}
     >
       {children}
@@ -73,136 +83,128 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const q = sp.q?.trim();
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 px-4 pt-5 pb-12">
-        <header className="flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <p className="text-ink-muted font-mono text-xs font-semibold uppercase">
-              Hybrid BM25 + pgvector Requirement Search
-            </p>
-            <h1 className="font-display text-2xl font-bold sm:text-3xl">
-              Explore by Problem Solved
-            </h1>
-          </div>
-          <span className="text-ink-muted font-mono text-xs tabular-nums" role="status">
-            {q ? `${items.length} tools matching “${q}”` : `${items.length} indexed tools`}
-          </span>
-        </header>
-
-        {/* Search Bar */}
-        <form role="search" action="/explore" className="relative">
-          <label htmlFor="q" className="sr-only">
-            Describe the problem you want solved
-          </label>
-          <IconSearch className="text-ink-muted pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2" />
-          <input
-            id="q"
-            name="q"
-            type="search"
-            defaultValue={q}
-            autoFocus={Boolean(sp.focus)}
-            enterKeyHint="search"
-            placeholder="Describe a requirement, e.g. “convert PDF resume to JSON” or “clean messy CSV”…"
-            className="border-line bg-paper-raised h-12 w-full rounded-full border pr-24 pl-12 text-sm font-medium shadow-2xs"
-          />
-          <button
-            type="submit"
-            className="bg-ink text-paper absolute top-1.5 right-1.5 h-9 rounded-full px-4 text-xs font-bold"
-          >
-            Search
-          </button>
-          {mode && <input type="hidden" name="mode" value={mode} />}
-          {sp.category && <input type="hidden" name="category" value={sp.category} />}
-          {sp.verified && <input type="hidden" name="verified" value={sp.verified} />}
-          {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
-        </form>
-
-        {/* Trending problem quick-chips */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-ink-muted font-mono text-[11px] font-semibold">
-            Trending queries:
-          </span>
-          {TRENDING_PROBLEMS.map((tp) => (
-            <Link
-              key={tp}
-              href={href(sp, { q: tp })}
-              className="border-line bg-paper hover:bg-paper-sunken rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium"
-            >
-              “{tp}”
-            </Link>
-          ))}
-          {q && (
-            <Link
-              href={href(sp, { q: undefined })}
-              className="text-primary font-mono text-[11px] font-bold underline"
-            >
-              Clear query
-            </Link>
-          )}
+    <div className="mx-auto max-w-[1080px] px-4 sm:px-6 py-6 lg:py-9 space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">
+            Explore Builds by Problem
+          </h1>
+          <p className="text-sm text-muted mt-0.5">
+            Search working developer tools and projects by what they solve.
+          </p>
         </div>
+      </header>
 
-        {/* Filters */}
-        <nav aria-label="Filters" className="border-line bg-paper-raised flex flex-col gap-2.5 rounded-2xl border p-3">
-          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
-            <Chip active={!mode} to={href(sp, { mode: undefined })}>
-              All Demo Modes
-            </Chip>
-            {MODES.map((m) => (
-              <Chip key={m} active={mode === m} to={href(sp, { mode: m })}>
-                {MODE_LABEL[m]}
-              </Chip>
-            ))}
-          </div>
+      {/* Search Bar */}
+      <form role="search" action="/explore" className="relative">
+        <label htmlFor="q" className="sr-only">
+          Describe the problem you want solved
+        </label>
+        <IconSearch className="text-muted pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2" />
+        <input
+          id="q"
+          name="q"
+          type="search"
+          defaultValue={q}
+          autoFocus={Boolean(sp.focus)}
+          enterKeyHint="search"
+          placeholder="Search by problem, e.g. 'convert PDF resume to JSON' or 'clean messy CSV'..."
+          className="h-12 w-full rounded-2xl border border-border bg-surface pr-28 pl-12 text-sm text-ink shadow-sm focus:border-accent focus:outline-none"
+        />
+        <button
+          type="submit"
+          className="absolute top-1.5 right-1.5 h-9 rounded-xl bg-ink px-4 text-xs font-semibold text-dune hover:bg-ink/90 transition-colors"
+        >
+          Search
+        </button>
+        {mode && <input type="hidden" name="mode" value={mode} />}
+        {sp.category && <input type="hidden" name="category" value={sp.category} />}
+        {sp.verified && <input type="hidden" name="verified" value={sp.verified} />}
+        {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
+      </form>
 
-          <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
-            <Chip active={!sp.category} to={href(sp, { category: undefined })}>
-              All Categories
-            </Chip>
-            {CATEGORIES.map((c) => (
-              <Chip key={c} active={sp.category === c} to={href(sp, { category: c })}>
-                {c}
-              </Chip>
-            ))}
-          </div>
-
-          <div className="border-line flex flex-wrap items-center justify-between gap-2 border-t pt-2">
-            <div className="flex items-center gap-1.5">
-              <span className="text-ink-muted font-mono text-xs">Sort:</span>
-              {SORTS.map(([key, label]) => (
-                <Chip key={key} active={(sp.sort ?? "trending") === key} to={href(sp, { sort: key })}>
-                  {label}
-                </Chip>
-              ))}
-            </div>
-
-            <Chip
-              active={verifiedOnly}
-              to={href(sp, { verified: verifiedOnly ? undefined : "1" })}
-            >
-              ✓ Verified Utility Only (&gt;85% Uptime)
-            </Chip>
-          </div>
-        </nav>
-
-        {items.length === 0 ? (
-          <div className="border-line bg-paper-raised rounded-[var(--radius-card)] border border-dashed p-8 text-center">
-            <p className="font-display text-lg font-bold text-balance">
-              No tools match that combination yet
-            </p>
-            <p className="text-ink-muted mt-1 text-sm text-pretty">
-              Try a broader problem phrase or reset active filters.
-            </p>
-            <Link
-              href="/explore"
-              className="bg-primary text-primary-ink mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold"
-            >
-              Reset all filters
-            </Link>
-          </div>
-        ) : (
-          <ExploreClient items={items} />
+      {/* Quick Topic Chips */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold text-muted">Popular searches:</span>
+        {TRENDING_PROBLEMS.map((tp) => (
+          <Link
+            key={tp}
+            href={href(sp, { q: tp })}
+            className="rounded-lg border border-border bg-surface px-2.5 py-1 text-xs font-medium text-ink hover:border-ink/40 transition-colors"
+          >
+            {tp}
+          </Link>
+        ))}
+        {q && (
+          <Link href={href(sp, { q: undefined })} className="text-xs font-semibold text-accent hover:underline">
+            Clear search
+          </Link>
         )}
       </div>
+
+      {/* Filters */}
+      <nav
+        aria-label="Filters"
+        className="rounded-2xl border border-border bg-surface p-4 space-y-3 shadow-sm"
+      >
+        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+          <Chip active={!mode} to={href(sp, { mode: undefined })}>
+            All Demo Types
+          </Chip>
+          {MODES.map((m) => (
+            <Chip key={m} active={mode === m} to={href(sp, { mode: m })}>
+              {MODE_LABELS[m]}
+            </Chip>
+          ))}
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+          <Chip active={!sp.category} to={href(sp, { category: undefined })}>
+            All Categories
+          </Chip>
+          {CATEGORIES.map((c) => (
+            <Chip key={c} active={sp.category === c} to={href(sp, { category: c })}>
+              {c}
+            </Chip>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted">Sort by:</span>
+            {SORTS.map(([key, label]) => (
+              <Chip
+                key={key}
+                active={(sp.sort ?? "trending") === key}
+                to={href(sp, { sort: key })}
+              >
+                {label}
+              </Chip>
+            ))}
+          </div>
+
+          <Chip active={verifiedOnly} to={href(sp, { verified: verifiedOnly ? undefined : "1" })}>
+            ✓ Verified Demos Only
+          </Chip>
+        </div>
+      </nav>
+
+      {items.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center space-y-3">
+          <p className="font-display text-lg font-bold text-ink">No matching builds found</p>
+          <p className="text-sm text-muted">
+            Try a broader search phrase or clear your active filters.
+          </p>
+          <Link
+            href="/explore"
+            className="inline-block rounded-xl bg-ink px-5 py-2.5 text-xs font-semibold text-dune"
+          >
+            Reset Filters
+          </Link>
+        </div>
+      ) : (
+        <ExploreClient items={items} />
+      )}
     </div>
   );
 }

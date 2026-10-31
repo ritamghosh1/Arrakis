@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const profile = await fetchProfile(handle);
   return {
     title: `${profile.user.displayName} (@${profile.user.handle})`,
-    description: `${profile.user.bio} · ${profile.user.followersCount} followers · Builder Score ${profile.user.builderScore}`,
+    description: `${profile.user.bio} · ${profile.user.followersCount} followers`,
   };
 }
 
@@ -19,14 +19,8 @@ export default async function ProfilePage({ params }: Props) {
   const { handle } = await params;
   const viewerId = process.env.NEXT_PUBLIC_DEFAULT_USER_ID ?? "usr_ritam";
   const profile = await fetchProfile(handle, viewerId);
-  const followersList = getFollowersForUser(profile.user.id);
-  const followingList = getFollowingForUser(profile.user.id);
+  const followers = getFollowersForUser(profile.user.id);
+  const following = getFollowingForUser(profile.user.id);
 
-  return (
-    <ProfileView
-      profile={profile}
-      followersList={followersList}
-      followingList={followingList}
-    />
-  );
+  return <ProfileView profile={profile} followers={followers} following={following} />;
 }

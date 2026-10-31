@@ -1,882 +1,958 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import type { DemoMode, FormFieldSchema, Post } from "@arrakis/contracts";
-import { cn, VIEWER_ID } from "@/lib/utils";
-import { CATEGORIES } from "@/lib/categories";
-import { MODE_LABEL } from "./reel-card";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  CheckCircleIcon,
+  PlayIcon,
+  PlusSquareIcon,
+  ShareIcon,
+  SparklesIcon,
+  TerminalIcon,
+  TrashIcon,
+  UploadCloudIcon,
+} from "./icons";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
-import { IconBolt, IconCheck, IconPlus, IconShare, IconSpark } from "./icons";
-
-const DRAFT_KEY = "arrakis_upload_draft_v1";
+import { CATEGORIES } from "@/lib/categories";
+import {
+  cn,
+  extractYouTubeId,
+  getYouTubeEmbedUrl,
+  getYouTubeThumbnailUrl,
+} from "@/lib/utils";
 
 const SAMPLE_VIDEOS = [
   {
-    label: "Terminal CLI & JSON Schema Demo (52s)",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
-    duration: 52,
+    label: "Terminal CLI Demo",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    thumbUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=900&auto=format&fit=crop&q=80",
+    durationSec: 45,
   },
   {
-    label: "Interactive Web Utility Walkthrough (68s)",
-    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4#t=2",
-    duration: 68,
+    label: "API Workflow Demo",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    thumbUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop&q=80",
+    durationSec: 52,
   },
-];
+] as const;
+
+const SAMPLE_YOUTUBE_LINKS = [
+  {
+    label: "Sample YouTube Build Pitch",
+    url: "https://www.youtube.com/watch?v=M7lc1UVf-VE",
+  },
+] as const;
+
+const DRAFT_STORAGE_KEY = "arrakis_create_post_draft_v2";
 
 export function CreatePostForm() {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
-  // Step 1: Pitch Video
-  const [videoUrl, setVideoUrl] = useState(SAMPLE_VIDEOS[0]!.url);
-  const [videoFileName, setVideoFileName] = useState("demo-reel-terminal.mp4");
-  const [durationSec, setDurationSec] = useState(52);
+  // Step 1: Pitch Reel (YouTube link, Upload file, or Sample video)
+  const [videoSourceMode, setVideoSourceMode] = useState<"youtube" | "upload" | "sample">("youtube");
+  const [youtubeInput, setYoutubeInput] = useState("https://www.youtube.com/watch?v=M7lc1UVf-VE");
+  const [videoUrl, setVideoUrl] = useState<string>("https://www.youtube.com/watch?v=M7lc1UVf-VE");
+  const [thumbUrl, setThumbUrl] = useState<string>(
+    "https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg"
+  );
+  const [durationSec, setDurationSec] = useState<number>(60);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
 
-  // Step 2: Basics & Problem Statement
-  const [title, setTitle] = useState("SQLite-to-REST — Turn any .db file into a typed OpenAPI server");
-  const [problemStatement, setProblemStatement] = useState(
-    "Spin up a read-only REST + OpenAPI endpoint from a raw SQLite file in 1 command without writing boilerplate routes.",
-  );
+  // Step 2: Problem & Basics
+  const [title, setTitle] = useState("");
+  const [problemStatement, setProblemStatement] = useState("");
   const [category, setCategory] = useState<string>(CATEGORIES[0]);
-  const [tagsText, setTagsText] = useState("sqlite, openapi, rest, cli");
+  const [tagsInput, setTagsInput] = useState("cli, automation, devtools");
 
-  // Step 3: Demo Wiring & Auto-Form Builder
+  // Step 3: Live Demo Wiring & Auto-Form Builder
   const [demoMode, setDemoMode] = useState<DemoMode>("container");
-  const [demoTarget, setDemoTarget] = useState("arrakis/sqlite-to-rest:latest");
-  const [repoUrl, setRepoUrl] = useState("https://github.com/ritamghosh1/sqlite-to-rest");
-  const [sampleCommand, setSampleCommand] = useState(
-    "sqlite-to-rest --db sample.sqlite --openapi",
-  );
-  const [fields, setFields] = useState<FormFieldSchema[]>([
+  const [demoTarget, setDemoTarget] = useState("ghcr.io/ritamghosh1/arrakis-demo:latest");
+  const [repoUrl, setRepoUrl] = useState("https://github.com/ritamghosh1/Arrakis");
+  const [sampleCommand, setSampleCommand] = useState("run-tool --format json");
+  const [formSchema, setFormSchema] = useState<FormFieldSchema[]>([
     {
-      name: "tableQuery",
-      label: "Table or SQL filter",
+      name: "input_text",
+      label: "Input Text or Payload",
       type: "text",
       required: true,
-      defaultValue: "SELECT id, email, created_at FROM users LIMIT 5;",
+      placeholder: "Paste sample input...",
+      defaultValue: "Sample project input for live test",
     },
     {
-      name: "readOnly",
-      label: "Enforce read-only mode",
-      type: "boolean",
-      required: false,
-      defaultValue: true,
+      name: "output_mode",
+      label: "Output Format",
+      type: "select",
+      required: true,
+      options: ["json", "markdown", "summary"],
+      defaultValue: "json",
     },
   ]);
 
-  // Step 4: AI Indexing & Publish
-  const [indexing, setIndexing] = useState(false);
-  const [indexedVector, setIndexedVector] = useState<number[]>([
-    0.84, 0.32, -0.18, 0.64, 0.51, -0.29, 0.77, 0.19, 0.44, -0.15, 0.68, 0.39, -0.22, 0.58,
-    0.49, 0.71,
-  ]);
-  const [consent, setConsent] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  // Step 4: Review & Publish
+  const [publishing, setPublishing] = useState(false);
   const [publishedPost, setPublishedPost] = useState<Post | null>(null);
-  const [tryPost, setTryPost] = useState<Post | null>(null);
-  const [sharePost, setSharePost] = useState<Post | null>(null);
-  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const [activeTryPost, setActiveTryPost] = useState<Post | null>(null);
+  const [activeSharePost, setActiveSharePost] = useState<Post | null>(null);
+  const [draftSavedNotice, setDraftSavedNotice] = useState(false);
 
-  // Restore draft on mount
+  // Restore saved draft on mount
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(DRAFT_KEY);
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (!raw) return;
-      const d = JSON.parse(raw) as Partial<{
-        title: string;
-        problemStatement: string;
-        category: string;
-        tagsText: string;
-        demoMode: DemoMode;
-        demoTarget: string;
-      }>;
-      if (d.title) setTitle(d.title);
-      if (d.problemStatement) setProblemStatement(d.problemStatement);
-      if (d.category) setCategory(d.category);
-      if (d.tagsText) setTagsText(d.tagsText);
-      if (d.demoMode) setDemoMode(d.demoMode);
-      if (d.demoTarget) setDemoTarget(d.demoTarget);
+      const draft = JSON.parse(raw);
+      if (draft.title) setTitle(draft.title);
+      if (draft.problemStatement) setProblemStatement(draft.problemStatement);
+      if (draft.category) setCategory(draft.category);
+      if (draft.tagsInput) setTagsInput(draft.tagsInput);
+      if (draft.demoMode) setDemoMode(draft.demoMode);
+      if (draft.demoTarget) setDemoTarget(draft.demoTarget);
+      if (draft.youtubeInput) {
+        setYoutubeInput(draft.youtubeInput);
+        const ytId = extractYouTubeId(draft.youtubeInput);
+        if (ytId) {
+          setVideoSourceMode("youtube");
+          setVideoUrl(draft.youtubeInput);
+          setThumbUrl(`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`);
+        }
+      }
     } catch {
-      // ignore
+      // Ignore draft parse error
     }
   }, []);
 
-  function saveDraft() {
+  function handleSaveDraft() {
     try {
       localStorage.setItem(
-        DRAFT_KEY,
+        DRAFT_STORAGE_KEY,
         JSON.stringify({
           title,
           problemStatement,
           category,
-          tagsText,
+          tagsInput,
           demoMode,
           demoTarget,
-        }),
+          youtubeInput,
+        })
       );
-      setDraftSavedAt(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+      setDraftSavedNotice(true);
+      setTimeout(() => setDraftSavedNotice(false), 2400);
     } catch {
-      // ignore
+      // Ignore storage error
     }
   }
 
-  function handleVideoFile(file: File | undefined) {
+  function handleYouTubeUrlChange(nextUrl: string) {
+    setYoutubeInput(nextUrl);
+    setVideoError(null);
+    const ytId = extractYouTubeId(nextUrl);
+    if (ytId) {
+      setVideoUrl(nextUrl.trim());
+      setThumbUrl(
+        getYouTubeThumbnailUrl(nextUrl) ?? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`
+      );
+      setUploadedFileName(null);
+    } else if (nextUrl.trim().length > 0) {
+      setVideoError("Please enter a valid YouTube link (youtube.com/watch?v=... or youtu.be/...)");
+    }
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
     setVideoError(null);
+
     if (!file.type.startsWith("video/")) {
-      setVideoError("Please select a valid MP4 or WebM video file.");
+      setVideoError("Please select an MP4 or WebM video file.");
       return;
     }
-    if (file.size > 80 * 1024 * 1024) {
-      setVideoError("Pitch reel must be under 80 MB (≤120 seconds).");
-      return;
-    }
-    const objUrl = URL.createObjectURL(file);
-    setVideoUrl(objUrl);
-    setVideoFileName(file.name);
-    setDurationSec(58);
+
+    const objectUrl = URL.createObjectURL(file);
+    const probe = document.createElement("video");
+    probe.preload = "metadata";
+    probe.onloadedmetadata = () => {
+      const sec = Math.round(probe.duration || 45);
+      if (sec > 120) {
+        setVideoError("Pitch videos should be under 2 minutes.");
+      } else {
+        setDurationSec(sec);
+        setVideoUrl(objectUrl);
+        setUploadedFileName(file.name);
+      }
+    };
+    probe.src = objectUrl;
   }
 
-  function addField() {
-    const idx = fields.length + 1;
-    setFields((prev) => [
+  function handleAddField() {
+    const idx = formSchema.length + 1;
+    setFormSchema((prev) => [
       ...prev,
       {
         name: `param_${idx}`,
-        label: `Input parameter #${idx}`,
+        label: `Input Parameter ${idx}`,
         type: "text",
-        required: true,
-        defaultValue: "sample_value",
+        required: false,
+        placeholder: "Enter value...",
+        defaultValue: "",
       },
     ]);
   }
 
-  function updateField(index: number, patch: Partial<FormFieldSchema>) {
-    setFields((prev) => prev.map((f, i) => (i === index ? { ...f, ...patch } : f)));
+  function handleUpdateField(index: number, patch: Partial<FormFieldSchema>) {
+    setFormSchema((prev) => prev.map((f, i) => (i === index ? { ...f, ...patch } : f)));
   }
 
-  function removeField(index: number) {
-    setFields((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function runAiUtilityIndexer() {
-    setIndexing(true);
-    setTimeout(() => {
-      // Zero-buzzword problem statement refinement + deterministic vector update
-      if (!problemStatement.toLowerCase().endsWith(".")) {
-        setProblemStatement((s) => `${s.trim()}.`);
-      }
-      setIndexedVector((prev) =>
-        prev.map((v, i) => Number((Math.sin(title.length + i * 1.7) * 0.85).toFixed(2))),
-      );
-      setIndexing(false);
-    }, 420);
+  function handleRemoveField(index: number) {
+    setFormSchema((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handlePublish(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitError(null);
-    if (!title.trim() || !problemStatement.trim() || !demoTarget.trim()) {
-      setSubmitError("Please fill in the project title, problem statement, and demo target.");
-      return;
-    }
-    setSubmitting(true);
+    if (publishing) return;
+
+    setPublishing(true);
     try {
-      const tags = tagsText
+      const tags = tagsInput
         .split(",")
-        .map((t) => t.trim().replace(/^#/, ""))
+        .map((t) => t.trim().toLowerCase().replace(/^#/, ""))
         .filter(Boolean);
 
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          authorId: VIEWER_ID,
-          title,
-          problemStatement,
+          authorId: "usr_ritam",
+          title: title.trim() || "Untitled Build",
+          problemStatement:
+            problemStatement.trim() ||
+            "Helps developers automate repetitive workflows directly from the browser.",
           category,
           videoUrl,
+          thumbUrl,
           durationSec,
           demo: {
             mode: demoMode,
-            target: demoTarget,
+            target: demoTarget.trim() || "ghcr.io/ritamghosh1/arrakis-demo:latest",
             repoUrl: repoUrl.trim() || undefined,
             sampleCommand: sampleCommand.trim() || undefined,
-            formSchema: demoMode === "container" || demoMode === "api" ? fields : undefined,
+            formSchema,
           },
-          tags,
+          tags: tags.length > 0 ? tags : ["devtools", "utility"],
         }),
       });
-      if (!res.ok) {
-        const err = (await res.json()) as { error?: string };
-        throw new Error(err.error ?? `Upload failed (${res.status})`);
+
+      const data = await res.json();
+      if (data.post) {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        setPublishedPost(data.post);
       }
-      const created = (await res.json()) as Post;
-      localStorage.removeItem(DRAFT_KEY);
-      setPublishedPost(created);
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Could not publish project.");
     } finally {
-      setSubmitting(false);
+      setPublishing(false);
     }
   }
 
+  const ytEmbedUrl = getYouTubeEmbedUrl(videoUrl);
+
   if (publishedPost) {
     return (
-      <div className="h-full overflow-y-auto">
-        <div className="mx-auto max-w-2xl px-4 py-8">
-          <div className="border-line bg-paper-raised space-y-5 rounded-[var(--radius-card)] border p-6 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="bg-sage text-primary-ink grid size-11 place-items-center rounded-2xl">
-                <IconCheck className="size-6" strokeWidth={2.5} />
+      <div className="mx-auto max-w-[780px] px-4 sm:px-6 py-10 space-y-6">
+        <div className="rounded-2xl border border-sage/40 bg-surface p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex items-start gap-3.5">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-sage-soft text-sage shrink-0">
+              <CheckCircleIcon className="size-6" />
+            </span>
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-sage">
+                Published Live
               </span>
-              <div>
-                <p className="text-sage font-mono text-xs font-bold uppercase">
-                  Live on Arrakis · Problem Statement Indexed in pgvector
-                </p>
-                <h1 className="font-display text-2xl font-bold">{publishedPost.title}</h1>
-              </div>
-            </div>
-
-            <div className="border-line bg-paper rounded-2xl border p-4">
-              <p className="text-ink-muted font-mono text-[11px] font-semibold uppercase">
-                Indexed Problem Statement (Zero-Buzzword)
+              <h1 className="font-display text-2xl font-bold text-ink">{publishedPost.title}</h1>
+              <p className="text-sm text-muted">
+                Your build and interactive demo are now live on Arrakis.
               </p>
-              <p className="mt-1 text-sm font-medium">{publishedPost.problemStatement}</p>
-              <div className="text-ink-muted mt-3 flex flex-wrap gap-2 font-mono text-xs">
-                <span className="bg-paper-sunken text-ink rounded-full px-2.5 py-0.5 font-semibold">
-                  {MODE_LABEL[publishedPost.demo.mode]}
-                </span>
-                <span>Target: {publishedPost.demo.target}</span>
-              </div>
-            </div>
-
-            <div className="grid gap-2.5 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={() => setTryPost(publishedPost)}
-                className="bg-primary text-primary-ink flex h-11 items-center justify-center gap-1.5 rounded-full text-xs font-bold"
-              >
-                <IconBolt className="size-4" />
-                Test 1-Tap Sandbox
-              </button>
-              <button
-                type="button"
-                onClick={() => setSharePost(publishedPost)}
-                className="border-line bg-paper hover:bg-paper-sunken flex h-11 items-center justify-center gap-1.5 rounded-full border text-xs font-bold"
-              >
-                <IconShare className="size-4" />
-                Share & QR Code
-              </button>
-              <Link
-                href="/"
-                className="bg-ink text-paper flex h-11 items-center justify-center rounded-full text-xs font-bold"
-              >
-                View in Home Feed →
-              </Link>
             </div>
           </div>
+
+          <div className="rounded-xl border border-border bg-dune/70 p-4 space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
+              Problem Statement
+            </span>
+            <p className="text-sm font-medium text-ink">{publishedPost.problemStatement}</p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setActiveTryPost(publishedPost)}
+              className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
+            >
+              <TerminalIcon className="size-4" />
+              <span>Test Live Demo</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveSharePost(publishedPost)}
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-dune px-4 py-2.5 text-sm font-semibold text-ink hover:bg-border/40 transition-colors"
+            >
+              <ShareIcon className="size-4" />
+              <span>Share Build</span>
+            </button>
+
+            <Link
+              href={`/p/${publishedPost.id}`}
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-ink hover:bg-dune transition-colors"
+            >
+              <span>Open Post Page →</span>
+            </Link>
+          </div>
         </div>
-        <TrySheet post={tryPost} onClose={() => setTryPost(null)} />
-        <ShareSheet post={sharePost} onClose={() => setSharePost(null)} />
+
+        <TrySheet post={activeTryPost} onClose={() => setActiveTryPost(null)} />
+        <ShareSheet post={activeSharePost} onClose={() => setActiveSharePost(null)} />
       </div>
     );
   }
 
-  return (
-    <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 pt-5 pb-14">
-        {/* Header & Save Draft */}
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-ink-muted font-mono text-xs font-semibold uppercase">
-              Zero-Code Builder Onboarding · 20% Cold-Start Boost Guaranteed
-            </p>
-            <h1 className="font-display text-2xl font-bold sm:text-3xl">
-              Publish a Utility Micro-Demo
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {draftSavedAt && (
-              <span className="text-sage font-mono text-xs" role="status">
-                Draft saved {draftSavedAt}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={saveDraft}
-              className="border-line bg-paper-raised hover:bg-paper-sunken rounded-full border px-3.5 py-1.5 text-xs font-bold"
-            >
-              Save Draft
-            </button>
-          </div>
-        </header>
+  const STEPS = [
+    { num: 1, title: "Pitch Video" },
+    { num: 2, title: "Problem & Info" },
+    { num: 3, title: "Live Demo Setup" },
+    { num: 4, title: "Review & Publish" },
+  ] as const;
 
-        {/* 4-Step Progress Bar */}
-        <nav aria-label="Upload steps" className="grid grid-cols-4 gap-2">
-          {(
-            [
-              [1, "1. Pitch Reel"],
-              [2, "2. Problem Solved"],
-              [3, "3. Sandbox Wiring"],
-              [4, "4. AI Index & Publish"],
-            ] as const
-          ).map(([s, label]) => {
-            const active = step === s;
-            const done = step > s;
-            return (
+  return (
+    <div className="mx-auto max-w-[920px] px-4 sm:px-6 py-6 lg:py-9 space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink">
+            Publish a Build
+          </h1>
+          <p className="text-sm text-muted mt-0.5">
+            Share a short pitch video or YouTube link paired with a live interactive demo.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSaveDraft}
+          className="rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-ink hover:bg-dune transition-colors"
+        >
+          {draftSavedNotice ? "✓ Draft Saved" : "Save Draft"}
+        </button>
+      </div>
+
+      {/* Stepper Bar */}
+      <ol className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {STEPS.map((s) => {
+          const active = step === s.num;
+          const completed = step > s.num;
+          return (
+            <li key={s.num}>
               <button
-                key={s}
                 type="button"
-                aria-current={active ? "step" : undefined}
-                onClick={() => setStep(s)}
+                onClick={() => setStep(s.num)}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-2xl border px-2.5 py-2.5 text-xs font-bold transition-colors",
+                  "w-full flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-colors",
                   active
-                    ? "border-ink bg-ink text-paper"
-                    : done
-                      ? "border-sage/40 bg-sage/10 text-sage"
-                      : "border-line bg-paper-raised text-ink-muted",
+                    ? "border-ink bg-ink text-dune shadow-sm"
+                    : completed
+                    ? "border-sage/40 bg-sage-soft/50 text-ink"
+                    : "border-border bg-surface text-muted hover:text-ink"
                 )}
               >
-                {done && <IconCheck className="size-3.5" strokeWidth={3} />}
-                <span className="truncate">{label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <form onSubmit={(e) => void handlePublish(e)} className="space-y-5">
-          {/* STEP 1: Pitch Video */}
-          {step === 1 && (
-            <section
-              aria-labelledby="step1-heading"
-              className="border-line bg-paper-raised space-y-4 rounded-[var(--radius-card)] border p-5"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 id="step1-heading" className="font-display text-lg font-bold">
-                    Step 1 — Upload a ≤2-Min Utility Demo Reel
-                  </h2>
-                  <p className="text-ink-muted text-xs">
-                    Show what problem the tool solves in action — not slides or static code.
-                  </p>
-                </div>
-                <span className="bg-paper-sunken rounded-full px-3 py-1 font-mono text-xs font-semibold tabular-nums">
-                  {durationSec}s / 120s max
+                <span
+                  className={cn(
+                    "flex size-6 items-center justify-center rounded-full text-xs font-bold shrink-0",
+                    active
+                      ? "bg-accent text-white"
+                      : completed
+                      ? "bg-sage text-white"
+                      : "bg-dune text-muted"
+                  )}
+                >
+                  {completed ? "✓" : s.num}
                 </span>
+                <span className="text-xs font-semibold truncate">{s.title}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
+      {/* Main Step Card */}
+      <div className="rounded-2xl border border-border bg-surface p-5 sm:p-7 shadow-sm">
+        {/* STEP 1: PITCH VIDEO OR YOUTUBE LINK */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg font-bold text-ink">
+                  Step 1 · Add Your Pitch Video
+                </h2>
+                <p className="text-xs text-muted mt-0.5">
+                  Paste a YouTube link, upload an MP4/WebM video file, or pick a sample demo video.
+                </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
-                <div className="space-y-3">
+              {/* Source Mode Selector */}
+              <div className="inline-flex rounded-xl border border-border bg-dune p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVideoSourceMode("youtube");
+                    if (youtubeInput) handleYouTubeUrlChange(youtubeInput);
+                  }}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                    videoSourceMode === "youtube"
+                      ? "bg-ink text-dune shadow-sm"
+                      : "text-muted hover:text-ink"
+                  )}
+                >
+                  YouTube Link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceMode("upload")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                    videoSourceMode === "upload"
+                      ? "bg-ink text-dune shadow-sm"
+                      : "text-muted hover:text-ink"
+                  )}
+                >
+                  Upload Video
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVideoSourceMode("sample");
+                    setVideoUrl(SAMPLE_VIDEOS[0].videoUrl);
+                    setThumbUrl(SAMPLE_VIDEOS[0].thumbUrl);
+                  }}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                    videoSourceMode === "sample"
+                      ? "bg-ink text-dune shadow-sm"
+                      : "text-muted hover:text-ink"
+                  )}
+                >
+                  Sample Reel
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Input Panel */}
+              <div className="lg:col-span-6 space-y-4">
+                {videoSourceMode === "youtube" && (
+                  <div className="rounded-2xl border border-border bg-dune/50 p-5 space-y-4">
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="youtube-url-input"
+                        className="block text-xs font-bold uppercase tracking-wider text-ink"
+                      >
+                        YouTube Video or Shorts Link
+                      </label>
+                      <input
+                        id="youtube-url-input"
+                        type="url"
+                        inputMode="url"
+                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                        value={youtubeInput}
+                        onChange={(e) => handleYouTubeUrlChange(e.target.value)}
+                        className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
+                      />
+                      <p className="text-xs text-muted">
+                        Supports standard YouTube watch URLs, shortened{" "}
+                        <code className="font-mono text-[11px]">youtu.be</code> links, and YouTube
+                        Shorts.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
+                      <span className="block text-xs font-semibold text-muted">
+                        Quick example link:
+                      </span>
+                      {SAMPLE_YOUTUBE_LINKS.map((item) => (
+                        <button
+                          key={item.url}
+                          type="button"
+                          onClick={() => handleYouTubeUrlChange(item.url)}
+                          className="w-full flex items-center justify-between rounded-xl border border-border bg-surface px-3 py-2 text-xs font-medium text-ink hover:border-ink/40 transition-colors"
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            <PlayIcon className="size-3.5 text-accent shrink-0" />
+                            <span className="truncate">{item.label}</span>
+                          </span>
+                          <span className="text-accent font-semibold shrink-0">Use Link</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {videoSourceMode === "upload" && (
                   <label
                     htmlFor="pitch-video-file"
-                    className="border-line bg-paper hover:bg-paper-sunken flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-6 text-center transition-colors"
+                    className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-dune/50 p-8 text-center cursor-pointer hover:border-accent transition-colors"
                   >
-                    <IconPlus className="text-primary size-7" />
-                    <span className="text-sm font-bold">
-                      Drop MP4 / WebM reel or click to browse
+                    <UploadCloudIcon className="size-9 text-accent mb-2.5" />
+                    <span className="text-sm font-semibold text-ink">
+                      {uploadedFileName ? uploadedFileName : "Click to select an MP4 or WebM file"}
                     </span>
-                    <span className="text-ink-muted font-mono text-xs">
-                      Selected: {videoFileName} ({durationSec}s)
+                    <span className="text-xs text-muted mt-1">
+                      Short demo showing the problem and your working solution
                     </span>
                     <input
                       id="pitch-video-file"
                       type="file"
                       accept="video/mp4,video/webm,video/quicktime"
-                      onChange={(e) => handleVideoFile(e.target.files?.[0])}
+                      onChange={handleFileUpload}
                       className="sr-only"
                     />
                   </label>
+                )}
 
-                  <div>
-                    <p className="text-xs font-semibold">Or pick a preset hackathon demo reel:</p>
-                    <div className="mt-1.5 flex flex-wrap gap-2">
-                      {SAMPLE_VIDEOS.map((sv) => (
-                        <button
-                          key={sv.url}
-                          type="button"
-                          onClick={() => {
-                            setVideoUrl(sv.url);
-                            setDurationSec(sv.duration);
-                            setVideoFileName(sv.label);
-                          }}
-                          className={cn(
-                            "rounded-xl border px-3 py-1.5 text-xs font-semibold",
-                            videoUrl === sv.url
-                              ? "border-ink bg-ink text-paper"
-                              : "border-line bg-paper text-ink",
-                          )}
-                        >
-                          {sv.label}
-                        </button>
-                      ))}
-                    </div>
+                {videoSourceMode === "sample" && (
+                  <div className="space-y-2.5">
+                    <span className="block text-xs font-semibold text-muted">
+                      Choose a sample pitch video:
+                    </span>
+                    {SAMPLE_VIDEOS.map((sample) => (
+                      <button
+                        key={sample.videoUrl}
+                        type="button"
+                        onClick={() => {
+                          setVideoUrl(sample.videoUrl);
+                          setThumbUrl(sample.thumbUrl);
+                          setDurationSec(sample.durationSec);
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between rounded-xl border p-3.5 text-left transition-colors",
+                          videoUrl === sample.videoUrl
+                            ? "border-ink bg-dune font-semibold text-ink"
+                            : "border-border bg-surface text-muted hover:text-ink"
+                        )}
+                      >
+                        <span className="flex items-center gap-2.5 text-sm">
+                          <PlayIcon className="size-4 text-accent" />
+                          <span>{sample.label}</span>
+                        </span>
+                        <span className="text-xs text-muted">Select</span>
+                      </button>
+                    ))}
                   </div>
+                )}
 
-                  {videoError && (
-                    <p className="text-alert text-xs font-semibold" role="alert">
-                      {videoError}
-                    </p>
+                {videoError && (
+                  <p role="alert" className="rounded-xl bg-crimson/10 px-3.5 py-2.5 text-xs font-semibold text-crimson">
+                    {videoError}
+                  </p>
+                )}
+              </div>
+
+              {/* Right Live Video / YouTube Preview */}
+              <div className="lg:col-span-6 space-y-2">
+                <span className="block text-xs font-semibold text-muted">Live Player Preview</span>
+                <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-ink border border-border">
+                  {ytEmbedUrl ? (
+                    <iframe
+                      title="YouTube pitch preview"
+                      src={ytEmbedUrl}
+                      className="h-full w-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      key={videoUrl}
+                      src={videoUrl}
+                      poster={thumbUrl}
+                      controls
+                      playsInline
+                      className="h-full w-full object-cover"
+                    />
                   )}
                 </div>
-
-                <div className="bg-ink relative aspect-[9/14] overflow-hidden rounded-2xl">
-                  <video
-                    src={videoUrl}
-                    muted
-                    loop
-                    playsInline
-                    controls
-                    className="size-full object-cover"
-                    aria-label="Uploaded pitch reel preview"
-                  />
-                </div>
               </div>
+            </div>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="bg-primary text-primary-ink rounded-full px-6 py-2.5 text-xs font-bold"
-                >
-                  Continue to Problem Statement →
-                </button>
-              </div>
-            </section>
-          )}
+            <div className="flex justify-end pt-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-dune hover:bg-ink/90 transition-colors"
+              >
+                Continue to Problem & Info →
+              </button>
+            </div>
+          </div>
+        )}
 
-          {/* STEP 2: Problem Statement & Basics */}
-          {step === 2 && (
-            <section
-              aria-labelledby="step2-heading"
-              className="border-line bg-paper-raised space-y-4 rounded-[var(--radius-card)] border p-5"
-            >
-              <div>
-                <h2 id="step2-heading" className="font-display text-lg font-bold">
-                  Step 2 — Define the Real-World Problem It Solves
-                </h2>
-                <p className="text-ink-muted text-xs">
-                  Arrakis indexes your problem statement in pgvector so everyday users find your tool by requirement, not buzzwords.
-                </p>
-              </div>
+        {/* STEP 2: PROBLEM STATEMENT & BASICS */}
+        {step === 2 && (
+          <div className="space-y-5">
+            <div>
+              <h2 className="font-display text-lg font-bold text-ink">
+                Step 2 · Problem Statement & Project Info
+              </h2>
+              <p className="text-xs text-muted mt-0.5">
+                Describe the exact problem your build solves in plain language.
+              </p>
+            </div>
 
-              <div className="space-y-1">
-                <label htmlFor="post-title" className="text-xs font-bold">
-                  Tool Name & 1-Line Headline (required)
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label htmlFor="post-title" className="block text-xs font-bold text-ink">
+                  Project Title
                 </label>
-                <span id="post-title-hint" className="text-ink-muted block text-xs">
-                  Format: ToolName — What it achieves (max 80 characters)
-                </span>
                 <input
                   id="post-title"
-                  name="title"
                   type="text"
                   required
-                  maxLength={80}
+                  placeholder="e.g., ResumeJSON — Instant ATS Parser & Validator"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  aria-describedby="post-title-hint"
-                  className="border-line bg-paper w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
                 />
               </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="post-problem" className="text-xs font-bold">
-                    Problem It Solves (required · indexed for search)
-                  </label>
-                  <span className="text-ink-muted font-mono text-[11px] tabular-nums">
-                    {problemStatement.length}/160
-                  </span>
-                </div>
-                <span id="post-problem-hint" className="text-ink-muted block text-xs">
-                  State the concrete task and outcome in plain language. Avoid vague AI buzzwords.
-                </span>
+              <div className="space-y-1.5">
+                <label htmlFor="post-problem" className="block text-xs font-bold text-ink">
+                  What specific problem does it solve?
+                </label>
                 <textarea
                   id="post-problem"
-                  name="problemStatement"
-                  required
-                  maxLength={160}
                   rows={3}
+                  required
+                  placeholder="e.g., Converts messy multi-column PDF resumes into clean, validated JSON schemas in one click without losing work history."
                   value={problemStatement}
                   onChange={(e) => setProblemStatement(e.target.value)}
-                  aria-describedby="post-problem-hint"
-                  className="border-line bg-paper w-full rounded-xl border px-3.5 py-2.5 text-sm"
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
                 />
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <label htmlFor="post-category" className="text-xs font-bold">
-                    Utility Category
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="post-category" className="block text-xs font-bold text-ink">
+                    Category
                   </label>
                   <select
                     id="post-category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="border-line bg-paper w-full rounded-xl border px-3.5 py-2.5 text-sm font-medium"
+                    className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
                   >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label htmlFor="post-tags" className="text-xs font-bold">
-                    Problem Tags (comma-separated)
+                <div className="space-y-1.5">
+                  <label htmlFor="post-tags" className="block text-xs font-bold text-ink">
+                    Tags (comma-separated)
                   </label>
                   <input
                     id="post-tags"
                     type="text"
-                    value={tagsText}
-                    onChange={(e) => setTagsText(e.target.value)}
-                    placeholder="csv, sql, parser, cli"
-                    className="border-line bg-paper w-full rounded-xl border px-3.5 py-2.5 font-mono text-xs"
+                    placeholder="cli, rust, parser, productivity"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none"
                   />
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-between pt-2">
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="rounded-xl border border-border bg-dune px-4 py-2.5 text-xs font-semibold text-ink"
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-dune hover:bg-ink/90 transition-colors"
+              >
+                Continue to Live Demo Setup →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: LIVE DEMO WIRING & INTERACTIVE INPUT BUILDER */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-display text-lg font-bold text-ink">
+                Step 3 · Configure the Try-It Live Demo
+              </h2>
+              <p className="text-xs text-muted mt-0.5">
+                Let viewers test your project right inside the feed without installing anything.
+              </p>
+            </div>
+
+            {/* Mode Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {(
+                [
+                  { id: "container", label: "Container / CLI", desc: "Docker image" },
+                  { id: "api", label: "API Endpoint", desc: "HTTP JSON endpoint" },
+                  { id: "web", label: "Web App", desc: "Interactive web preview" },
+                  { id: "handoff", label: "Desktop App", desc: "Send link to laptop" },
+                ] as const
+              ).map((m) => (
                 <button
+                  key={m.id}
                   type="button"
-                  onClick={() => setStep(1)}
-                  className="border-line bg-paper rounded-full border px-5 py-2.5 text-xs font-bold"
+                  onClick={() => setDemoMode(m.id)}
+                  className={cn(
+                    "rounded-xl border p-3 text-left transition-colors",
+                    demoMode === m.id
+                      ? "border-ink bg-ink text-dune"
+                      : "border-border bg-dune/50 text-ink hover:border-ink/40"
+                  )}
                 >
-                  ← Back
+                  <span className="block text-xs font-bold">{m.label}</span>
+                  <span
+                    className={cn(
+                      "block text-[11px] mt-0.5",
+                      demoMode === m.id ? "text-dune/75" : "text-muted"
+                    )}
+                  >
+                    {m.desc}
+                  </span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setStep(3)}
-                  className="bg-primary text-primary-ink rounded-full px-6 py-2.5 text-xs font-bold"
-                >
-                  Continue to Sandbox Wiring →
-                </button>
-              </div>
-            </section>
-          )}
+              ))}
+            </div>
 
-          {/* STEP 3: Sandbox Wiring & Auto-Form Builder */}
-          {step === 3 && (
-            <section
-              aria-labelledby="step3-heading"
-              className="border-line bg-paper-raised space-y-4 rounded-[var(--radius-card)] border p-5"
-            >
-              <div>
-                <h2 id="step3-heading" className="font-display text-lg font-bold">
-                  Step 3 — Wire the 1-Tap Sandbox & Auto-Form Builder
-                </h2>
-                <p className="text-ink-muted text-xs">
-                  Pick how users test your project inside the feed. Container mode runs an isolated Docker image with CPU/RAM/TTL limits.
-                </p>
-              </div>
-
-              {/* Demo Mode Radio Cards */}
-              <fieldset>
-                <legend className="text-xs font-bold">Sandbox Execution Mode</legend>
-                <div className="mt-1.5 grid gap-2 sm:grid-cols-4">
-                  {(
-                    [
-                      ["container", "Container Sandbox", "Docker image / Dockerfile"],
-                      ["api", "Live API Proxy", "Edge proxy + 10s timeout"],
-                      ["web", "Web Sandbox", "Isolated <iframe sandbox>"],
-                      ["handoff", "Desktop Handoff", "1-tap Send to Laptop"],
-                    ] as const
-                  ).map(([m, label, sub]) => (
-                    <label
-                      key={m}
-                      className={cn(
-                        "flex cursor-pointer flex-col rounded-2xl border p-3 text-xs transition-colors",
-                        demoMode === m
-                          ? "border-primary bg-primary/5 font-bold"
-                          : "border-line bg-paper",
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="demoMode"
-                        value={m}
-                        checked={demoMode === m}
-                        onChange={() => setDemoMode(m)}
-                        className="sr-only"
-                      />
-                      <span className="font-display text-sm font-bold">{label}</span>
-                      <span className="text-ink-muted mt-0.5 font-mono text-[10px]">{sub}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <label htmlFor="demo-target" className="text-xs font-bold">
-                    {demoMode === "container"
-                      ? "Docker Image Tag (required)"
-                      : "Live Endpoint / Web App URL (required)"}
-                  </label>
-                  <input
-                    id="demo-target"
-                    type="text"
-                    required
-                    value={demoTarget}
-                    onChange={(e) => setDemoTarget(e.target.value)}
-                    placeholder={
-                      demoMode === "container"
-                        ? "arrakis/your-tool:latest"
-                        : "https://your-tool.vercel.app/api/run"
-                    }
-                    className="border-line bg-paper w-full rounded-xl border px-3.5 py-2 font-mono text-xs"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="demo-command" className="text-xs font-bold">
-                    Sample CLI Command / Entrypoint
-                  </label>
-                  <input
-                    id="demo-command"
-                    type="text"
-                    value={sampleCommand}
-                    onChange={(e) => setSampleCommand(e.target.value)}
-                    className="border-line bg-paper w-full rounded-xl border px-3.5 py-2 font-mono text-xs"
-                  />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label htmlFor="demo-target" className="block text-xs font-bold text-ink">
+                  {demoMode === "container"
+                    ? "Container Image"
+                    : demoMode === "api"
+                    ? "API Endpoint URL"
+                    : "Web / Project URL"}
+                </label>
+                <input
+                  id="demo-target"
+                  type="text"
+                  value={demoTarget}
+                  onChange={(e) => setDemoTarget(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+                />
               </div>
 
-              {/* Interactive Auto-Form Schema Builder + Live Preview */}
-              {(demoMode === "container" || demoMode === "api") && (
-                <div className="border-line bg-paper grid gap-4 rounded-2xl border p-4 lg:grid-cols-2">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-display text-sm font-bold">
-                        Zero-Code Form Schema Builder
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={addField}
-                        className="bg-ink text-paper rounded-full px-3 py-1 font-mono text-[11px] font-bold"
-                      >
-                        + Add Field
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      {fields.map((f, idx) => (
-                        <div
-                          key={idx}
-                          className="border-line bg-paper-raised space-y-2 rounded-xl border p-2.5"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              aria-label={`Field ${idx + 1} label`}
-                              value={f.label}
-                              onChange={(e) => updateField(idx, { label: e.target.value })}
-                              placeholder="Field label"
-                              className="border-line bg-paper flex-1 rounded-lg border px-2.5 py-1 text-xs font-semibold"
-                            />
-                            <select
-                              aria-label={`Field ${idx + 1} type`}
-                              value={f.type}
-                              onChange={(e) =>
-                                updateField(idx, {
-                                  type: e.target.value as FormFieldSchema["type"],
-                                })
-                              }
-                              className="border-line bg-paper rounded-lg border px-2 py-1 font-mono text-xs"
-                            >
-                              <option value="text">text</option>
-                              <option value="number">number</option>
-                              <option value="url">url</option>
-                              <option value="boolean">boolean</option>
-                            </select>
-                            <button
-                              type="button"
-                              onClick={() => removeField(idx)}
-                              className="text-alert font-mono text-xs font-bold"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                          <input
-                            type="text"
-                            aria-label={`Field ${idx + 1} default value`}
-                            value={String(f.defaultValue ?? "")}
-                            onChange={(e) => updateField(idx, { defaultValue: e.target.value })}
-                            placeholder="Default sample value for 1-tap trial"
-                            className="border-line bg-paper w-full rounded-lg border px-2.5 py-1 font-mono text-[11px]"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Live Preview of the generated Try-It form */}
-                  <div className="border-line bg-paper-raised flex flex-col justify-between rounded-xl border p-3.5">
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-ink-muted font-mono text-[10px] font-bold uppercase">
-                          Live Tester Overlay Preview
-                        </span>
-                        <span className="bg-sage/15 text-sage rounded-full px-2 py-0.5 font-mono text-[10px] font-bold">
-                          Auto-Generated
-                        </span>
-                      </div>
-                      {fields.map((f, i) => (
-                        <div key={i} className="space-y-1">
-                          <label className="block text-xs font-semibold">{f.label}</label>
-                          {f.type === "boolean" ? (
-                            <input
-                              type="checkbox"
-                              checked={Boolean(f.defaultValue)}
-                              readOnly
-                              className="size-4"
-                            />
-                          ) : (
-                            <input
-                              type="text"
-                              readOnly
-                              value={String(f.defaultValue ?? "")}
-                              className="border-line bg-paper w-full rounded-lg border px-2.5 py-1.5 font-mono text-xs"
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="bg-primary text-primary-ink mt-3 flex h-9 items-center justify-center gap-1.5 rounded-full text-xs font-bold opacity-90">
-                      <IconBolt className="size-3.5" />
-                      Run 1-Tap Container Sandbox
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="border-line bg-paper rounded-full border px-5 py-2.5 text-xs font-bold"
-                >
-                  ← Back
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep(4)}
-                  className="bg-primary text-primary-ink rounded-full px-6 py-2.5 text-xs font-bold"
-                >
-                  Continue to AI Vector Indexing →
-                </button>
+              <div className="space-y-1.5">
+                <label htmlFor="demo-repo" className="block text-xs font-bold text-ink">
+                  GitHub Repository (optional)
+                </label>
+                <input
+                  id="demo-repo"
+                  type="url"
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+                />
               </div>
-            </section>
-          )}
+            </div>
 
-          {/* STEP 4: AI Vector Auto-Indexing & Publish */}
-          {step === 4 && (
-            <section
-              aria-labelledby="step4-heading"
-              className="border-line bg-paper-raised space-y-4 rounded-[var(--radius-card)] border p-5"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Zero-Code Input Builder */}
+            <div className="rounded-2xl border border-border bg-dune/50 p-4 space-y-3.5">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 id="step4-heading" className="font-display text-lg font-bold">
-                    Step 4 — AI Requirement Indexing & Publish
-                  </h2>
-                  <p className="text-ink-muted text-xs">
-                    Whisper + LLM Utility Extractor verifies your problem statement and builds its 16-d pgvector embedding.
+                  <h3 className="font-display text-sm font-bold text-ink">
+                    Interactive Demo Inputs
+                  </h3>
+                  <p className="text-xs text-muted">
+                    Fields shown to users when they click &ldquo;Try Live Demo&rdquo;
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={runAiUtilityIndexer}
-                  disabled={indexing}
-                  className="bg-ink text-paper flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold"
+                  onClick={handleAddField}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-3 py-1.5 text-xs font-semibold text-dune"
                 >
-                  <IconSpark className="size-4" />
-                  {indexing ? "Extracting vector…" : "Re-run AI Indexer"}
+                  <PlusSquareIcon className="size-3.5" />
+                  <span>Add Field</span>
                 </button>
               </div>
 
-              <div className="border-line bg-paper space-y-3 rounded-2xl border p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold">
-                    Extracted Problem Vector (text-embedding-3-small · 16-d preview)
-                  </span>
-                  <span className="text-sage font-mono text-xs font-bold">
-                    ✓ Zero-Buzzword Check Passed
-                  </span>
-                </div>
-
-                {/* Visual 16-d embedding bar representation */}
-                <div className="grid grid-cols-16 items-end gap-1 h-12 pt-2">
-                  {indexedVector.map((v, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-primary/85 rounded-xs"
-                      style={{ height: `${Math.max(18, Math.round(Math.abs(v) * 100))}%` }}
-                      title={`dim[${idx}] = ${v}`}
+              <div className="space-y-2.5">
+                {formSchema.map((field, idx) => (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center rounded-xl border border-border bg-surface p-3"
+                  >
+                    <input
+                      type="text"
+                      aria-label="Field label"
+                      placeholder="Field label"
+                      value={field.label}
+                      onChange={(e) =>
+                        handleUpdateField(idx, {
+                          label: e.target.value,
+                          name: e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, "_")
+                            .replace(/^_|_$/g, ""),
+                        })
+                      }
+                      className="sm:col-span-4 rounded-lg border border-border bg-dune/40 px-2.5 py-1.5 text-xs text-ink"
                     />
-                  ))}
-                </div>
+                    <select
+                      aria-label="Field type"
+                      value={field.type}
+                      onChange={(e) =>
+                        handleUpdateField(idx, {
+                          type: e.target.value as FormFieldSchema["type"],
+                        })
+                      }
+                      className="sm:col-span-3 rounded-lg border border-border bg-dune/40 px-2.5 py-1.5 text-xs text-ink"
+                    >
+                      <option value="text">Text</option>
+                      <option value="number">Number</option>
+                      <option value="url">URL</option>
+                      <option value="json">JSON</option>
+                      <option value="select">Dropdown</option>
+                    </select>
+                    <input
+                      type="text"
+                      aria-label="Default sample value"
+                      placeholder="Default sample value..."
+                      value={String(field.defaultValue ?? "")}
+                      onChange={(e) => handleUpdateField(idx, { defaultValue: e.target.value })}
+                      className="sm:col-span-4 rounded-lg border border-border bg-dune/40 px-2.5 py-1.5 text-xs text-ink"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveField(idx)}
+                      aria-label={`Remove ${field.label}`}
+                      className="sm:col-span-1 flex items-center justify-center rounded-lg p-1.5 text-muted hover:text-crimson"
+                    >
+                      <TrashIcon className="size-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                <div className="space-y-1 pt-1">
-                  <label htmlFor="final-problem-edit" className="text-xs font-bold">
-                    Confirm Indexed Problem Statement
-                  </label>
-                  <textarea
-                    id="final-problem-edit"
-                    rows={2}
-                    value={problemStatement}
-                    onChange={(e) => setProblemStatement(e.target.value)}
-                    className="border-line bg-paper-raised w-full rounded-xl border px-3 py-2 text-xs"
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="rounded-xl border border-border bg-dune px-4 py-2.5 text-xs font-semibold text-ink"
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-dune hover:bg-ink/90 transition-colors"
+              >
+                Review & Publish →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: CLEAN REVIEW & PUBLISH */}
+        {step === 4 && (
+          <form onSubmit={handlePublish} className="space-y-6">
+            <div>
+              <h2 className="font-display text-lg font-bold text-ink">
+                Step 4 · Review & Publish
+              </h2>
+              <p className="text-xs text-muted mt-0.5">
+                Confirm how your project card will appear in the feed.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Video / YouTube Preview */}
+              <div className="lg:col-span-5 rounded-2xl border border-border bg-ink overflow-hidden aspect-[16/10]">
+                {ytEmbedUrl ? (
+                  <iframe
+                    title="YouTube preview"
+                    src={ytEmbedUrl}
+                    className="h-full w-full border-0"
+                    allowFullScreen
                   />
+                ) : (
+                  <video
+                    src={videoUrl}
+                    poster={thumbUrl}
+                    controls
+                    playsInline
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
+
+              {/* Clean Summary Details */}
+              <div className="lg:col-span-7 rounded-2xl border border-border bg-dune/60 p-5 space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-md bg-surface px-2.5 py-0.5 text-xs font-semibold text-ink border border-border">
+                    {category}
+                  </span>
+                  <span className="rounded-md bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent capitalize">
+                    {demoMode} Demo
+                  </span>
+                  {extractYouTubeId(videoUrl) && (
+                    <span className="rounded-md bg-sage-soft px-2.5 py-0.5 text-xs font-semibold text-sage">
+                      YouTube Pitch Linked
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="font-display text-xl font-bold text-ink">
+                    {title.trim() || "Untitled Build"}
+                  </h3>
+                  <p className="text-sm text-muted mt-1">
+                    {problemStatement.trim() ||
+                      "Helps developers automate repetitive workflows directly from the browser."}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-border/80 flex items-center justify-between text-xs text-muted">
+                  <span>Interactive Demo Fields: {formSchema.length}</span>
+                  <span>Ready for instant community testing</span>
                 </div>
               </div>
+            </div>
 
-              <label className="flex items-start gap-2.5 text-xs">
-                <input
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
-                  required
-                  className="mt-0.5 size-4 rounded"
-                />
-                <span>
-                  I confirm this micro-demo runs inside Arrakis&apos;s sandbox constraints (no host mounts, 60s TTL, SSRF-guarded egress).
-                </span>
-              </label>
-
-              {submitError && (
-                <p className="text-alert text-xs font-bold" role="alert">
-                  {submitError}
-                </p>
-              )}
-
-              <div className="flex justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(3)}
-                  className="border-line bg-paper rounded-full border px-5 py-2.5 text-xs font-bold"
-                >
-                  ← Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting || !consent}
-                  className="bg-primary text-primary-ink flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold shadow-sm disabled:opacity-60"
-                >
-                  <IconBolt className="size-4" />
-                  {submitting ? "Publishing to Feed…" : "Publish Utility Tool"}
-                </button>
-              </div>
-            </section>
-          )}
-        </form>
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="rounded-xl border border-border bg-dune px-4 py-2.5 text-xs font-semibold text-ink"
+              >
+                ← Back
+              </button>
+              <button
+                type="submit"
+                disabled={publishing}
+                className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-60 transition-colors shadow-sm"
+              >
+                <SparklesIcon className="size-4" />
+                <span>{publishing ? "Publishing..." : "Publish Build Now"}</span>
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

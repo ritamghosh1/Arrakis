@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "node --watch --experimental-strip-types src/index.ts",
     "start": "node --experimental-strip-types src/index.ts",
+    "test": "node --test --experimental-strip-types src/scoring.test.ts",
+    "rebuild-from-events": "node --experimental-strip-types -e \"import('./src/engine.ts').then(m => console.log('[scoring:rebuild]', m.defaultScoringLedger.rebuildFromEvents()))\"",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "build": "tsc --noEmit"
