@@ -22,17 +22,17 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 
 ### A1. Design foundation (M0–M1)
 - [x] Run `ui-skills-root`; generate `DESIGN.md` via `create-design-md` (palette: dune/ember/ink/sage, type scale, spacing, radii, motion tokens)
-- [ ] Original brand: name lockup, icon set (own/OSS licensed — **not** Instagram assets), favicon, OG image
+- [x] Original brand: name lockup, icon set (own/OSS licensed — **not** Instagram assets), favicon, OG image
 - [x] Tailwind config with tokens; z-index scale; `h-dvh`, safe-area utilities
-- [ ] Base components: Button, IconButton (aria-label), Chip, Avatar, Badge, Skeleton, Toast, Sheet(`<dialog>`), Popover, Tabs
+- [x] Base components: Button, IconButton (aria-label), Chip, Avatar, Badge, Skeleton, Toast, Sheet(`<dialog>`), Popover, Tabs
 - [x] Run `modern-web-guidance search` for each feature below before coding; note guide IDs in PR
 
 ### A2. App shell & navigation
 - [x] Bottom nav (Home · Explore · Create · Ranks · Me) → left rail ≥1024px
 - [x] Route structure: `/`, `/explore`, `/create`, `/ranks`, `/u/[handle]`, `/p/[id]`
-- [ ] View Transitions between tabs & feed→post (`same-document-transitions` / `cross-document-transitions`)
+- [x] View Transitions between tabs & feed→post (`same-document-transitions` / `cross-document-transitions`)
 - [x] Keyboard shortcuts (`j/k/t/u//`) + focus management
-- [ ] PWA manifest, install prompt, offline shell (cut-list #3)
+- [x] PWA manifest, install prompt, offline shell (cut-list #3)
 
 ### A3. Home feed (recommended)
 - [x] Snap-scroll reel container (`scroll-snap-state-sync`) + IntersectionObserver play/pause/preload
@@ -49,16 +49,16 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 - [x] Problem-first search bar with debounced query + recent searches
 - [x] 🔗 Result cards with similarity "why" label
 - [x] Filters & sort (mode, category, Verified only; Trending/New/Most-tried)
-- [ ] Trending problem chips; empty-results suggestion state
+- [x] Trending problem chips; empty-results suggestion state
 
 ### A5. Try-It overlay (UI) — 🔗 Dev B sandbox
 - [x] Bottom-sheet `<dialog>` (`dialog`, `light-dismiss-a-dialog`, `prevent-page-scroll-under-modal-dialog`)
 - [x] Auto-generated form from `formSchema` (validation after interaction)
 - [x] SSE terminal component (ANSI-safe render, auto-scroll, copy, 1 MB cap)
-- [ ] Web-mode sandboxed iframe viewer + "open on laptop" button
+- [x] Web-mode sandboxed iframe viewer + "open on laptop" button
 - [x] State machine UI: queued(position) → starting → running → done/timeout/rate-limited/failed(+retry)
-- [ ] 3-tap micro-review + XP toast → `POST /reviews`
-- [ ] Health Card (p50/p95 latency, uptime %, crash rate) on post detail
+- [x] 3-tap micro-review + XP toast → `POST /reviews`
+- [x] Health Card (p50/p95 latency, uptime %, crash rate) on post detail
 
 ### A6. Share
 - [x] Share sheet: Web Share API (feature-detect) → copy link, QR, email, "Send to laptop"
@@ -66,30 +66,30 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 - [x] Emit `share` events
 
 ### A7. Upload / Create form
-- [ ] Step 1 Pitch video: drag-drop/record, ≤120 s check, type/size validation, preview, progress (signed upload)
-- [ ] Step 2 Basics: title, **problem it solves** (required), category, tags
-- [ ] Step 3 Demo wiring: mode radio (URL/API/Container/CLI), URL validation, **form-schema builder** with live preview
-- [ ] Step 4 Review & publish: AI-extracted statement (editable), consent, submit, success + share CTA
-- [ ] Validation UX per `validate-input-after-interaction` (`:user-invalid`), proper `autocomplete/inputmode/type`
-- [ ] Draft autosave (IndexedDB), accessible error summary
-- [ ] `POST /posts` + 🔗 indexing status polling ("Indexing…" → prefilled)
+- [x] Step 1 Pitch video: drag-drop/record, ≤120 s check, type/size validation, preview, progress (signed upload)
+- [x] Step 2 Basics: title, **problem it solves** (required), category, tags
+- [x] Step 3 Demo wiring: mode radio (URL/API/Container/CLI), URL validation, **form-schema builder** with live preview
+- [x] Step 4 Review & publish: AI-extracted statement (editable), consent, submit, success + share CTA
+- [x] Validation UX per `validate-input-after-interaction` (`:user-invalid`), proper `autocomplete/inputmode/type`
+- [x] Draft autosave (IndexedDB), accessible error summary
+- [x] `POST /posts` + 🔗 indexing status polling ("Indexing…" → prefilled)
 
 ### A8. Profile
-- [ ] Header (avatar, handle, role, bio, counts, badges, XP/rank)
-- [ ] 🔗 Follow/Following button (optimistic) + followers/following lists
-- [ ] Tabs: Projects (project shelf w/ telemetry) · Tried · Reviews
-- [ ] Edit profile; builder dashboard (tries, conversions, feedback inbox)
+- [x] Header (avatar, handle, role, bio, counts, badges, XP/rank)
+- [x] 🔗 Follow/Following button (optimistic) + followers/following lists
+- [x] Tabs: Projects (project shelf w/ telemetry) · Tried · Reviews
+- [x] Edit profile; builder dashboard (tries, conversions, feedback inbox)
 
 ### A9. Ranking & Leaderboard (`services/scoring`)
-- [ ] Implement `PostScore` (weighted votes 3×, trialRate, quality, decay) + unit tests (golden cases)
+- [x] Implement `PostScore` (weighted votes 3×, trialRate, quality, decay) + unit tests (golden cases)
 - [ ] Anti-gaming: ignore self-events, one vote/user/post, require completed run for reviews, IP/device clustering discount, mutual-vote ring dampening
-- [ ] Builder score + Verified Utility badge (>85% uptime, ≥20 runs)
-- [ ] Tester XP engine (try +10, review +25, first-25 +100, bug confirmed +50), levels, badges
+- [x] Builder score + Verified Utility badge (>85% uptime, ≥20 runs)
+- [x] Tester XP engine (try +10, review +25, first-25 +100, bug confirmed +50), levels, badges
 - [ ] Event consumer (Redis stream/poll) with idempotent incremental updates + `rebuild-from-events`
 - [ ] Redis ZSET leaderboards (builders/testers/trending × periods) + daily snapshot for ▲▼ deltas
-- [ ] `GET /leaderboard`, `GET /users/:id/profile` (rank, XP, badges)
-- [ ] Leaderboard UI: tabs, period filter, podium, rows with delta, "why this rank" popover, pinned "You" row, `aria-live`
-- [ ] Badge gallery component + XP/level-up toast
+- [x] `GET /leaderboard`, `GET /users/:id/profile` (rank, XP, badges)
+- [x] Leaderboard UI: tabs, period filter, podium, rows with delta, "why this rank" popover, pinned "You" row, `aria-live`
+- [x] Badge gallery component + XP/level-up toast
 
 ### A10. Quality (M4)
 - [ ] `fixing-accessibility` audit on every screen; fix findings

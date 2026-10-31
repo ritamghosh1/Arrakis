@@ -20,17 +20,22 @@ typography:
     lineHeight: 32px
     fontWeight: 700
   body:
-    fontFamily: system-ui
+    fontFamily: Plus Jakarta Sans
     fontSize: 15px
     lineHeight: 22px
     fontWeight: 400
   caption:
-    fontFamily: system-ui
+    fontFamily: Plus Jakarta Sans
     fontSize: 12px
     lineHeight: 16px
     fontWeight: 500
+  mono:
+    fontFamily: JetBrains Mono
+    fontSize: 12px
+    lineHeight: 18px
+    fontWeight: 500
 rounded:
-  base: 14px
+  base: 16px
   pill: 999px
 spacing:
   base: 4px
@@ -42,11 +47,11 @@ Arrakis is a short-form feed for indie and student projects. The interface borro
 
 ## Colors
 
-One accent (`primary` (ember orange)) per view, reserved for the Try it action and the active navigation item. `sage` signals live-demo health only. Reel overlays use solid translucent `ink` panels, never gradients. Text on `primary` (ember orange) uses `primary-ink`.
+One accent (`primary`) per view, reserved for the Try it action and the active navigation item. `sage` signals live-demo health only. Reel overlays use solid translucent `ink` panels, never gradients. Text on `primary` uses `primary-ink`.
 
 ## Typography
 
-`display` is for screen titles and the lockup; everything else is `body` or `caption`. Numeric data (tries, uptime, rank, XP) uses tabular figures. Headings use balanced wrapping, paragraphs use pretty wrapping.
+`display` is for screen titles and the lockup; `body` and `caption` handle interface copy; `mono` is reserved for container telemetry, latency readouts, command snippets and live SSE terminal output. Numeric data (tries, uptime, rank, XP) uses tabular figures. Headings use balanced wrapping, paragraphs use pretty wrapping.
 
 ## Layout
 
@@ -63,7 +68,7 @@ Cards and sheets use `rounded.base`; chips, segmented controls and avatars use `
 ## Components
 
 - **Reason chip:** every feed card shows why it was recommended (followed builder, taste match, cold-start spotlight, trending). It is text-first and links to the referenced builder when one exists.
-- **Try it dock:** the single `primary` (ember orange) filled button on the card, always reachable with the thumb.
+- **Try it dock:** the single `primary` filled button on the card, always reachable with the thumb.
 - **Sheets:** use native `<dialog>` opened as a modal, with Esc and outside-click dismissal.
 
 ## Do's and Don'ts

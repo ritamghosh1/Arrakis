@@ -1,13 +1,7 @@
-import { ComingSoon } from "@/components/coming-soon";
+import { CreatePostForm } from "@/components/create-post-form";
 
-export const metadata = { title: "Create" };
+export const metadata = { title: "Publish Tool" };
 
 export default function CreatePage() {
-  return (
-    <ComingSoon
-      title="Post a demo"
-      blurb="The four-step upload form (pitch video, problem statement, demo wiring, publish) is the next milestone."
-      cta={{ href: "/", label: "Back to Home" }}
-    />
-  );
+  return <CreatePostForm />;
 }
