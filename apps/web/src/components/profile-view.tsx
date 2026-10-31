@@ -10,6 +10,7 @@ import {
   ShareIcon,
   SparklesIcon,
   TerminalIcon,
+  TrashIcon,
   VerifiedIcon,
 } from "./icons";
 import { ShareSheet } from "./share-sheet";
@@ -51,6 +52,8 @@ const BADGE_INFO: Record<BadgeId, { label: string; description: string }> = {
 
 export function ProfileView({ profile, followers, following }: ProfileViewProps) {
   const [user, setUser] = useState<User>(profile.user);
+  const [projects, setProjects] = useState<Post[]>(profile.projects);
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState<boolean>(profile.isFollowing);
   const [followerCount, setFollowerCount] = useState<number>(profile.user.followersCount);
   const [activeTab, setActiveTab] = useState<"projects" | "tried" | "reviews">("projects");
@@ -130,6 +133,28 @@ export function ProfileView({ profile, followers, following }: ProfileViewProps)
       cofounderOpen: editCofounder,
     }));
     setEditingProfile(false);
+  }
+
+  async function handleDeletePost(post: Post) {
+    const ok = window.confirm(
+      `Delete "${post.title}"?\n\nThis will permanently remove it from your profile, the live feed, and standings.`
+    );
+    if (!ok) return;
+
+    setDeletingPostId(post.id);
+    try {
+      const res = await fetch(`/api/posts?id=${encodeURIComponent(post.id)}&authorId=${encodeURIComponent(user.id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete post");
+      }
+      setProjects((prev) => prev.filter((p) => p.id !== post.id));
+    } catch (err: any) {
+      alert(err?.message || "Could not delete this build.");
+    } finally {
+      setDeletingPostId(null);
+    }
   }
 
   const modalUsers = networkModal === "followers" ? followers : following;
@@ -244,7 +269,7 @@ export function ProfileView({ profile, followers, following }: ProfileViewProps)
 
           <div className="rounded-xl border border-border bg-dune/60 p-3.5">
             <span className="block font-display text-xl font-bold text-ink">
-              {profile.projects.length}
+              {projects.length}
             </span>
             <span className="block text-xs text-muted mt-0.5">Published Builds</span>
           </div>
@@ -282,7 +307,7 @@ export function ProfileView({ profile, followers, following }: ProfileViewProps)
       <div className="flex items-center gap-2 border-b border-border pb-3">
         {(
           [
-            { id: "projects", label: `Projects (${profile.projects.length})` },
+            { id: "projects", label: `Projects (${projects.length})` },
             { id: "tried", label: `Tried Demos (${profile.triedPosts.length})` },
             { id: "reviews", label: `Reviews (${profile.recentReviews.length})` },
           ] as const
@@ -306,60 +331,93 @@ export function ProfileView({ profile, followers, following }: ProfileViewProps)
 
       {/* TAB 1: PUBLISHED PROJECTS */}
       {activeTab === "projects" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {profile.projects.map((post) => (
-            <article
-              key={post.id}
-              className="rounded-2xl border border-border bg-surface overflow-hidden shadow-sm flex flex-col justify-between"
-            >
-              <div>
-                <Link href={`/p/${post.id}`} className="block relative aspect-[16/9] bg-ink">
-                  <img
-                    src={post.thumbUrl}
-                    alt={post.title}
-                    className="h-full w-full object-cover opacity-90 hover:opacity-100 transition-opacity"
-                  />
-                  <span className="absolute top-3 left-3 rounded-lg bg-ink/80 px-2.5 py-1 text-[11px] font-semibold text-dune">
-                    {post.category}
-                  </span>
-                </Link>
-
-                <div className="p-5 space-y-3">
-                  <Link
-                    href={`/p/${post.id}`}
-                    className="block font-display text-lg font-bold text-ink hover:text-accent transition-colors"
-                  >
-                    {post.title}
+        projects.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center space-y-3">
+            <p className="font-display text-base font-bold text-ink">No published builds yet</p>
+            <p className="text-xs text-muted max-w-sm mx-auto">
+              Ready to ship? Publish your interactive CLI tool, container demo, or web utility.
+            </p>
+            {isOwnProfile && (
+              <Link
+                href="/create"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-semibold text-white hover:bg-accent-hover transition-colors mt-2"
+              >
+                <span>Publish a Build</span>
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {projects.map((post) => (
+              <article
+                key={post.id}
+                className="rounded-2xl border border-border bg-surface overflow-hidden shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  <Link href={`/p/${post.id}`} className="block relative aspect-[16/9] bg-ink">
+                    <img
+                      src={post.thumbUrl}
+                      alt={post.title}
+                      className="h-full w-full object-cover opacity-90 hover:opacity-100 transition-opacity"
+                    />
+                    <span className="absolute top-3 left-3 rounded-lg bg-ink/80 px-2.5 py-1 text-[11px] font-semibold text-dune">
+                      {post.category}
+                    </span>
                   </Link>
-                  <p className="text-xs text-muted line-clamp-2 leading-relaxed">
-                    {post.problemStatement}
-                  </p>
+
+                  <div className="p-5 space-y-3">
+                    <Link
+                      href={`/p/${post.id}`}
+                      className="block font-display text-lg font-bold text-ink hover:text-accent transition-colors"
+                    >
+                      {post.title}
+                    </Link>
+                    <p className="text-xs text-muted line-clamp-2 leading-relaxed">
+                      {post.problemStatement}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="px-5 pb-5 pt-3 border-t border-border flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveTryPost(post)}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-semibold text-white hover:bg-accent-hover transition-colors"
-                >
-                  <TerminalIcon className="size-3.5" />
-                  <span>Try Live Demo</span>
-                </button>
+                <div className="px-5 pb-5 pt-3 border-t border-border flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTryPost(post)}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-semibold text-white hover:bg-accent-hover transition-colors"
+                  >
+                    <TerminalIcon className="size-3.5" />
+                    <span>Try Live Demo</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setActiveSharePost(post)}
-                  aria-label={`Share ${post.title}`}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-dune px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-border/50 transition-colors"
-                >
-                  <ShareIcon className="size-3.5" />
-                  <span>Share</span>
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSharePost(post)}
+                    aria-label={`Share ${post.title}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-dune px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-border/50 transition-colors"
+                  >
+                    <ShareIcon className="size-3.5" />
+                    <span>Share</span>
+                  </button>
+
+                  {isOwnProfile && (
+                    <button
+                      type="button"
+                      disabled={deletingPostId === post.id}
+                      onClick={() => handleDeletePost(post)}
+                      aria-label={`Delete ${post.title}`}
+                      title="Delete this build permanently"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 dark:border-red-950/40 bg-red-50 dark:bg-red-950/20 px-3.5 py-2.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50"
+                    >
+                      <TrashIcon className="size-3.5" />
+                      <span className="hidden sm:inline">
+                        {deletingPostId === post.id ? "Deleting..." : "Delete"}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )
       )}
 
       {/* TAB 2: TRIED DEMOS */}

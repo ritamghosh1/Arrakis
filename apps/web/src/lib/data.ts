@@ -221,6 +221,16 @@ export function createRuntimePost(input: UploadPostInput): Post {
   return post;
 }
 
+export function deleteRuntimePost(id: string): boolean {
+  const idx = runtimePosts.findIndex((p) => p.id === id);
+  if (idx !== -1) {
+    runtimePosts.splice(idx, 1);
+    delete SEED_POST_VECTORS[id];
+    return true;
+  }
+  return false;
+}
+
 export function getUserIntentVector(userId: string): number[] | null {
   return runtimeUserVectors.get(userId) ?? SEED_USER_VECTORS[userId] ?? null;
 }

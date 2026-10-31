@@ -242,6 +242,19 @@ describe("A10 — Quality, Accessibility, Motion Performance & E2E Judge Loop", 
     assert.equal(profileRes.status, 200);
     const profileHtml = await profileRes.text();
     assert.ok(profileHtml.includes("EnvGuard CLI"), "Published build must appear on /u/ritam profile");
+
+    // Verify author can delete their build via DELETE /api/posts and it disappears from profile
+    const deleteRes = await fetch(`${BASE_URL}/api/posts?id=${encodeURIComponent(post.id)}&authorId=usr_ritam`, {
+      method: "DELETE",
+    });
+    assert.equal(deleteRes.status, 200);
+    const deleteJson = (await deleteRes.json()) as { ok: boolean; deleted: boolean };
+    assert.equal(deleteJson.ok, true);
+
+    const postDeleteProfile = await fetch(`${BASE_URL}/u/ritam`);
+    assert.equal(postDeleteProfile.status, 200);
+    const postDeleteHtml = await postDeleteProfile.text();
+    assert.ok(!postDeleteHtml.includes(post.id), "Deleted build must no longer appear on profile");
   });
 
   it("5. Recommender System E2E: Auto-Embedding (16-d pgvector), Following Feed, Follow Toggle, 80/20 Cold-Start Quota, and Hybrid Global Search", async () => {

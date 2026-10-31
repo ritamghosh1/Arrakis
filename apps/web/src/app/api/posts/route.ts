@@ -4,8 +4,8 @@ import {
   computeSimHash64,
   type UploadPostInput,
 } from "@arrakis/contracts";
-import { createRuntimePost } from "@/lib/data";
-import { USE_DB, dbInsertPost } from "@/lib/db";
+import { createRuntimePost, deleteRuntimePost } from "@/lib/data";
+import { USE_DB, dbDeletePost, dbInsertPost } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -65,5 +65,48 @@ export async function POST(req: NextRequest) {
     );
   } catch {
     return NextResponse.json({ error: "invalid_post_payload" }, { status: 400 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    let id = searchParams.get("id");
+    let authorId = searchParams.get("authorId") || undefined;
+
+    if (!id) {
+      try {
+        const body = (await req.json()) as { id?: string; authorId?: string };
+        id = body.id ?? null;
+        if (body.authorId) authorId = body.authorId;
+      } catch {
+        // Query param only
+      }
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: "Post ID is required" }, { status: 400 });
+    }
+
+    const inMemoryDeleted = deleteRuntimePost(id);
+    let dbDeleted = false;
+
+    if (USE_DB) {
+      try {
+        dbDeleted = await dbDeletePost(id, authorId);
+      } catch (err) {
+        console.error("Failed to delete post from db:", err);
+      }
+    }
+
+    return NextResponse.json({
+      ok: true,
+      id,
+      deleted: inMemoryDeleted || dbDeleted,
+      inMemoryDeleted,
+      dbDeleted,
+    });
+  } catch (err) {
+    return NextResponse.json({ error: "failed_to_delete_post" }, { status: 500 });
   }
 }

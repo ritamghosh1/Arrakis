@@ -280,6 +280,15 @@ export async function dbInsertPost(post: Post): Promise<DbInsertPostResult> {
 
 export const dbCreatePost = dbInsertPost;
 
+export async function dbDeletePost(postId: string, authorId?: string): Promise<boolean> {
+  const query = authorId
+    ? "DELETE FROM posts WHERE id = $1 AND author_id = $2 RETURNING id"
+    : "DELETE FROM posts WHERE id = $1 RETURNING id";
+  const params = authorId ? [postId, authorId] : [postId];
+  const { rowCount } = await pool().query(query, params);
+  return (rowCount ?? 0) > 0;
+}
+
 export async function dbGetPostsByAuthor(authorId: string): Promise<Post[]> {
   const { rows } = await pool().query(
     `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
