@@ -19,6 +19,8 @@ jobs:
         run: npm install
       - name: Typecheck all workspaces
         run: npm run typecheck
+      - name: Build web app
+        run: npm run build --workspace @arrakis/web
       - name: Verify deterministic seed generator
         run: npm run seed
 

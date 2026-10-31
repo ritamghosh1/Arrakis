@@ -21,49 +21,49 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 ## 👤 DEV A (Ritam) — UI + Ranking & Leaderboard
 
 ### A1. Design foundation (M0–M1)
-- [ ] Run `ui-skills-root`; generate `DESIGN.md` via `create-design-md` (palette: dune/ember/ink/sage, type scale, spacing, radii, motion tokens)
+- [x] Run `ui-skills-root`; generate `DESIGN.md` via `create-design-md` (palette: dune/ember/ink/sage, type scale, spacing, radii, motion tokens)
 - [ ] Original brand: name lockup, icon set (own/OSS licensed — **not** Instagram assets), favicon, OG image
-- [ ] Tailwind config with tokens; z-index scale; `h-dvh`, safe-area utilities
+- [x] Tailwind config with tokens; z-index scale; `h-dvh`, safe-area utilities
 - [ ] Base components: Button, IconButton (aria-label), Chip, Avatar, Badge, Skeleton, Toast, Sheet(`<dialog>`), Popover, Tabs
-- [ ] Run `modern-web-guidance search` for each feature below before coding; note guide IDs in PR
+- [x] Run `modern-web-guidance search` for each feature below before coding; note guide IDs in PR
 
 ### A2. App shell & navigation
-- [ ] Bottom nav (Home · Explore · Create · Ranks · Me) → left rail ≥1024px
-- [ ] Route structure: `/`, `/explore`, `/create`, `/ranks`, `/u/[handle]`, `/p/[id]`
+- [x] Bottom nav (Home · Explore · Create · Ranks · Me) → left rail ≥1024px
+- [x] Route structure: `/`, `/explore`, `/create`, `/ranks`, `/u/[handle]`, `/p/[id]`
 - [ ] View Transitions between tabs & feed→post (`same-document-transitions` / `cross-document-transitions`)
-- [ ] Keyboard shortcuts (`j/k/t/u//`) + focus management
+- [x] Keyboard shortcuts (`j/k/t/u//`) + focus management
 - [ ] PWA manifest, install prompt, offline shell (cut-list #3)
 
 ### A3. Home feed (recommended)
-- [ ] Snap-scroll reel container (`scroll-snap-state-sync`) + IntersectionObserver play/pause/preload
-- [ ] `lazy-load-video-and-audio`: poster-first, release off-screen media
-- [ ] Post card: video, problem-statement card, author row, action rail (Upvote · Comment · Save · Share), **Try it** dock
-- [ ] 🔗 **Reason chip** rendering from `FeedItem.reason` ("Recommended because you follow @x", taste, cold-start, trending)
-- [ ] "For you" ↔ "Following" toggle
-- [ ] "Fresh Builds" rail with uptime ring
-- [ ] Infinite pagination (cursor), pull-to-refresh, skeletons, error/empty states
-- [ ] Optimistic upvote/save/follow with rollback
-- [ ] Batched `POST /events` (view dwell, try, share) with `sendBeacon`
+- [x] Snap-scroll reel container (`scroll-snap-state-sync`) + IntersectionObserver play/pause/preload
+- [x] `lazy-load-video-and-audio`: poster-first, release off-screen media
+- [x] Post card: video, problem-statement card, author row, action rail (Upvote · Comment · Save · Share), **Try it** dock
+- [x] 🔗 **Reason chip** rendering from `FeedItem.reason` ("Recommended because you follow @x", taste, cold-start, trending)
+- [x] "For you" ↔ "Following" toggle
+- [x] "Fresh Builds" rail with uptime ring
+- [x] Infinite pagination (cursor), pull-to-refresh, skeletons, error/empty states
+- [x] Optimistic upvote/save/follow with rollback
+- [x] Batched `POST /events` (view dwell, try, share) with `sendBeacon`
 
 ### A4. Global feed / Explore
-- [ ] Problem-first search bar with debounced query + recent searches
-- [ ] 🔗 Result cards with similarity "why" label
-- [ ] Filters & sort (mode, category, Verified only; Trending/New/Most-tried)
+- [x] Problem-first search bar with debounced query + recent searches
+- [x] 🔗 Result cards with similarity "why" label
+- [x] Filters & sort (mode, category, Verified only; Trending/New/Most-tried)
 - [ ] Trending problem chips; empty-results suggestion state
 
 ### A5. Try-It overlay (UI) — 🔗 Dev B sandbox
-- [ ] Bottom-sheet `<dialog>` (`dialog`, `light-dismiss-a-dialog`, `prevent-page-scroll-under-modal-dialog`)
-- [ ] Auto-generated form from `formSchema` (validation after interaction)
-- [ ] SSE terminal component (ANSI-safe render, auto-scroll, copy, 1 MB cap)
+- [x] Bottom-sheet `<dialog>` (`dialog`, `light-dismiss-a-dialog`, `prevent-page-scroll-under-modal-dialog`)
+- [x] Auto-generated form from `formSchema` (validation after interaction)
+- [x] SSE terminal component (ANSI-safe render, auto-scroll, copy, 1 MB cap)
 - [ ] Web-mode sandboxed iframe viewer + "open on laptop" button
-- [ ] State machine UI: queued(position) → starting → running → done/timeout/rate-limited/failed(+retry)
+- [x] State machine UI: queued(position) → starting → running → done/timeout/rate-limited/failed(+retry)
 - [ ] 3-tap micro-review + XP toast → `POST /reviews`
 - [ ] Health Card (p50/p95 latency, uptime %, crash rate) on post detail
 
 ### A6. Share
-- [ ] Share sheet: Web Share API (feature-detect) → copy link, QR, email, "Send to laptop"
-- [ ] Deep-link page `/p/[id]` with metadata/OG/JSON-LD (`fixing-metadata`)
-- [ ] Emit `share` events
+- [x] Share sheet: Web Share API (feature-detect) → copy link, QR, email, "Send to laptop"
+- [x] Deep-link page `/p/[id]` with metadata/OG/JSON-LD (`fixing-metadata`)
+- [x] Emit `share` events
 
 ### A7. Upload / Create form
 - [ ] Step 1 Pitch video: drag-drop/record, ≤120 s check, type/size validation, preview, progress (signed upload)

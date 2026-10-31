@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/* Arrakis design tokens — mirrors /DESIGN.md */
+@theme {
+  --color-paper: #faf4ea;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunken: #efe6d6;
+  --color-ink: #1b1612;
+  --color-ink-muted: #5c5247;
+  --color-line: #ddd0bb;
+  --color-primary: #c2410c;
+  --color-primary-ink: #ffffff;
+  --color-sage: #2f7d4f;
+  --color-alert: #b42318;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --radius-card: 0.875rem;
+}
+
+/* Fixed z-index scale (no arbitrary z-* values) */
+@utility z-base {
+  z-index: 0;
+}
+@utility z-feed {
+  z-index: 10;
+}
+@utility z-nav {
+  z-index: 20;
+}
+@utility z-sheet {
+  z-index: 30;
+}
+@utility z-toast {
+  z-index: 40;
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* Native <dialog> bottom sheet (modern-web-guidance: dialog, prevent-page-scroll-under-modal-dialog) */
+dialog.sheet {
+  margin: auto auto 0;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 88dvh;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+@media (min-width: 640px) {
+  dialog.sheet {
+    margin: auto;
+    border-radius: var(--radius-card);
+  }
+}
+dialog.sheet:modal {
+  overscroll-behavior: contain;
+}
+dialog.sheet::backdrop {
+  background: rgb(27 22 18 / 0.55);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+dialog.sheet[open] {
+  animation: sheet-in 160ms ease-out;
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Validation feedback only after the user has interacted (:user-invalid) */
+input:user-invalid,
+textarea:user-invalid,
+select:user-invalid {
+  border-color: var(--color-alert);
+}
+
+/* Feed scroller */
+.feed-scroller {
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+.feed-scroller::-webkit-scrollbar {
+  display: none;
+}
+.feed-item {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
