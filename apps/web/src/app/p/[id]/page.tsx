@@ -66,9 +66,19 @@ export default async function PostPage({ params }: Props) {
           >
             ← Back to Feed
           </Link>
-          <span className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink">
-            {post.category}
-          </span>
+          <div className="flex items-center gap-2">
+            {post.hackathonName && (
+              <Link
+                href="/hackathons"
+                className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-700 hover:bg-amber-500/20 transition-colors"
+              >
+                🏆 Built at {post.hackathonName}
+              </Link>
+            )}
+            <span className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink">
+              {post.category}
+            </span>
+          </div>
         </div>
 
         <header className="rounded-2xl border border-border bg-surface p-5 sm:p-7 shadow-sm space-y-5">

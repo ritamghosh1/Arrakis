@@ -135,6 +135,21 @@ export interface Post {
   popularityScore?: number;
   usabilityScore?: number;
   dailyLeaderboardScore?: number;
+  hackathonId?: string;
+  hackathonName?: string;
+  createdAt: string;
+}
+
+export interface Hackathon {
+  id: string;
+  slug: string;
+  name: string;
+  tag: string;
+  description: string;
+  organizerName: string;
+  websiteUrl?: string;
+  bannerUrl?: string;
+  projectCount?: number;
   createdAt: string;
 }
 
@@ -290,4 +305,6 @@ export interface UploadPostInput {
   durationSec: number;
   demo: DemoConfig;
   tags: string[];
+  hackathonId?: string;
+  hackathonName?: string;
 }

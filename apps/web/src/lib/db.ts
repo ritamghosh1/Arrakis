@@ -20,6 +20,7 @@ import {
   type RunTier,
   type TelemetryPayload,
   type User,
+  type Hackathon,
 } from "@arrakis/contracts";
 
 const SEED_POST_ID_LIST = SEED_POSTS.map((p) => p.id);
@@ -31,11 +32,14 @@ const globalForPg = globalThis as unknown as { __arrakisPool?: pg.Pool };
 
 export function pool(): pg.Pool {
   if (!globalForPg.__arrakisPool) {
+    const connStr =
+      process.env.DATABASE_URL ?? "postgresql://arrakis:arrakis_dev@localhost:5432/arrakis";
+    const isSsl = connStr.includes("sslmode=require") || connStr.includes("neon.tech");
     globalForPg.__arrakisPool = new pg.Pool({
-      connectionString:
-        process.env.DATABASE_URL ?? "postgresql://arrakis:arrakis_dev@localhost:5432/arrakis",
+      connectionString: connStr,
       max: 10,
       connectionTimeoutMillis: 5000,
+      ssl: isSsl ? { rejectUnauthorized: false } : undefined,
     });
   }
   return globalForPg.__arrakisPool;
@@ -111,6 +115,8 @@ function rowToPost(r: Row): Post {
     popularityScore: Number(Number(r.popularity_score).toFixed(2)),
     usabilityScore: Number(Number(r.usability_score).toFixed(2)),
     dailyLeaderboardScore: Number(Number(r.daily_leaderboard_score).toFixed(4)),
+    hackathonId: r.hackathon_id ?? undefined,
+    hackathonName: r.hackathon_name ?? undefined,
     createdAt: new Date(r.created_at).toISOString(),
   };
 }
@@ -207,14 +213,14 @@ export async function dbInsertPost(post: Post): Promise<DbInsertPostResult> {
       impressions, tries_count, upvotes_count, trial_upvotes_count, comments_count,
       uptime_pct, p50_latency_ms, p95_latency_ms, crash_rate, post_score,
       project_type, proxy_success_rate, popularity_score, usability_score, daily_leaderboard_score,
-      intent_embedding, created_at
+      intent_embedding, hackathon_id, hackathon_name, created_at
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7,
       $8, $9, $10, $11::jsonb, $12::jsonb, $13,
       $14, $15, $16, $17, $18,
       $19, $20, $21, $22, $23,
       $24, $25, $26, $27, $28,
-      $29::vector, NOW()
+      $29::vector, $30, $31, NOW()
     ) ON CONFLICT (id) DO UPDATE SET
       title = EXCLUDED.title,
       problem_statement = EXCLUDED.problem_statement,
@@ -228,6 +234,8 @@ export async function dbInsertPost(post: Post): Promise<DbInsertPostResult> {
       tags = EXCLUDED.tags,
       project_type = EXCLUDED.project_type,
       intent_embedding = EXCLUDED.intent_embedding,
+      hackathon_id = COALESCE(EXCLUDED.hackathon_id, posts.hackathon_id),
+      hackathon_name = COALESCE(EXCLUDED.hackathon_name, posts.hackathon_name),
       daily_leaderboard_score = GREATEST(posts.daily_leaderboard_score, EXCLUDED.daily_leaderboard_score),
       created_at = NOW()`,
     [
@@ -260,8 +268,23 @@ export async function dbInsertPost(post: Post): Promise<DbInsertPostResult> {
       2.15,
       1.65,
       vecStr,
+      post.hackathonId ?? null,
+      post.hackathonName ?? null,
     ],
   );
+
+  if (post.hackathonId) {
+    try {
+      await pool().query(
+        `INSERT INTO hackathon_projects (hackathon_id, project_id)
+         VALUES ($1, $2)
+         ON CONFLICT (hackathon_id, project_id) DO NOTHING`,
+        [post.hackathonId, post.id],
+      );
+    } catch {
+      // Ignore relation conflict if table is not yet migrated in some environments
+    }
+  }
 
   await pool().query(
     `INSERT INTO post_embeddings (post_id, embedding) VALUES ($1, $2::vector)
@@ -710,6 +733,147 @@ export async function dbLeaderboard(
     };
   });
   return { type, period, updatedAt: new Date().toISOString(), rows: out };
+}
+
+export async function dbGetHackathons(): Promise<Hackathon[]> {
+  try {
+    const { rows } = await pool().query(`
+      SELECT h.*, COUNT(hp.project_id)::int AS project_count
+      FROM hackathons h
+      LEFT JOIN hackathon_projects hp ON hp.hackathon_id = h.id
+      GROUP BY h.id
+      ORDER BY h.created_at DESC
+    `);
+    return rows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      tag: r.tag,
+      description: r.description ?? "",
+      organizerName: r.organizer_name ?? "Community",
+      websiteUrl: r.website_url ?? undefined,
+      bannerUrl: r.banner_url ?? undefined,
+      projectCount: Number(r.project_count ?? 0),
+      createdAt: new Date(r.created_at).toISOString(),
+    }));
+  } catch (err) {
+    console.error("[dbGetHackathons] error:", err);
+    return [];
+  }
+}
+
+export async function dbGetHackathonBySlug(slugOrId: string): Promise<Hackathon | null> {
+  try {
+    const { rows } = await pool().query(
+      `SELECT h.*, COUNT(hp.project_id)::int AS project_count
+       FROM hackathons h
+       LEFT JOIN hackathon_projects hp ON hp.hackathon_id = h.id
+       WHERE h.slug = $1 OR h.id = $1 OR h.tag = $1
+       GROUP BY h.id
+       LIMIT 1`,
+      [slugOrId]
+    );
+    if (rows.length === 0) return null;
+    const r = rows[0]!;
+    return {
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      tag: r.tag,
+      description: r.description ?? "",
+      organizerName: r.organizer_name ?? "Community",
+      websiteUrl: r.website_url ?? undefined,
+      bannerUrl: r.banner_url ?? undefined,
+      projectCount: Number(r.project_count ?? 0),
+      createdAt: new Date(r.created_at).toISOString(),
+    };
+  } catch (err) {
+    console.error("[dbGetHackathonBySlug] error:", err);
+    return null;
+  }
+}
+
+export async function dbCreateHackathon(input: {
+  name: string;
+  slug?: string;
+  tag?: string;
+  description?: string;
+  organizerName?: string;
+  websiteUrl?: string;
+  bannerUrl?: string;
+}): Promise<Hackathon> {
+  const normalizedSlug = (
+    input.slug ||
+    input.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+  ).slice(0, 48);
+
+  const normalizedTag = (
+    input.tag ||
+    `hack-${normalizedSlug}`
+  ).toLowerCase().replace(/[^a-z0-9_-]+/g, "").slice(0, 36);
+
+  const id = `hack_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+
+  const { rows } = await pool().query(
+    `INSERT INTO hackathons (id, slug, name, tag, description, organizer_name, website_url, banner_url, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+     ON CONFLICT (slug) DO UPDATE SET
+       name = EXCLUDED.name,
+       description = EXCLUDED.description,
+       organizer_name = EXCLUDED.organizer_name
+     RETURNING *`,
+    [
+      id,
+      normalizedSlug,
+      input.name.trim(),
+      normalizedTag,
+      input.description?.trim() ?? "",
+      input.organizerName?.trim() ?? "Community Organizer",
+      input.websiteUrl?.trim() ?? null,
+      input.bannerUrl?.trim() ?? null,
+    ]
+  );
+
+  const r = rows[0]!;
+  return {
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    tag: r.tag,
+    description: r.description ?? "",
+    organizerName: r.organizer_name ?? "Community Organizer",
+    websiteUrl: r.website_url ?? undefined,
+    bannerUrl: r.banner_url ?? undefined,
+    projectCount: 0,
+    createdAt: new Date(r.created_at).toISOString(),
+  };
+}
+
+export async function dbGetHackathonProjects(hackathonSlugOrId: string): Promise<Post[]> {
+  try {
+    const { rows } = await pool().query(
+      `SELECT ${POST_SELECT}
+       FROM posts p
+       JOIN users u ON u.id = p.author_id
+       LEFT JOIN hackathon_projects hp ON hp.project_id = p.id
+       LEFT JOIN hackathons h ON h.id = hp.hackathon_id OR h.id = p.hackathon_id
+       WHERE p.hackathon_id = $1 
+          OR hp.hackathon_id = $1 
+          OR h.slug = $1 
+          OR h.tag = $1
+          OR p.tags ? ('hackathon:' || $1)
+          OR p.tags ? $1
+       ORDER BY p.post_score DESC, p.created_at DESC`,
+      [hackathonSlugOrId]
+    );
+    return rows.map(rowToPost);
+  } catch (err) {
+    console.error("[dbGetHackathonProjects] error:", err);
+    return [];
+  }
 }
 
 export type { User };

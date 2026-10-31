@@ -32,12 +32,17 @@ import {
   type TelemetryPayload,
   type UploadPostInput,
   type User,
+  type Hackathon,
 } from "@arrakis/contracts";
 import {
   USE_DB,
   dbFollowingFeed,
   dbGetFollowersIds,
   dbGetFollowingIds,
+  dbGetHackathons,
+  dbGetHackathonBySlug,
+  dbCreateHackathon,
+  dbGetHackathonProjects,
   dbGetPostsByAuthor,
   dbGetRecentUserPublishedPosts,
   dbInsertPost,
@@ -196,6 +201,8 @@ export function createRuntimePost(input: UploadPostInput): Post {
     popularityScore: 28.0,
     usabilityScore: 1.54,
     dailyLeaderboardScore: 0.89,
+    hackathonId: input.hackathonId,
+    hackathonName: input.hackathonName,
     createdAt: new Date().toISOString(),
   };
   const newHash = computeContentHash(post);
@@ -756,4 +763,134 @@ export async function fetchFreshBuilds(limit = 10): Promise<Post[]> {
     }
   }
   return getFreshBuilds(limit);
+}
+
+const FALLBACK_HACKATHONS: Hackathon[] = [
+  {
+    id: "hack_arrakis_2026",
+    slug: "arrakis-buildathon",
+    name: "Arrakis Flagship Buildathon",
+    tag: "arrakis-buildathon",
+    description:
+      "The premier utility-first demo hackathon. Build tools that solve real problems with 1-tap live sandboxes.",
+    organizerName: "Arrakis Core Team",
+    websiteUrl: "https://arrakis.dev",
+    bannerUrl:
+      "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1200&auto=format&fit=crop&q=80",
+    projectCount: 6,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "hack_agents_sprint",
+    slug: "ai-agents-sprint",
+    name: "AI Agents Global Sprint",
+    tag: "ai-agents-sprint",
+    description:
+      "Building autonomous coding assistants, scrapers, and automated browser workflows.",
+    organizerName: "DeepMind / Frontier Lab",
+    websiteUrl: "https://agents.dev",
+    bannerUrl:
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80",
+    projectCount: 4,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "hack_indie_weekend",
+    slug: "indie-weekend-2026",
+    name: "Indie Hacker 48h Shipathon",
+    tag: "indie-weekend",
+    description:
+      "48-hour challenge to build and launch single-purpose dev utilities and micro-SaaS.",
+    organizerName: "Indie Builders Collective",
+    websiteUrl: "https://indiehackers.com",
+    bannerUrl:
+      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&auto=format&fit=crop&q=80",
+    projectCount: 5,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export async function fetchHackathons(): Promise<Hackathon[]> {
+  if (USE_DB) {
+    try {
+      const dbList = await dbGetHackathons();
+      if (dbList.length > 0) return dbList;
+    } catch {
+      // Fallback
+    }
+  }
+  return FALLBACK_HACKATHONS;
+}
+
+export async function fetchHackathonBySlug(slug: string): Promise<Hackathon | null> {
+  if (USE_DB) {
+    try {
+      const h = await dbGetHackathonBySlug(slug);
+      if (h) return h;
+    } catch {
+      // Fallback
+    }
+  }
+  return (
+    FALLBACK_HACKATHONS.find(
+      (h) => h.slug === slug || h.id === slug || h.tag === slug
+    ) ?? null
+  );
+}
+
+export async function createHackathonSpace(input: {
+  name: string;
+  slug?: string;
+  tag?: string;
+  description?: string;
+  organizerName?: string;
+  websiteUrl?: string;
+  bannerUrl?: string;
+}): Promise<Hackathon> {
+  if (USE_DB) {
+    try {
+      return await dbCreateHackathon(input);
+    } catch {
+      // Fallback
+    }
+  }
+  const slug = (
+    input.slug ||
+    input.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+  ).slice(0, 48);
+  const created: Hackathon = {
+    id: `hack_${Date.now().toString(36)}`,
+    slug,
+    name: input.name,
+    tag: input.tag || `hack-${slug}`,
+    description: input.description ?? "",
+    organizerName: input.organizerName ?? "Community Organizer",
+    websiteUrl: input.websiteUrl,
+    bannerUrl: input.bannerUrl,
+    projectCount: 0,
+    createdAt: new Date().toISOString(),
+  };
+  FALLBACK_HACKATHONS.unshift(created);
+  return created;
+}
+
+export async function fetchHackathonProjects(slugOrId: string): Promise<Post[]> {
+  if (USE_DB) {
+    try {
+      const projects = await dbGetHackathonProjects(slugOrId);
+      if (projects.length > 0) return projects;
+    } catch {
+      // Fallback
+    }
+  }
+  return deduplicatePosts(
+    [...runtimePosts, ...SEED_POSTS].filter(
+      (p) =>
+        p.hackathonId === slugOrId ||
+        p.tags.some((t) => t.includes(slugOrId) || t.includes("hackathon"))
+    )
+  );
 }

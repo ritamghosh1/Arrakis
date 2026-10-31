@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/", label: "Feed", sublabel: "Curated for you", icon: HomeIcon },
   { href: "/explore", label: "Explore", sublabel: "Search by problem", icon: CompassIcon },
+  { href: "/hackathons", label: "Hackathons", sublabel: "Sprints & events", icon: SparklesIcon },
   { href: "/create", label: "Publish", sublabel: "Share a build", icon: PlusSquareIcon },
   { href: "/ranks", label: "Standings", sublabel: "Builders & scouts", icon: TrophyIcon },
   { href: "/u/ritam", label: "Profile", sublabel: "@ritam", icon: UserIcon },
