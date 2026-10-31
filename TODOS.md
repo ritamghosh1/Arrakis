@@ -14,7 +14,7 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 - [x] 🤝 Seed script `npm run seed` / `pnpm seed` (30 users / 60 posts / 200 follows / 50 events in `infra/seed/*.json`) + demo personas (`@ritam`, `@srinjoy`, `@aanya`, `@kabir`, `@devika`)
 - [x] 🤝 `.env.example`, `.gitignore`, lint/format/typecheck scripts, GitHub Actions CI (`.github/workflows/ci.yml`)
 - [x] 🤝 Mock mode (`MOCK=1`) convention implemented in `packages/contracts/src/mocks/seed-data.ts` and wired into all service entrypoints
-- [ ] 🤝 Push to `origin main` (https://github.com/ritamghosh1/Arrakis) — *ready locally for your review before pushing*
+- [x] 🤝 Push to `origin main` (https://github.com/ritamghosh1/Arrakis)
 
 ---
 

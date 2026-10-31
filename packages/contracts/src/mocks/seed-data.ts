@@ -18,7 +18,7 @@ import type {
   TrialRun,
   User,
   UserRef,
-} from "../types.js";
+} from "../types.ts";
 
 /**
  * Deterministic PRNG (Mulberry32) so seed data is 100% identical across machines

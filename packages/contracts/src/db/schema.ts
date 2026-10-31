@@ -10,7 +10,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import type { BadgeId, FormFieldSchema, ScoreBreakdown } from "../types.js";
+import type { BadgeId, FormFieldSchema, ScoreBreakdown } from "../types.ts";
 
 /**
  * Custom pgvector column type for Drizzle ORM
