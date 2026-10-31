@@ -4,9 +4,12 @@ import {
   SEED_POST_VECTORS,
   SEED_USERS,
   SEED_USER_VECTORS,
+  ScalableImpressionTracker,
   classifyTelemetryRunTier,
+  computeContentHash,
   computeIntentEmbedding,
   cosineSim,
+  deduplicatePosts,
   getMockGlobalFeed,
   getMockHomeFeed,
   getMockLeaderboard,
@@ -52,6 +55,7 @@ const runtimeFollowDelta = new Map<string, boolean>(); // key: `${followerId}->$
 const runtimeXpBonus = new Map<string, number>();
 const runtimeUserVectors = new Map<string, number[]>();
 const runtimeUserImpressions = new Map<string, Set<string>>();
+export const impressionTracker = new ScalableImpressionTracker(5000);
 
 const MOCK = process.env.MOCK !== "0";
 const RECOMMENDER_URL = process.env.NEXT_PUBLIC_RECOMMENDER_URL ?? "http://localhost:4001";
@@ -60,7 +64,7 @@ const SCORING_URL = process.env.NEXT_PUBLIC_SCORING_URL ?? "http://localhost:400
 export { CATEGORIES } from "./categories";
 
 export function getAllPosts(): Post[] {
-  return [...runtimePosts, ...SEED_POSTS];
+  return deduplicatePosts([...runtimePosts, ...SEED_POSTS]);
 }
 
 export function getPostById(id: string): Post | undefined {
@@ -194,6 +198,11 @@ export function createRuntimePost(input: UploadPostInput): Post {
     category: post.category,
     tags: post.tags,
   });
+  const newHash = computeContentHash(post);
+  const existingIdx = runtimePosts.findIndex((p) => computeContentHash(p) === newHash);
+  if (existingIdx >= 0) {
+    runtimePosts.splice(existingIdx, 1);
+  }
   runtimePosts.unshift(post);
   return post;
 }
@@ -513,7 +522,7 @@ export async function fetchHomeFeed(
               },
             };
           });
-          return { items, nextCursor: null, mode: "for_you" };
+          return { items: deduplicatePosts(items), nextCursor: null, mode: "for_you" };
         }
       }
     } catch {
@@ -539,10 +548,10 @@ export async function fetchHomeFeed(
       }));
       return {
         ...base,
-        items: [...prepended, ...base.items],
+        items: deduplicatePosts([...prepended, ...base.items]),
       };
     }
-    return base;
+    return { ...base, items: deduplicatePosts(base.items) };
   }
   const qs = new URLSearchParams({ userId, mode });
   if (cursor) qs.set("cursor", cursor);
@@ -610,7 +619,7 @@ export async function fetchGlobalFeed(params: {
         },
       }));
 
-    let combined = [...runtimeMatches, ...base.items];
+    let combined = deduplicatePosts([...runtimeMatches, ...base.items]);
     if (params.verifiedOnly) {
       combined = combined.filter((i) => i.post.health.verifiedUtility);
     }
@@ -671,7 +680,7 @@ export async function fetchProfile(handleOrId: string, viewerId = "usr_ritam"): 
         followingCount: followingIds.length || updatedUser.followingCount,
       },
       isFollowing: followerIds.includes(viewerId),
-      projects: [...userRuntimePosts, ...base.projects],
+      projects: deduplicatePosts([...userRuntimePosts, ...base.projects]),
       recentReviews: [...userRuntimeReviews, ...base.recentReviews],
     };
   }
@@ -687,5 +696,5 @@ export async function fetchProfile(handleOrId: string, viewerId = "usr_ritam"): 
 export function getFreshBuilds(limit = 10): Post[] {
   const cold = new Set(SEED_USERS.filter((u) => u.followersCount === 0).map((u) => u.id));
   const coldPosts = SEED_POSTS.filter((p) => cold.has(p.authorId));
-  return [...runtimePosts, ...coldPosts].slice(0, limit);
+  return deduplicatePosts([...runtimePosts, ...coldPosts]).slice(0, limit);
 }

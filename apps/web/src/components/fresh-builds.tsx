@@ -22,7 +22,7 @@ export function FreshBuilds({ posts }: { posts: Post[] }) {
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.author.avatarUrl} alt="" width={48} height={48} className="bg-paper-sunken size-12 rounded-full" />
+                  <img src={p.author.avatarUrl} alt={p.author.displayName} width={48} height={48} className="bg-paper-sunken size-12 rounded-full" />
                 </span>
                 <span className="text-ink w-full truncate text-center text-[11px] font-medium">@{p.author.handle}</span>
               </Link>

@@ -55,7 +55,11 @@ async function main() {
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::vector,$14::jsonb,$15::jsonb,$16,
            $17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,
            $38,$39,$40)
-         ON CONFLICT (id) DO NOTHING`,
+         ON CONFLICT (id) DO UPDATE SET
+           title = EXCLUDED.title,
+           problem_statement = EXCLUDED.problem_statement,
+           category = EXCLUDED.category,
+           tags = EXCLUDED.tags`,
         [
           p.id, p.authorId, p.title, p.problemStatement, p.category, p.videoUrl, p.thumbUrl,
           p.durationSec, p.demo.mode, p.demo.target, projectType,

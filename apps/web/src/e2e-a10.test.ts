@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
-import { computeIntentEmbedding, cosineSim } from "@arrakis/contracts";
+import {
+  SEED_POSTS,
+  computeContentHash,
+  computeIntentEmbedding,
+  computeSimHash64,
+  cosineSim,
+  deduplicatePosts,
+  hammingDistance64,
+} from "@arrakis/contracts";
 
 const BASE_URL = process.env.TEST_BASE_URL ?? "http://localhost:3000";
 const WEB_ROOT = path.resolve(import.meta.dirname, "..");
@@ -269,5 +277,42 @@ describe("A10 — Quality, Accessibility, Motion Performance & E2E Judge Loop", 
     assert.ok(searchFeed.items.length > 0, "Hybrid search should return matching builds");
     assert.equal(searchFeed.items[0]!.reason.kind, "search");
     assert.ok((searchFeed.items[0]!.reason.similarity ?? 0) >= 0.7);
+  });
+
+  it("6. Scalable Deduplication & Full-Screen Mobile Snap Feed: 64-bit ContentHash + LSH SimHash collapses clones and guarantees 100% unique feed reels", async () => {
+    // Step A: Verify 64-bit ContentHash and SimHash64 collapse near-duplicate clone posts
+    const cloneA = {
+      ...SEED_POSTS[0]!,
+      id: "post_clone_a",
+      title: "GitBisect Replay — Find the exact commit (#7)",
+      problemStatement: "Automatically replay a curl request against recent git commits in a container.",
+    };
+    const cloneB = {
+      ...SEED_POSTS[0]!,
+      id: "post_clone_b",
+      title: "GitBisect Replay — Find the exact commit (#19)",
+      problemStatement: "Automatically replay a curl request against recent git commits in a container!",
+    };
+    assert.equal(computeContentHash(cloneA), computeContentHash(cloneB));
+    assert.equal(hammingDistance64(computeSimHash64(cloneA), computeSimHash64(cloneB)), 0);
+
+    const collapsed = deduplicatePosts([cloneA, cloneB, SEED_POSTS[1]!]);
+    assert.equal(collapsed.length, 2, "Near-duplicate clones must collapse into a single item");
+
+    // Step B: Verify live feed returns 0 duplicate IDs and 0 duplicate contentHashes
+    const feedRes = await fetch(`${BASE_URL}/api/feed?userId=usr_ritam&mode=for_you&limit=10`);
+    assert.equal(feedRes.status, 200);
+    const feed = (await feedRes.json()) as {
+      items: Array<{ post: { id: string; title: string; problemStatement: string } }>;
+    };
+    const seenIds = new Set(feed.items.map((i) => i.post.id));
+    const seenHashes = new Set(feed.items.map((i) => computeContentHash(i.post)));
+    assert.equal(seenIds.size, feed.items.length, "Feed must not contain duplicate post IDs");
+    assert.equal(seenHashes.size, feed.items.length, "Feed must not contain duplicate content hashes");
+
+    // Step C: Verify Home page renders full-screen vertical snap scroller (.feed-scroller + .feed-item h-full w-full)
+    const homeHtml = await (await fetch(`${BASE_URL}/`)).text();
+    assert.ok(homeHtml.includes("feed-scroller"), "Home feed must use .feed-scroller for vertical snap");
+    assert.ok(homeHtml.includes("feed-item h-full w-full"), "Each reel item must be full-height (.feed-item h-full w-full)");
   });
 });

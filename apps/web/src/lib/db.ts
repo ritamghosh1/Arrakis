@@ -3,7 +3,9 @@ import {
   SEED_POSTS,
   SEED_POST_VECTORS,
   classifyTelemetryRunTier,
+  computeContentHash,
   computeIntentEmbedding,
+  deduplicatePosts,
   getQuickFeedbackTagDelta,
   updateEmaVector,
   type DemoMode,
@@ -191,55 +193,67 @@ export async function dbInsertPost(post: Post): Promise<void> {
   );
 }
 
-/** Ranked feed via get_personalized_feed RPC with 80/20 Cold-Start Spotlight mixer (2 of 10 slots). */
+/** Ranked feed via get_personalized_feed RPC with 80/20 Cold-Start Spotlight mixer & SimHash/ContentHash deduplication. */
 export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Post[]> {
   const userVec = await dbGetUserVector(userId);
+  const fetchCount = Math.max(limit * 3, 24);
   const { rows: ranked } = await pool().query(
     "SELECT id FROM get_personalized_feed($1, $2::vector, $3)",
-    [userId, userVec ? toVec(userVec) : null, limit],
+    [userId, userVec ? toVec(userVec) : null, fetchCount],
   );
   const ids: string[] = ranked.map((r) => r.id);
 
-  if (ids.length < limit) {
+  if (ids.length < fetchCount) {
     const { rows: fill } = await pool().query(
       `SELECT id FROM posts WHERE id <> ALL($1::text[]) AND proxy_success_rate > 0.3
        ORDER BY daily_leaderboard_score DESC LIMIT $2`,
-      [ids, limit - ids.length],
+      [ids, fetchCount - ids.length],
     );
     ids.push(...fill.map((r) => r.id));
   }
   if (ids.length === 0) return [];
-
-  // Enforce 80/20 Cold-Start Spotlight quota (slots 2 and 7 in a 10-post page)
-  if (limit >= 8) {
-    const { rows: coldRows } = await pool().query(
-      `SELECT p.id FROM posts p JOIN users u ON u.id = p.author_id
-       WHERE (u.followers_count = 0 OR p.impressions < 100)
-         AND p.proxy_success_rate > 0.3
-         AND p.author_id <> $1
-       ORDER BY p.usability_score DESC, p.created_at DESC
-       LIMIT 4`,
-      [userId],
-    );
-    const coldIds = coldRows.map((r) => r.id as string);
-    const slotPositions = [2, 7];
-    let coldCursor = 0;
-    for (const slot of slotPositions) {
-      if (slot < ids.length && coldCursor < coldIds.length) {
-        const candidate = coldIds[coldCursor++]!;
-        if (!ids.includes(candidate)) {
-          ids[slot] = candidate;
-        }
-      }
-    }
-  }
 
   const { rows } = await pool().query(
     `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = ANY($1::text[])`,
     [ids],
   );
   const byId = new Map(rows.map((r) => [r.id, rowToPost(r)]));
-  return ids.map((id) => byId.get(id)!).filter(Boolean);
+  const orderedCandidates = ids.map((id) => byId.get(id)!).filter(Boolean);
+
+  // Deduplicate by exact ID, canonical title stem, 64-bit contentHash, and 64-bit LSH SimHash
+  const deduped = deduplicatePosts(orderedCandidates).slice(0, limit);
+
+  // Enforce 80/20 Cold-Start Spotlight quota (slots 2 and 7 in a 10-post page)
+  if (limit >= 8 && deduped.length >= 8) {
+    const { rows: coldRows } = await pool().query(
+      `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE (u.followers_count = 0 OR p.impressions < 100)
+         AND p.proxy_success_rate > 0.3
+         AND p.author_id <> $1
+       ORDER BY p.usability_score DESC, p.created_at DESC
+       LIMIT 8`,
+      [userId],
+    );
+    const coldPosts = deduplicatePosts(coldRows.map(rowToPost));
+    const existingIds = new Set(deduped.map((p) => p.id));
+    const existingHashes = new Set(deduped.map((p) => computeContentHash(p)));
+    const slotPositions = [2, 7];
+    let coldCursor = 0;
+    for (const slot of slotPositions) {
+      while (coldCursor < coldPosts.length) {
+        const candidate = coldPosts[coldCursor++]!;
+        const cHash = computeContentHash(candidate);
+        if (!existingIds.has(candidate.id) && !existingHashes.has(cHash)) {
+          deduped[slot] = candidate;
+          existingIds.add(candidate.id);
+          existingHashes.add(cHash);
+          break;
+        }
+      }
+    }
+  }
+
+  return deduped;
 }
 
 export async function dbGetFollowingIds(userId: string): Promise<string[]> {
@@ -330,9 +344,9 @@ export async function dbFollowingFeed(userId: string, limit = 10, offset = 0): P
        AND p.proxy_success_rate > 0.3
      ORDER BY p.created_at DESC, p.daily_leaderboard_score DESC
      LIMIT $2 OFFSET $3`,
-    [userId, limit, offset],
+    [userId, limit * 2, offset],
   );
-  return rows.map(rowToPost);
+  return deduplicatePosts(rows.map(rowToPost)).slice(0, limit);
 }
 
 /** Hybrid Global Search combining Postgres Full-Text Search (tsvector), lexical phrase matching, and pgvector cosine similarity. */
@@ -360,7 +374,7 @@ export async function dbSearchGlobalFeed(params: {
     if (params.verifiedOnly) {
       conds.push(`p.uptime_pct >= 85 AND p.tries_count >= 20`);
     }
-    args.push(limit);
+    args.push(limit * 2);
     const { rows } = await pool().query(
       `SELECT ${POST_SELECT}
        FROM posts p JOIN users u ON u.id = p.author_id
@@ -369,7 +383,7 @@ export async function dbSearchGlobalFeed(params: {
        LIMIT $${args.length}`,
       args,
     );
-    return rows.map((r) => ({ post: rowToPost(r), similarity: 0.9 }));
+    return deduplicatePosts(rows.map((r) => ({ post: rowToPost(r), similarity: 0.9 }))).slice(0, limit);
   }
 
   const qVec = toVec(
@@ -393,7 +407,7 @@ export async function dbSearchGlobalFeed(params: {
   if (params.verifiedOnly) {
     conds.push(`p.uptime_pct >= 85 AND p.tries_count >= 20`);
   }
-  args.push(limit);
+  args.push(limit * 2);
 
   const { rows } = await pool().query(
     `WITH scored AS (
@@ -425,10 +439,12 @@ export async function dbSearchGlobalFeed(params: {
   );
 
   if (rows.length > 0) {
-    return rows.map((r) => ({
-      post: rowToPost(r),
-      similarity: Number(Math.min(0.99, Math.max(0.72, Number(r.hybrid_score) || Number(r.vec_sim) || 0.85)).toFixed(2)),
-    }));
+    return deduplicatePosts(
+      rows.map((r) => ({
+        post: rowToPost(r),
+        similarity: Number(Math.min(0.99, Math.max(0.72, Number(r.hybrid_score) || Number(r.vec_sim) || 0.85)).toFixed(2)),
+      })),
+    ).slice(0, limit);
   }
 
   // Semantic pgvector fallback when exact lexical match returns 0 rows
@@ -442,13 +458,15 @@ export async function dbSearchGlobalFeed(params: {
      FROM posts p JOIN users u ON u.id = p.author_id
      WHERE p.proxy_success_rate > 0.3
      ORDER BY vec_sim DESC, p.daily_leaderboard_score DESC
-     LIMIT 5`,
+     LIMIT 12`,
     [qVec],
   );
-  return fallbackRows.map((r) => ({
-    post: rowToPost(r),
-    similarity: Number(Math.min(0.95, Math.max(0.7, Number(r.vec_sim) || 0.78)).toFixed(2)),
-  }));
+  return deduplicatePosts(
+    fallbackRows.map((r) => ({
+      post: rowToPost(r),
+      similarity: Number(Math.min(0.95, Math.max(0.7, Number(r.vec_sim) || 0.78)).toFixed(2)),
+    })),
+  ).slice(0, 5);
 }
 
 export async function dbRecordTelemetry(payload: TelemetryPayload): Promise<{
@@ -514,10 +532,10 @@ export async function dbLeaderboard(
 ): Promise<LeaderboardResponse> {
   const { rows } = await pool().query(
     `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
-     ORDER BY ${ORDER[type]} DESC LIMIT 15`,
+     ORDER BY ${ORDER[type]} DESC LIMIT 30`,
   );
-  const out: LeaderboardRow[] = rows.map((r, idx) => {
-    const post = rowToPost(r);
+  const uniquePosts = deduplicatePosts(rows.map(rowToPost)).slice(0, 15);
+  const out: LeaderboardRow[] = uniquePosts.map((post, idx) => {
     const passive = post.stats.upvotes - post.stats.trialUpvotes;
     const rank = idx + 1;
     const score =

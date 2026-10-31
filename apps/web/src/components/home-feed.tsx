@@ -1,6 +1,6 @@
 "use client";
 
-import type { FeedItem, Post, User } from "@arrakis/contracts";
+import { deduplicatePosts, type FeedItem, type Post, type User } from "@arrakis/contracts";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FreshBuilds } from "./fresh-builds";
@@ -18,15 +18,17 @@ interface HomeFeedProps {
 
 export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedProps) {
   const [mode, setMode] = useState<"for_you" | "following">("for_you");
-  const [items, setItems] = useState<FeedItem[]>(initialItems);
+  const [items, setItems] = useState<FeedItem[]>(() => deduplicatePosts(initialItems));
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeTryPost, setActiveTryPost] = useState<Post | null>(null);
   const [activeSharePost, setActiveSharePost] = useState<Post | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [followedSuggestions, setFollowedSuggestions] = useState<Record<string, boolean>>({});
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    const root = scrollerRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -36,7 +38,7 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
           }
         }
       },
-      { threshold: [0.55] }
+      { root, threshold: [0.55] }
     );
 
     for (const el of cardRefs.current) {
@@ -63,11 +65,11 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
       if (e.key === "j") {
         e.preventDefault();
         const nextIdx = Math.min(items.length - 1, activeIndex + 1);
-        cardRefs.current[nextIdx]?.scrollIntoView({ behavior: scrollBehavior, block: "center" });
+        cardRefs.current[nextIdx]?.scrollIntoView({ behavior: scrollBehavior, block: "start" });
       } else if (e.key === "k") {
         e.preventDefault();
         const prevIdx = Math.max(0, activeIndex - 1);
-        cardRefs.current[prevIdx]?.scrollIntoView({ behavior: scrollBehavior, block: "center" });
+        cardRefs.current[prevIdx]?.scrollIntoView({ behavior: scrollBehavior, block: "start" });
       } else if (e.key === "t") {
         e.preventDefault();
         const current = items[activeIndex];
@@ -81,12 +83,13 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
   async function handleSwitchMode(nextMode: "for_you" | "following") {
     setMode(nextMode);
     try {
-      const res = await fetch(`/api/feed/home?mode=${nextMode}`);
+      const res = await fetch(`/api/feed?mode=${nextMode}`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.items) && data.items.length > 0) {
-          setItems(data.items);
+          setItems(deduplicatePosts(data.items));
           setActiveIndex(0);
+          scrollerRef.current?.scrollTo({ top: 0 });
           return;
         }
       }
@@ -94,11 +97,12 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
       // Fallback to local filter
     }
     if (nextMode === "following") {
-      setItems(initialItems.filter((item) => item.reason.kind === "followed"));
+      setItems(deduplicatePosts(initialItems.filter((item) => item.reason.kind === "followed")));
     } else {
-      setItems(initialItems);
+      setItems(deduplicatePosts(initialItems));
     }
     setActiveIndex(0);
+    scrollerRef.current?.scrollTo({ top: 0 });
   }
 
   function showToast(msg: string) {
@@ -140,13 +144,13 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
   }
 
   return (
-    <div className="mx-auto max-w-[1140px] px-4 sm:px-6 py-5 lg:py-7">
-      {/* Top Feed Header */}
-      <header className="sticky top-0 z-feed mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface/95 backdrop-blur-md px-4 py-3 shadow-sm">
+    <div className="mx-auto flex h-full w-full max-w-[1140px] min-h-0 flex-col sm:px-6">
+      {/* Top Feed Bar (Zero horizontal divider lines across the screen) */}
+      <header className="pt-safe z-feed flex shrink-0 items-center justify-between gap-3 bg-dune px-3.5 py-2.5 sm:px-2">
         {/* Mobile App Logo (shown below lg where left rail is hidden) */}
         <Link
           href="/"
-          className="flex lg:hidden items-center gap-2.5 focus-visible:outline-none"
+          className="flex lg:hidden items-center gap-2 focus-visible:outline-none"
         >
           <span className="flex size-8 items-center justify-center rounded-xl bg-ink text-dune font-display text-sm font-bold tracking-tight">
             A
@@ -156,15 +160,23 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
           </span>
         </Link>
 
+        <h1 className="hidden lg:block font-display text-xl font-bold tracking-tight text-ink">
+          Utility Feed
+        </h1>
+
         {/* For You / Following Toggle */}
-        <div className="flex items-center gap-1 rounded-xl bg-dune p-1 border border-border">
+        <div
+          role="group"
+          aria-label="Feed mode"
+          className="flex items-center gap-1 rounded-full bg-surface p-1 shadow-xs"
+        >
           <button
             type="button"
             onClick={() => handleSwitchMode("for_you")}
             aria-pressed={mode === "for_you"}
             className={cn(
-              "rounded-lg px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-colors",
-              mode === "for_you" ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
+              "rounded-full px-3.5 sm:px-4 py-1 text-xs font-semibold transition-colors",
+              mode === "for_you" ? "bg-ink text-dune" : "text-muted hover:text-ink"
             )}
           >
             For You
@@ -174,8 +186,8 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
             onClick={() => handleSwitchMode("following")}
             aria-pressed={mode === "following"}
             className={cn(
-              "rounded-lg px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-colors",
-              mode === "following" ? "bg-ink text-dune shadow-sm" : "text-muted hover:text-ink"
+              "rounded-full px-3.5 sm:px-4 py-1 text-xs font-semibold transition-colors",
+              mode === "following" ? "bg-ink text-dune" : "text-muted hover:text-ink"
             )}
           >
             Following
@@ -183,76 +195,81 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
         </div>
 
         <div className="hidden lg:flex items-center gap-2 text-xs text-muted">
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-dune px-2.5 py-1 font-medium text-ink border border-border">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 font-medium text-ink shadow-xs">
             <SparklesIcon className="size-3.5 text-accent" />
             Real working demos · Zero clout bias
           </span>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_310px] gap-7 items-start">
-        {/* Main Feed Column */}
-        <div className="space-y-6 min-w-0">
-          {/* Fresh Builds Spotlight Rail */}
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3 px-1">
+      {/* Main Viewport: Full-Screen Snap Reel Scroller (1 demo at a time) + Desktop Context Rail */}
+      <div className="flex flex-1 min-h-0 gap-7 items-stretch">
+        {/* Full-Height Vertical Snap Reel Scroller */}
+        <div
+          ref={scrollerRef}
+          className="feed-scroller flex-1 min-h-0 h-full overflow-y-auto"
+          tabIndex={-1}
+        >
+          {items.length === 0 ? (
+            <div className="feed-item grid h-full place-items-center p-6">
+              <div className="rounded-2xl bg-surface p-8 text-center space-y-3 max-w-sm shadow-sm">
+                <p className="font-display text-base font-bold text-ink">
+                  No builds in your Following feed yet
+                </p>
+                <p className="text-sm text-muted">
+                  Switch back to For You or follow builders to see their latest releases.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleSwitchMode("for_you")}
+                  className="rounded-full bg-ink px-4 py-2 text-xs font-semibold text-dune"
+                >
+                  Back to For You
+                </button>
+              </div>
+            </div>
+          ) : (
+            items.map((item, idx) => (
+              <div
+                key={item.post.id}
+                data-index={idx}
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
+                }}
+                className="feed-item h-full w-full sm:py-2"
+              >
+                <ReelCard
+                  item={item}
+                  isActive={idx === activeIndex}
+                  onTry={(it) => setActiveTryPost(it.post)}
+                  onShare={(it) => setActiveSharePost(it.post)}
+                />
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Right Context Rail (Desktop >= 1280px only — keeps mobile 100% single-reel fullscreen) */}
+        <aside className="hidden xl:flex xl:w-[310px] xl:shrink-0 xl:flex-col xl:gap-4 xl:py-2 xl:overflow-y-auto">
+          {/* Fresh Builds Spotlight */}
+          <div className="rounded-2xl bg-surface p-4 shadow-xs space-y-2.5">
+            <div className="flex items-center justify-between px-1">
               <div>
                 <h2 className="font-display text-sm font-bold text-ink">Fresh Builds</h2>
-                <p className="text-xs text-muted">New launches from emerging builders</p>
+                <p className="text-[11px] text-muted">New launches from emerging builders</p>
               </div>
               <Link
                 href="/explore"
                 className="text-xs font-semibold text-accent hover:underline"
               >
-                Explore all →
+                Explore →
               </Link>
             </div>
             <FreshBuilds posts={freshPosts} />
           </div>
 
-          {/* Reels Stack */}
-          {items.length === 0 ? (
-            <div className="rounded-2xl border border-border bg-surface p-10 text-center space-y-3">
-              <p className="font-display text-base font-bold text-ink">
-                No builds in your Following feed yet
-              </p>
-              <p className="text-sm text-muted max-w-md mx-auto">
-                Switch back to For You or follow builders on the right to see their latest releases.
-              </p>
-              <button
-                type="button"
-                onClick={() => handleSwitchMode("for_you")}
-                className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-dune"
-              >
-                Back to For You
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-7">
-              {items.map((item, idx) => (
-                <div
-                  key={item.post.id}
-                  data-index={idx}
-                  ref={(el) => {
-                    cardRefs.current[idx] = el;
-                  }}
-                >
-                  <ReelCard
-                    item={item}
-                    isActive={idx === activeIndex}
-                    onTry={(it) => setActiveTryPost(it.post)}
-                    onShare={(it) => setActiveSharePost(it.post)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Right Context Rail (Desktop >= 1280px) */}
-        <aside className="hidden xl:block space-y-5 sticky top-24">
           {/* Builders to Follow */}
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-3.5">
+          <div className="rounded-2xl bg-surface p-4 shadow-xs space-y-3.5">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-sm font-bold text-ink">Builders to Follow</h2>
               <Link href="/ranks" className="text-xs font-semibold text-accent hover:underline">
@@ -269,7 +286,7 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
                       <img
                         src={u.avatarUrl}
                         alt={u.displayName}
-                        className="size-9 rounded-full border border-border bg-dune object-cover shrink-0"
+                        className="size-9 rounded-full bg-dune object-cover shrink-0"
                       />
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
@@ -288,9 +305,9 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
                       type="button"
                       onClick={() => handleToggleFollowUser(u.id)}
                       className={cn(
-                        "rounded-lg px-2.5 py-1 text-[11px] font-semibold transition-colors shrink-0",
+                        "rounded-full px-3 py-1 text-[11px] font-semibold transition-colors shrink-0",
                         isFollowed
-                          ? "border border-border bg-dune text-ink"
+                          ? "bg-dune text-ink"
                           : "bg-ink text-dune hover:bg-ink/90"
                       )}
                     >
@@ -303,7 +320,7 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
           </div>
 
           {/* Community Standings Card */}
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-2.5">
+          <div className="rounded-2xl bg-surface p-4 shadow-xs space-y-2">
             <div className="flex items-center gap-2 text-ink">
               <TrophyIcon className="size-4 text-accent" />
               <h3 className="font-display text-sm font-bold">Community Standings</h3>
@@ -326,7 +343,7 @@ export function HomeFeed({ initialItems, freshPosts, suggestedUsers }: HomeFeedP
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-20 lg:bottom-6 right-6 z-toast rounded-xl border border-sage/40 bg-ink px-4 py-3 text-xs font-semibold text-dune shadow-lg"
+          className="fixed bottom-20 lg:bottom-6 right-6 z-toast rounded-full bg-ink px-4 py-2.5 text-xs font-semibold text-dune shadow-lg"
         >
           {toastMessage}
         </div>
