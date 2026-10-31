@@ -13,6 +13,7 @@ import {
   TrashIcon,
   UploadCloudIcon,
 } from "./icons";
+import { InAppBrowser } from "./in-app-browser";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
 import { CATEGORIES } from "@/lib/categories";
@@ -92,7 +93,9 @@ export function CreatePostForm() {
   ]);
 
   // Step 4: Review & Publish
+  const [reviewPreviewTab, setReviewPreviewTab] = useState<"browser" | "video">("browser");
   const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [publishedPost, setPublishedPost] = useState<Post | null>(null);
   const [activeTryPost, setActiveTryPost] = useState<Post | null>(null);
   const [activeSharePost, setActiveSharePost] = useState<Post | null>(null);
@@ -214,11 +217,21 @@ export function CreatePostForm() {
     if (publishing) return;
 
     setPublishing(true);
+    setPublishError(null);
     try {
       const tags = tagsInput
         .split(",")
         .map((t) => t.trim().toLowerCase().replace(/^#/, ""))
         .filter(Boolean);
+
+      let normalizedTarget = demoTarget.trim() || "https://example.com";
+      if (
+        demoMode === "web" &&
+        !normalizedTarget.startsWith("http://") &&
+        !normalizedTarget.startsWith("https://")
+      ) {
+        normalizedTarget = `https://${normalizedTarget}`;
+      }
 
       const res = await fetch("/api/posts", {
         method: "POST",
@@ -235,7 +248,7 @@ export function CreatePostForm() {
           durationSec,
           demo: {
             mode: demoMode,
-            target: demoTarget.trim() || "ghcr.io/ritamghosh1/arrakis-demo:latest",
+            target: normalizedTarget,
             repoUrl: repoUrl.trim() || undefined,
             sampleCommand: sampleCommand.trim() || undefined,
             formSchema,
@@ -245,10 +258,15 @@ export function CreatePostForm() {
       });
 
       const data = await res.json();
-      if (data.post) {
+      const created: Post | null = data?.post ?? (data?.id ? (data as Post) : null);
+      if (created) {
         localStorage.removeItem(DRAFT_STORAGE_KEY);
-        setPublishedPost(data.post);
+        setPublishedPost(created);
+      } else {
+        setPublishError(data?.error ?? "Could not publish build. Please check your fields.");
       }
+    } catch {
+      setPublishError("Network error while publishing build. Please try again.");
     } finally {
       setPublishing(false);
     }
@@ -256,58 +274,107 @@ export function CreatePostForm() {
 
   const ytEmbedUrl = getYouTubeEmbedUrl(videoUrl);
 
+  const normalizedPreviewTarget = (() => {
+    const raw = demoTarget.trim();
+    if (!raw) return demoMode === "web" ? "https://example.com" : "ghcr.io/ritamghosh1/arrakis-demo:latest";
+    if (demoMode === "web" && !raw.startsWith("http://") && !raw.startsWith("https://")) {
+      return `https://${raw}`;
+    }
+    return raw;
+  })();
+
+  const draftPreviewPost: Post = {
+    id: "post_draft_preview",
+    authorId: "usr_ritam",
+    author: {
+      id: "usr_ritam",
+      handle: "ritam",
+      displayName: "Ritam Ghosh",
+      avatarUrl: "https://api.dicebear.com/9.x/shapes/svg?seed=ritam",
+      verifiedUtility: true,
+    },
+    title: title.trim() || "Untitled Build",
+    problemStatement:
+      problemStatement.trim() ||
+      "Helps developers automate repetitive workflows directly from the browser.",
+    category,
+    videoUrl,
+    thumbUrl,
+    durationSec,
+    demo: {
+      mode: demoMode,
+      target: normalizedPreviewTarget,
+      repoUrl: repoUrl.trim() || undefined,
+      sampleCommand: sampleCommand.trim() || undefined,
+      formSchema,
+    },
+    tags: tagsInput
+      .split(",")
+      .map((t) => t.trim().toLowerCase().replace(/^#/, ""))
+      .filter(Boolean),
+    indexingStatus: "ready",
+    stats: { views: 1, tries: 1, upvotes: 1, trialUpvotes: 1, comments: 0 },
+    health: {
+      uptimePct: 99.8,
+      p50LatencyMs: 120,
+      p95LatencyMs: 240,
+      crashRate: 0,
+      verifiedUtility: true,
+    },
+    postScore: 48.0,
+    createdAt: new Date().toISOString(),
+  };
+
   if (publishedPost) {
     return (
-      <div className="mx-auto max-w-[780px] px-4 sm:px-6 py-10 space-y-6">
+      <div className="mx-auto max-w-[1000px] px-4 sm:px-6 py-8 space-y-6">
         <div className="rounded-2xl border border-sage/40 bg-surface p-6 sm:p-8 shadow-sm space-y-6">
-          <div className="flex items-start gap-3.5">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-sage-soft text-sage shrink-0">
-              <CheckCircleIcon className="size-6" />
-            </span>
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-sage">
-                Published Live
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <span className="flex size-11 items-center justify-center rounded-2xl bg-sage-soft text-sage shrink-0">
+                <CheckCircleIcon className="size-6" />
               </span>
-              <h1 className="font-display text-2xl font-bold text-ink">{publishedPost.title}</h1>
-              <p className="text-sm text-muted">
-                Your build and interactive demo are now live on Arrakis.
-              </p>
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-sage">
+                  Published Live
+                </span>
+                <h1 className="font-display text-2xl font-bold text-ink">{publishedPost.title}</h1>
+                <p className="text-sm text-muted">
+                  Your build and in-app browser experience are now live on Arrakis.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setActiveTryPost(publishedPost)}
+                className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-semibold text-white hover:bg-accent-hover transition-colors"
+              >
+                <TerminalIcon className="size-4" />
+                <span>Full-Screen Sandbox</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSharePost(publishedPost)}
+                className="inline-flex items-center gap-2 rounded-xl border border-border bg-dune px-3.5 py-2.5 text-xs font-semibold text-ink hover:bg-border/40 transition-colors"
+              >
+                <ShareIcon className="size-4" />
+                <span>Share</span>
+              </button>
+
+              <Link
+                href={`/p/${publishedPost.id}`}
+                className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-xs font-semibold text-dune hover:bg-ink/90 transition-colors"
+              >
+                <span>Open Project Page →</span>
+              </Link>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-dune/70 p-4 space-y-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
-              Problem Statement
-            </span>
-            <p className="text-sm font-medium text-ink">{publishedPost.problemStatement}</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => setActiveTryPost(publishedPost)}
-              className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
-            >
-              <TerminalIcon className="size-4" />
-              <span>Test Live Demo</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveSharePost(publishedPost)}
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-dune px-4 py-2.5 text-sm font-semibold text-ink hover:bg-border/40 transition-colors"
-            >
-              <ShareIcon className="size-4" />
-              <span>Share Build</span>
-            </button>
-
-            <Link
-              href={`/p/${publishedPost.id}`}
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-ink hover:bg-dune transition-colors"
-            >
-              <span>Open Post Page →</span>
-            </Link>
-          </div>
+          {/* Live In-App Browser Preview right on Published confirmation */}
+          <InAppBrowser post={publishedPost} className="min-h-[480px]" />
         </div>
 
         <TrySheet post={activeTryPost} onClose={() => setActiveTryPost(null)} />
@@ -716,7 +783,15 @@ export function CreatePostForm() {
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => setDemoMode(m.id)}
+                  onClick={() => {
+                    setDemoMode(m.id);
+                    if (
+                      m.id === "web" &&
+                      demoTarget === "ghcr.io/ritamghosh1/arrakis-demo:latest"
+                    ) {
+                      setDemoTarget("https://example.com");
+                    }
+                  }}
                   className={cn(
                     "rounded-xl border p-3 text-left transition-colors",
                     demoMode === m.id
@@ -744,11 +819,16 @@ export function CreatePostForm() {
                     ? "Container Image"
                     : demoMode === "api"
                     ? "API Endpoint URL"
-                    : "Web / Project URL"}
+                    : "Web / Project URL (In-App Browser Link)"}
                 </label>
                 <input
                   id="demo-target"
                   type="text"
+                  placeholder={
+                    demoMode === "web"
+                      ? "https://your-project.vercel.app"
+                      : "ghcr.io/ritamghosh1/arrakis-demo:latest"
+                  }
                   value={demoTarget}
                   onChange={(e) => setDemoTarget(e.target.value)}
                   className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none"
@@ -767,6 +847,19 @@ export function CreatePostForm() {
                   className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none"
                 />
               </div>
+            </div>
+
+            {/* Live In-App Browser Preview in Step 3 */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-ink">
+                  Live In-App Browser Preview ({normalizedPreviewTarget})
+                </span>
+                <span className="text-[11px] text-muted">
+                  Updates live as you enter your URL
+                </span>
+              </div>
+              <InAppBrowser post={draftPreviewPost} className="min-h-[380px]" />
             </div>
 
             {/* Zero-Code Input Builder */}
@@ -871,23 +964,85 @@ export function CreatePostForm() {
         {/* STEP 4: CLEAN REVIEW & PUBLISH */}
         {step === 4 && (
           <form onSubmit={handlePublish} className="space-y-6">
-            <div>
-              <h2 className="font-display text-lg font-bold text-ink">
-                Step 4 · Review & Publish
-              </h2>
-              <p className="text-xs text-muted mt-0.5">
-                Confirm how your project card will appear in the feed.
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg font-bold text-ink">
+                  Step 4 · Review & Publish
+                </h2>
+                <p className="text-xs text-muted mt-0.5">
+                  Preview your live In-App Browser experience and project details before publishing.
+                </p>
+              </div>
+
+              <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-dune p-1">
+                <button
+                  type="button"
+                  onClick={() => setReviewPreviewTab("browser")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                    reviewPreviewTab === "browser"
+                      ? "bg-ink text-dune shadow-sm"
+                      : "text-muted hover:text-ink"
+                  )}
+                >
+                  🌐 In-App Browser Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReviewPreviewTab("video")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                    reviewPreviewTab === "video"
+                      ? "bg-ink text-dune shadow-sm"
+                      : "text-muted hover:text-ink"
+                  )}
+                >
+                  🎬 Pitch Video Preview
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Video / YouTube Preview */}
-              <div className="lg:col-span-5 rounded-2xl border border-border bg-ink overflow-hidden aspect-[16/10]">
+            {/* Clean Summary Details */}
+            <div className="rounded-2xl border border-border bg-dune/60 p-5 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-md bg-surface px-2.5 py-0.5 text-xs font-semibold text-ink border border-border">
+                    {category}
+                  </span>
+                  <span className="rounded-md bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent capitalize">
+                    {demoMode} Demo
+                  </span>
+                  <span className="rounded-md bg-surface px-2.5 py-0.5 font-mono text-xs text-muted border border-border">
+                    {normalizedPreviewTarget}
+                  </span>
+                </div>
+                <span className="text-xs text-muted">
+                  Interactive Demo Fields: {formSchema.length}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-display text-xl font-bold text-ink">
+                  {title.trim() || "Untitled Build"}
+                </h3>
+                <p className="text-sm text-muted mt-1">
+                  {problemStatement.trim() ||
+                    "Helps developers automate repetitive workflows directly from the browser."}
+                </p>
+              </div>
+            </div>
+
+            {/* Live Preview Stage */}
+            {reviewPreviewTab === "browser" ? (
+              <InAppBrowser post={draftPreviewPost} className="min-h-[440px]" />
+            ) : (
+              <div className="rounded-2xl border border-border bg-ink overflow-hidden aspect-[16/10] max-w-[680px]">
                 {ytEmbedUrl ? (
                   <iframe
                     title="YouTube preview"
                     src={ytEmbedUrl}
                     className="h-full w-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 ) : (
@@ -900,39 +1055,16 @@ export function CreatePostForm() {
                   />
                 )}
               </div>
+            )}
 
-              {/* Clean Summary Details */}
-              <div className="lg:col-span-7 rounded-2xl border border-border bg-dune/60 p-5 space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-md bg-surface px-2.5 py-0.5 text-xs font-semibold text-ink border border-border">
-                    {category}
-                  </span>
-                  <span className="rounded-md bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent capitalize">
-                    {demoMode} Demo
-                  </span>
-                  {extractYouTubeId(videoUrl) && (
-                    <span className="rounded-md bg-sage-soft px-2.5 py-0.5 text-xs font-semibold text-sage">
-                      YouTube Pitch Linked
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="font-display text-xl font-bold text-ink">
-                    {title.trim() || "Untitled Build"}
-                  </h3>
-                  <p className="text-sm text-muted mt-1">
-                    {problemStatement.trim() ||
-                      "Helps developers automate repetitive workflows directly from the browser."}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-border/80 flex items-center justify-between text-xs text-muted">
-                  <span>Interactive Demo Fields: {formSchema.length}</span>
-                  <span>Ready for instant community testing</span>
-                </div>
-              </div>
-            </div>
+            {publishError && (
+              <p
+                role="alert"
+                className="rounded-xl bg-crimson/10 border border-crimson/30 px-4 py-3 text-xs font-semibold text-crimson"
+              >
+                {publishError}
+              </p>
+            )}
 
             <div className="flex items-center justify-between pt-3 border-t border-border">
               <button

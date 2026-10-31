@@ -2,12 +2,14 @@
 
 import type { Post } from "@arrakis/contracts";
 import { useState } from "react";
-import { ShareIcon, TerminalIcon } from "./icons";
+import { PlayIcon, ShareIcon, TerminalIcon } from "./icons";
+import { InAppBrowser } from "./in-app-browser";
 import { ShareSheet } from "./share-sheet";
 import { TrySheet } from "./try-sheet";
-import { getYouTubeEmbedUrl } from "@/lib/utils";
+import { cn, getYouTubeEmbedUrl } from "@/lib/utils";
 
 export function PostDetailClient({ post }: { post: Post }) {
+  const [stageTab, setStageTab] = useState<"browser" | "video">("browser");
   const [tryOpen, setTryOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -17,7 +19,7 @@ export function PostDetailClient({ post }: { post: Post }) {
     {
       id: "c1",
       handle: "srinjoy",
-      text: "Tested the live demo — super clean output and zero setup needed.",
+      text: "Tested the live demo in the in-app browser — super clean output and zero setup needed.",
       time: "2h ago",
     },
     {
@@ -47,8 +49,8 @@ export function PostDetailClient({ post }: { post: Post }) {
 
   return (
     <div className="space-y-6">
-      {/* Video or YouTube Stage */}
-      <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-ink border border-border">
+      {/* Video or YouTube Pitch Stage */}
+      <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden bg-ink border border-border shadow-sm">
         {ytEmbedUrl ? (
           <iframe
             title={post.title}
@@ -76,7 +78,7 @@ export function PostDetailClient({ post }: { post: Post }) {
           className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-hover transition-colors shadow-sm"
         >
           <TerminalIcon className="size-4" />
-          <span>Try Live Demo</span>
+          <span>Launch 1-Tap Sandbox</span>
         </button>
 
         <button
@@ -88,6 +90,19 @@ export function PostDetailClient({ post }: { post: Post }) {
           <span>Share</span>
         </button>
       </div>
+
+      {/* Live In-App Browser Workbench */}
+      <section className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-muted">
+            Live In-App Browser Preview
+          </span>
+          <span className="text-xs font-semibold text-accent">
+            Interactive Testbed
+          </span>
+        </div>
+        <InAppBrowser post={post} className="min-h-[440px]" />
+      </section>
 
       {/* Discussion / Builder Feedback */}
       <section className="pt-4 border-t border-border space-y-4">

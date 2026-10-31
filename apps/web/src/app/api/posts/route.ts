@@ -27,7 +27,6 @@ export async function POST(req: NextRequest) {
       demo: body.demo,
       tags: Array.isArray(body.tags) ? body.tags : ["utility", "indie"],
     });
-
     if (USE_DB) {
       try {
         await dbInsertPost(created);

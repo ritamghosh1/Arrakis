@@ -183,12 +183,22 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
             )}
           </div>
 
-          {post.health.verifiedUtility && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/85 px-2.5 py-0.5 text-[10px] font-semibold text-sage-soft">
-              <span className="size-1.5 rounded-full bg-sage" />
-              Verified Demo
+          <div className="flex items-center gap-1.5">
+            {post.health.verifiedUtility && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/85 px-2.5 py-0.5 text-[10px] font-semibold text-sage-soft">
+                <span className="size-1.5 rounded-full bg-sage" />
+                Verified Demo
+              </span>
+            )}
+            <span
+              className="rounded-full bg-ink/85 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-dune"
+              title="Bayesian Usability Score and Popularity Score"
+            >
+              <span className="text-sage-soft">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
+              <span className="text-dune/40 mx-1">·</span>
+              <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
             </span>
-          )}
+          </div>
         </div>
       </div>
 
@@ -335,20 +345,30 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
           </div>
         </div>
 
-        {/* Primary 1-Tap Try Live Demo Button */}
-        <button
-          type="button"
-          onClick={() => onTry(item)}
-          className="flex h-11 sm:h-12 w-full items-center justify-between gap-3 rounded-full bg-accent px-5 text-white font-bold text-sm hover:bg-accent-hover active:scale-[0.98] transition-transform shadow-md"
-        >
-          <span className="flex items-center gap-2">
-            <TerminalIcon className="size-4 shrink-0" />
-            <span>Try Live Demo</span>
-          </span>
-          <span className="rounded-full bg-ink/25 px-3 py-0.5 text-xs font-semibold">
-            Launch →
-          </span>
-        </button>
+        {/* Primary 1-Tap Try Live Demo Button + View Project Page Link */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onTry(item)}
+            className="flex-1 flex h-11 sm:h-12 items-center justify-between gap-3 rounded-full bg-accent px-5 text-white font-bold text-sm hover:bg-accent-hover active:scale-[0.98] transition-transform shadow-md"
+          >
+            <span className="flex items-center gap-2">
+              <TerminalIcon className="size-4 shrink-0" />
+              <span>Try Live Demo</span>
+            </span>
+            <span className="rounded-full bg-ink/25 px-3 py-0.5 text-xs font-semibold">
+              In-App Browser →
+            </span>
+          </button>
+
+          <Link
+            href={`/p/${post.id}`}
+            aria-label="View project page and in-tab browser"
+            className="grid size-11 sm:size-12 place-items-center rounded-full bg-ink/85 text-dune shadow-md hover:bg-ink transition-transform active:scale-95 shrink-0 text-sm font-bold"
+          >
+            ↗
+          </Link>
+        </div>
       </div>
     </article>
   );

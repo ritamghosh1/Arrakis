@@ -32,9 +32,11 @@ import {
 } from "@arrakis/contracts";
 import {
   USE_DB,
+  dbCreatePost,
   dbFollowingFeed,
   dbGetFollowersIds,
   dbGetFollowingIds,
+  dbInsertPost,
   dbLeaderboard,
   dbGetUserVector,
   dbPersonalizedFeed,
@@ -204,6 +206,11 @@ export function createRuntimePost(input: UploadPostInput): Post {
     runtimePosts.splice(existingIdx, 1);
   }
   runtimePosts.unshift(post);
+  if (USE_DB) {
+    void dbCreatePost(post).catch(() => {
+      // Fallback to in-memory runtimePosts if Postgres is offline
+    });
+  }
   return post;
 }
 
@@ -522,7 +529,7 @@ export async function fetchHomeFeed(
               },
             };
           });
-          return { items: deduplicatePosts(items), nextCursor: null, mode: "for_you" };
+          return { items, nextCursor: null, mode: "for_you" };
         }
       }
     } catch {

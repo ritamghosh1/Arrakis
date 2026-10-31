@@ -193,10 +193,10 @@ export async function dbInsertPost(post: Post): Promise<void> {
   );
 }
 
-/** Ranked feed via get_personalized_feed RPC with 80/20 Cold-Start Spotlight mixer & SimHash/ContentHash deduplication. */
+export const dbCreatePost = dbInsertPost;
 export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Post[]> {
   const userVec = await dbGetUserVector(userId);
-  const fetchCount = Math.max(limit * 3, 24);
+  const fetchCount = Math.max(limit * 6, 60);
   const { rows: ranked } = await pool().query(
     "SELECT id FROM get_personalized_feed($1, $2::vector, $3)",
     [userId, userVec ? toVec(userVec) : null, fetchCount],
@@ -221,10 +221,26 @@ export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Po
   const orderedCandidates = ids.map((id) => byId.get(id)!).filter(Boolean);
 
   // Deduplicate by exact ID, canonical title stem, 64-bit contentHash, and 64-bit LSH SimHash
-  const deduped = deduplicatePosts(orderedCandidates).slice(0, limit);
+  let deduped = deduplicatePosts(orderedCandidates);
+
+  if (deduped.length < limit) {
+    const existingIds = new Set(deduped.map((p) => p.id));
+    const { rows: extraRows } = await pool().query(
+      `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE p.id <> ALL($1::text[])
+       ORDER BY p.post_score DESC LIMIT $2`,
+      [Array.from(existingIds), (limit - deduped.length) * 4],
+    );
+    const extraCandidates = deduplicatePosts(extraRows.map(rowToPost), {
+      seenIds: existingIds,
+    });
+    deduped = [...deduped, ...extraCandidates];
+  }
+
+  const finalDeduped = deduped.slice(0, limit);
 
   // Enforce 80/20 Cold-Start Spotlight quota (slots 2 and 7 in a 10-post page)
-  if (limit >= 8 && deduped.length >= 8) {
+  if (limit >= 8 && finalDeduped.length >= 8) {
     const { rows: coldRows } = await pool().query(
       `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id
        WHERE (u.followers_count = 0 OR p.impressions < 100)
@@ -235,8 +251,8 @@ export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Po
       [userId],
     );
     const coldPosts = deduplicatePosts(coldRows.map(rowToPost));
-    const existingIds = new Set(deduped.map((p) => p.id));
-    const existingHashes = new Set(deduped.map((p) => computeContentHash(p)));
+    const existingIds = new Set(finalDeduped.map((p) => p.id));
+    const existingHashes = new Set(finalDeduped.map((p) => computeContentHash(p)));
     const slotPositions = [2, 7];
     let coldCursor = 0;
     for (const slot of slotPositions) {
@@ -244,7 +260,7 @@ export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Po
         const candidate = coldPosts[coldCursor++]!;
         const cHash = computeContentHash(candidate);
         if (!existingIds.has(candidate.id) && !existingHashes.has(cHash)) {
-          deduped[slot] = candidate;
+          finalDeduped[slot] = candidate;
           existingIds.add(candidate.id);
           existingHashes.add(cHash);
           break;
@@ -253,7 +269,7 @@ export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Po
     }
   }
 
-  return deduped;
+  return finalDeduped;
 }
 
 export async function dbGetFollowingIds(userId: string): Promise<string[]> {
