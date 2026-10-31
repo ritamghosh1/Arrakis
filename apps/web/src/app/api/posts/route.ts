@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   computeContentHash,
   computeSimHash64,
+  verifyGitIntegrity,
   type UploadPostInput,
 } from "@arrakis/contracts";
 import { createRuntimePost, deleteRuntimePost } from "@/lib/data";
@@ -18,6 +19,24 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Git Plagiarism / Duplicate simulation check
+    const repoCandidate = body.demo?.repoUrl?.trim() || (body.demo?.target?.includes("github.com") ? body.demo.target.trim() : "");
+    let gitInspection = repoCandidate
+      ? verifyGitIntegrity(repoCandidate, {
+          projectMeta: { title: body.title, authorHandle: "developer" },
+          registerIfClean: true,
+        })
+      : null;
+
+    const isDuplicateFlagged = Boolean(body.isDuplicateFlagged || gitInspection?.isFlagged);
+    const gitCommitSha = body.gitCommitSha || gitInspection?.commitSha;
+
+    const tags = Array.isArray(body.tags) ? [...body.tags] : ["utility", "indie"];
+    if (isDuplicateFlagged && !tags.includes("flagged-duplicate")) {
+      tags.push("flagged-duplicate");
+    }
+
     const created = createRuntimePost({
       authorId: body.authorId ?? process.env.NEXT_PUBLIC_DEFAULT_USER_ID ?? "usr_ritam",
       title: body.title,
@@ -28,10 +47,16 @@ export async function POST(req: NextRequest) {
         "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4#t=2",
       thumbUrl: body.thumbUrl,
       durationSec: body.durationSec ?? 60,
-      demo: body.demo,
-      tags: Array.isArray(body.tags) ? body.tags : ["utility", "indie"],
+      demo: {
+        ...body.demo,
+        isDuplicateFlagged,
+        repoSha: gitCommitSha,
+      },
+      tags,
       hackathonId: body.hackathonId,
       hackathonName: body.hackathonName,
+      isDuplicateFlagged,
+      gitCommitSha,
     });
 
     let deduplicated = false;

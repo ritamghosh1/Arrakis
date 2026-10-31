@@ -336,6 +336,14 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
               </div>
             )}
 
+            {Boolean(post.isDuplicateFlagged || post.tags?.includes("flagged-duplicate") || post.demo?.isDuplicateFlagged) && (
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <span className="inline-flex items-center gap-1 rounded-md bg-rose-500/25 border border-rose-500/50 px-2 py-0.5 text-[10px] font-bold text-rose-200">
+                  <span>⚠️ Flagged: Duplicate Git SHA</span>
+                </span>
+              </div>
+            )}
+
             <Link
               href={`/p/${post.id}`}
               className="block font-display text-sm sm:text-[17px] leading-snug font-bold text-dune hover:text-accent-soft transition-colors text-balance line-clamp-2"

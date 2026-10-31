@@ -75,6 +75,11 @@ export default async function PostPage({ params }: Props) {
                 🏆 Built at {post.hackathonName}
               </Link>
             )}
+            {Boolean(post.isDuplicateFlagged || post.tags?.includes("flagged-duplicate") || post.demo?.isDuplicateFlagged) && (
+              <span className="rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-xs font-bold text-rose-700">
+                ⚠️ Flagged: Duplicate Git SHA
+              </span>
+            )}
             <span className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink">
               {post.category}
             </span>

@@ -6,8 +6,10 @@ import {
   computeSimHash64,
   extractTitleStem,
   hammingDistance64,
+  verifyGitIntegrity,
   type DemoMode,
   type FormFieldSchema,
+  type GitInspectionResult,
   type Hackathon,
   type Post,
 } from "@arrakis/contracts";
@@ -119,6 +121,12 @@ export function CreatePostForm() {
       defaultValue: "json",
     },
   ]);
+
+  // Git Integrity & Plagiarism Checker simulation states
+  const [gitInspection, setGitInspection] = useState<GitInspectionResult | null>(null);
+  const [isScanningGit, setIsScanningGit] = useState(false);
+  const [gitUploadedFileName, setGitUploadedFileName] = useState<string | null>(null);
+  const [showFileHashes, setShowFileHashes] = useState(false);
 
   // Step 4: Review & Publish
   const [reviewPreviewTab, setReviewPreviewTab] = useState<"browser" | "video">("browser");
@@ -307,6 +315,53 @@ export function CreatePostForm() {
     setFormSchema((prev) => prev.filter((_, i) => i !== index));
   }
 
+  async function triggerGitScan(urlOverride?: string, fileName?: string) {
+    const targetUrl = urlOverride !== undefined ? urlOverride : repoUrl;
+    if (!targetUrl.trim() && !fileName) {
+      setGitInspection(null);
+      return;
+    }
+    setIsScanningGit(true);
+    try {
+      const res = await fetch("/api/git-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          repoUrl: targetUrl,
+          gitFileName: fileName || gitUploadedFileName || undefined,
+          register: false,
+          projectMeta: {
+            title: title.trim() || "Untitled Build",
+            authorHandle: "developer",
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data?.result) {
+        setGitInspection(data.result);
+      } else {
+        const local = verifyGitIntegrity(targetUrl, {
+          gitFileName: fileName || gitUploadedFileName || undefined,
+        });
+        setGitInspection(local);
+      }
+    } catch {
+      const local = verifyGitIntegrity(targetUrl, {
+        gitFileName: fileName || gitUploadedFileName || undefined,
+      });
+      setGitInspection(local);
+    } finally {
+      setIsScanningGit(false);
+    }
+  }
+
+  function handleGitFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setGitUploadedFileName(file.name);
+    triggerGitScan(repoUrl, file.name);
+  }
+
   async function handlePublish(e?: React.SyntheticEvent) {
     e?.preventDefault();
     if (publishing) return;
@@ -325,6 +380,12 @@ export function CreatePostForm() {
         if (selectedHackathon.tag && !tags.includes(selectedHackathon.tag)) {
           tags.push(selectedHackathon.tag);
         }
+      }
+
+      const isDuplicateFlagged = Boolean(gitInspection?.isFlagged);
+      const gitCommitSha = gitInspection?.commitSha;
+      if (isDuplicateFlagged && !tags.includes("flagged-duplicate")) {
+        tags.push("flagged-duplicate");
       }
 
       let normalizedTarget = demoTarget.trim() || "https://example.com";
@@ -353,12 +414,17 @@ export function CreatePostForm() {
             mode: demoMode,
             target: normalizedTarget,
             repoUrl: repoUrl.trim() || undefined,
+            repoSha: gitCommitSha,
+            isDuplicateFlagged,
+            duplicateOf: gitInspection?.matchedProject?.title,
             sampleCommand: sampleCommand.trim() || undefined,
             formSchema,
           },
           tags: tags.length > 0 ? tags : ["devtools", "utility"],
           hackathonId: selectedHackathon?.id,
           hackathonName: selectedHackathon?.name,
+          isDuplicateFlagged,
+          gitCommitSha,
         }),
       });
 
@@ -474,6 +540,18 @@ export function CreatePostForm() {
                 </p>
               </div>
             </div>
+
+            {Boolean(publishedPost.isDuplicateFlagged || gitInspection?.isFlagged) && (
+              <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-xs text-rose-900 space-y-1">
+                <span className="font-bold flex items-center gap-1.5 text-rose-800">
+                  <span>⚠️</span>
+                  <span>Flagged as Duplicate Repository</span>
+                </span>
+                <p>
+                  This project has been flagged because its Git repository SHA matches an earlier submission ({gitInspection?.matchedProject?.title || "existing build"}). Hackathon judges and community reviewers will see this flag.
+                </p>
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-2">
               <Link
@@ -1271,10 +1349,155 @@ export function CreatePostForm() {
                   id="demo-repo"
                   type="url"
                   value={repoUrl}
-                  onChange={(e) => setRepoUrl(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setRepoUrl(next);
+                    triggerGitScan(next);
+                  }}
                   className="w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm text-ink focus:border-accent focus:outline-none"
                 />
               </div>
+            </div>
+
+            {/* Git Tree & Plagiarism Integrity Verification Simulator */}
+            <div className="rounded-2xl border border-border bg-dune/60 p-4 sm:p-5 space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-ink text-dune text-xs font-mono font-bold">
+                    git
+                  </span>
+                  <div>
+                    <h3 className="font-display text-sm font-bold text-ink">
+                      Git Tree &amp; Plagiarism Integrity Check
+                    </h3>
+                    <p className="text-xs text-muted">
+                      Inspects .git commit history to calculate file-by-file SHAs and detect duplicate codebases in DB.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="git-file-upload"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-ink hover:border-ink/40 cursor-pointer transition-colors"
+                  >
+                    <span>📁 Inspect .git Bundle</span>
+                    <input
+                      id="git-file-upload"
+                      type="file"
+                      accept=".git,application/x-git-bundle,.zip,.tar.gz"
+                      onChange={handleGitFileUpload}
+                      className="sr-only"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => triggerGitScan(repoUrl)}
+                    disabled={isScanningGit}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-3.5 py-1.5 text-xs font-semibold text-dune hover:bg-ink/90 disabled:opacity-50 transition-colors"
+                  >
+                    <SparklesIcon className="size-3.5" />
+                    <span>{isScanningGit ? "Calculating SHAs..." : "Scan & Verify Git SHA"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {gitUploadedFileName && (
+                <div className="text-xs font-mono text-muted bg-surface rounded-lg px-2.5 py-1 border border-border inline-block">
+                  Inspecting file: {gitUploadedFileName}
+                </div>
+              )}
+
+              {/* Status Display */}
+              {isScanningGit && (
+                <div className="rounded-xl border border-border bg-surface p-4 flex items-center gap-3">
+                  <div className="size-4 rounded-full border-2 border-accent border-t-transparent animate-spin" />
+                  <div className="text-xs space-y-0.5">
+                    <p className="font-semibold text-ink">Traversing .git commit history &amp; DAG...</p>
+                    <p className="text-muted font-mono">Computing Git object SHAs for blobs and tree hashes...</p>
+                  </div>
+                </div>
+              )}
+
+              {!isScanningGit && gitInspection && (
+                <div className="space-y-3">
+                  {gitInspection.isFlagged ? (
+                    <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3.5 sm:p-4 text-xs text-rose-900 space-y-2">
+                      <div className="flex items-center gap-2 font-bold text-rose-800">
+                        <span className="text-sm">⚠️</span>
+                        <span>Duplicate Repository Detected / Flagged for Review</span>
+                      </div>
+                      <p>
+                        The calculated Git tree SHA for this repository matches an already published submission in the database:
+                      </p>
+                      <div className="rounded-lg bg-surface/80 p-2.5 border border-rose-300 font-mono text-[11px] text-ink space-y-1">
+                        <div>
+                          <strong>Matched Project:</strong> {gitInspection.matchedProject?.title} (@{gitInspection.matchedProject?.authorHandle})
+                        </div>
+                        <div>
+                          <strong>Repo URL:</strong> {gitInspection.matchedProject?.repoUrl}
+                        </div>
+                        <div>
+                          <strong>Git SHA:</strong> {gitInspection.commitSha}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-rose-800">
+                        {gitInspection.flagReason || "Flagged: Identical repository URL and commit history hash detected."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-900 space-y-1.5">
+                      <div className="flex items-center gap-2 font-bold text-emerald-800">
+                        <span className="text-sm">✅</span>
+                        <span>Repository Integrity Verified — Unique Submission</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-emerald-800">
+                        <span>Commit SHA: {gitInspection.commitSha.slice(0, 12)}...</span>
+                        <span>Tree SHA: {gitInspection.treeSha.slice(0, 10)}...</span>
+                        <span>Status: 0 matches in DB registry</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* File-by-file Git SHA viewer */}
+                  <div className="rounded-xl border border-border bg-surface overflow-hidden text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setShowFileHashes((prev) => !prev)}
+                      className="w-full flex items-center justify-between p-3 text-left font-semibold text-ink hover:bg-dune/40 transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <TerminalIcon className="size-3.5 text-accent" />
+                        <span>Calculated File-by-File Git SHAs ({gitInspection.files.length} tracked objects)</span>
+                      </span>
+                      <span className="text-[11px] text-muted">
+                        {showFileHashes ? "Hide details ▲" : "View file SHAs ▼"}
+                      </span>
+                    </button>
+
+                    {showFileHashes && (
+                      <div className="border-t border-border p-3 space-y-2 bg-ink/95 text-dune font-mono text-[11px] max-h-60 overflow-y-auto">
+                        <div className="text-muted-soft text-[10px] pb-1 border-b border-border/20">
+                          # Simulated `git ls-tree -r --stage HEAD`
+                        </div>
+                        {gitInspection.files.map((file) => (
+                          <div key={file.path} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-0.5">
+                            <span className="text-dune font-bold truncate">{file.path}</span>
+                            <div className="flex items-center gap-2 text-[10px] text-dune/70 shrink-0">
+                              <span className="text-accent-soft font-mono">blob {file.blobSha.slice(0, 10)}...</span>
+                              <span className="text-muted-soft">({file.sizeBytes} B)</span>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="pt-2 border-t border-border/20 text-[10px] text-accent-soft flex items-center justify-between">
+                          <span>HEAD commit: {gitInspection.commitSha.slice(0, 20)}...</span>
+                          <span>tree: {gitInspection.treeSha.slice(0, 10)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Live In-App Browser Preview in Step 3 */}
@@ -1445,6 +1668,15 @@ export function CreatePostForm() {
                       🏆 Built at {selectedHackathon.name}
                     </span>
                   )}
+                  {gitInspection?.isFlagged ? (
+                    <span className="rounded-md bg-rose-500/20 border border-rose-500/40 px-2.5 py-0.5 text-xs font-bold text-rose-800 flex items-center gap-1">
+                      ⚠️ Duplicate Git SHA ({gitInspection.matchedProject?.title || "Existing DB Match"})
+                    </span>
+                  ) : gitInspection?.commitSha ? (
+                    <span className="rounded-md bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 flex items-center gap-1">
+                      🛡️ Git SHA: {gitInspection.commitSha.slice(0, 8)} (Verified)
+                    </span>
+                  ) : null}
                   <span className="rounded-md bg-surface px-2.5 py-0.5 font-mono text-xs text-muted border border-border">
                     {normalizedPreviewTarget}
                   </span>
@@ -1453,6 +1685,18 @@ export function CreatePostForm() {
                   ContentHash: 0x{liveContentHash.slice(0, 10)} · SimHash64: 0x{liveSimHashHex.slice(0, 10)}
                 </span>
               </div>
+
+              {gitInspection?.isFlagged && (
+                <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-xs text-rose-900 space-y-1">
+                  <p className="font-bold flex items-center gap-1.5 text-rose-800">
+                    <span>⚠️</span>
+                    <span>Plagiarism / Duplicate Repository Flag Active</span>
+                  </p>
+                  <p>
+                    Matches project <strong>{gitInspection.matchedProject?.title}</strong> by @{gitInspection.matchedProject?.authorHandle}. Both submissions share identical Git commit SHAs.
+                  </p>
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>

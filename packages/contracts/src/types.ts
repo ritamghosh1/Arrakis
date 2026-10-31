@@ -80,6 +80,11 @@ export interface DemoConfig {
   target: string;
   /** Optional Dockerfile repo URL if building from source */
   repoUrl?: string;
+  /** Calculated git commit SHA */
+  repoSha?: string;
+  /** Flagged duplicate / plagiarism status */
+  isDuplicateFlagged?: boolean;
+  duplicateOf?: string;
   /** Auto-generated form fields for API/CLI/Container modes */
   formSchema?: FormFieldSchema[];
   /** Default CLI args or sample payload */
@@ -137,6 +142,8 @@ export interface Post {
   dailyLeaderboardScore?: number;
   hackathonId?: string;
   hackathonName?: string;
+  isDuplicateFlagged?: boolean;
+  gitCommitSha?: string;
   createdAt: string;
 }
 
@@ -307,4 +314,46 @@ export interface UploadPostInput {
   tags: string[];
   hackathonId?: string;
   hackathonName?: string;
+  isDuplicateFlagged?: boolean;
+  gitCommitSha?: string;
 }
+
+export interface GitFileHash {
+  path: string;
+  blobSha: string;
+  sizeBytes: number;
+  commitMessage: string;
+}
+
+export interface GitInspectionResult {
+  repoUrl: string;
+  normalizedUrl: string;
+  branch: string;
+  commitSha: string;
+  treeSha: string;
+  parentSha?: string;
+  files: GitFileHash[];
+  isDuplicate: boolean;
+  isFlagged: boolean;
+  flagReason?: string;
+  matchedProject?: {
+    id: string;
+    title: string;
+    authorHandle: string;
+    registeredAt?: string;
+    repoUrl: string;
+  };
+}
+
+export interface StoredGitHashRecord {
+  urlHash: string;
+  commitSha: string;
+  treeSha: string;
+  repoUrl: string;
+  normalizedUrl: string;
+  projectId: string;
+  projectTitle: string;
+  authorHandle: string;
+  registeredAt: string;
+}
+

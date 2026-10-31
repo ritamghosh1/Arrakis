@@ -203,6 +203,8 @@ export function createRuntimePost(input: UploadPostInput): Post {
     dailyLeaderboardScore: 0.89,
     hackathonId: input.hackathonId,
     hackathonName: input.hackathonName,
+    isDuplicateFlagged: input.isDuplicateFlagged,
+    gitCommitSha: input.gitCommitSha,
     createdAt: new Date().toISOString(),
   };
   const newHash = computeContentHash(post);
