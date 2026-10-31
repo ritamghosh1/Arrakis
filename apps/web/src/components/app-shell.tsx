@@ -23,13 +23,14 @@ const NAV_ITEMS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isHomeFeed = pathname === "/";
 
   return (
     <div className="min-h-dvh bg-dune text-ink flex flex-col lg:flex-row">
       {/* Desktop Left Rail (>= 1024px) */}
       <aside
         aria-label="Primary navigation"
-        className="hidden lg:flex lg:w-[264px] lg:shrink-0 lg:flex-col lg:justify-between lg:border-r lg:border-border lg:bg-surface/90 lg:px-5 lg:py-6 lg:sticky lg:top-0 lg:h-dvh z-nav"
+        className="hidden lg:flex lg:w-[264px] lg:shrink-0 lg:flex-col lg:justify-between lg:bg-surface/90 lg:px-5 lg:py-6 lg:sticky lg:top-0 lg:h-dvh z-nav"
       >
         <div className="space-y-7">
           <Link
@@ -125,7 +126,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main id="main-content" className="flex-1 min-w-0 pb-20 lg:pb-0">
+      <main
+        id="main-content"
+        className={cn(
+          "flex-1 min-w-0",
+          isHomeFeed
+            ? "h-[calc(100dvh-3.75rem)] lg:h-dvh overflow-hidden flex flex-col"
+            : "pb-20 lg:pb-0"
+        )}
+      >
         {children}
       </main>
 

@@ -1042,6 +1042,7 @@ export function CreatePostForm() {
                     title="YouTube preview"
                     src={ytEmbedUrl}
                     className="h-full w-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 ) : (

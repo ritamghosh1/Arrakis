@@ -16,6 +16,8 @@
     "dev:scoring": "npm --workspace @arrakis/scoring run dev",
     "dev:recommender": "cd services/recommender && .venv/bin/uvicorn app.main:app --reload --port 4001",
     "build": "npm run build --workspaces --if-present",
+    "test": "npm test --workspace @arrakis/scoring",
+    "test:e2e": "npm --workspace @arrakis/web run test:e2e",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "db:generate": "npm --workspace @arrakis/contracts run db:generate",

@@ -87,17 +87,17 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 - [x] Tester XP engine (try +10, review +25, first-25 +100, bug confirmed +50), levels, badges
 - [x] Event consumer (Redis stream/poll) with idempotent incremental updates + `rebuild-from-events`
 - [x] Redis ZSET leaderboards (builders/testers/trending × periods) + daily snapshot for ▲▼ deltas
-- [x] `GET /leaderboard`, `GET /users/:id/profile` (rank, XP, badges)
+ - [x] `GET /leaderboard`, `GET /users/:id/profile` (rank, XP, badges)
 - [x] Leaderboard UI: tabs, period filter, podium, rows with delta, "why this rank" popover, pinned "You" row, `aria-live`
 - [x] Badge gallery component + XP/level-up toast
 
 ### A10. Quality (M4)
-- [ ] `fixing-accessibility` audit on every screen; fix findings
-- [ ] `fixing-motion-performance` audit (feed, transitions); honour reduced motion
-- [ ] `baseline-ui` polish pass; `improve-ui` review → plan → fixes
-- [ ] Perf: LCP<2.5s, INP<200ms, CLS<0.1 (`performance` guide); `content-visibility` on lists
-- [ ] Responsive QA (360px, 768px, 1280px+), Safari/Chrome/Firefox check
-- [ ] Playwright e2e: browse→try→review→leaderboard; upload happy path
+- [x] `fixing-accessibility` audit on every screen; fix findings
+- [x] `fixing-motion-performance` audit (feed, transitions); honour reduced motion
+- [x] `baseline-ui` polish pass; `improve-ui` review → plan → fixes
+- [x] Perf: LCP<2.5s, INP<200ms, CLS<0.1 (`performance` guide); `content-visibility` on lists
+- [x] Responsive QA (360px, 768px, 1280px+), Safari/Chrome/Firefox check
+- [x] Playwright e2e: browse→try→review→leaderboard; upload happy path
 
 ---
 
@@ -107,32 +107,32 @@ Owners: **Dev A (Ritam)** = UI + Ranking/Leaderboard · **Dev B (Srinjoy)** = Re
 - [x] Postgres schema for `follows`, `events`, `post_embeddings` (pgvector + HNSW/IVFFlat index), `taste_vectors`, `user_impressions` + telemetry RPCs (`0001_telemetry_dual_scoring.sql`)
 - [x] Event & telemetry ingest `POST /events` + `POST /api/telemetry` (run tier classification, EMA taste vector update)
 - [x] Mock server serving seed JSON per contract (unblocks Dev A — **do first**)
-- [ ] Embedding utility with fallback (OpenAI → local model → seeded vectors)
+- [x] Embedding utility with fallback (OpenAI → local model → seeded vectors)
 
 ### B2. Follow system
-- [ ] `POST/DELETE /follow/:userId` (idempotent, no self-follow), counts cache
-- [ ] `GET /users/:id/followers|following` with pagination
-- [ ] `GET /suggestions/users` (followed-by-my-follows + topical affinity + top builders)
-- [ ] Follow → taste-vector nudge + `follow` event
+- [x] `POST/DELETE /follow/:userId` (idempotent, no self-follow), counts cache
+- [x] `GET /users/:id/followers|following` with pagination
+- [x] `GET /suggestions/users` (followed-by-my-follows + topical affinity + top builders)
+- [x] Follow → taste-vector nudge + `follow` event
 
 ### B3. Recommendation engine
-- [ ] Taste vector updater with decay & weights (watch .2, try .6, review 1.0, share .4)
-- [ ] Candidate generators: followed_recent, taste ANN, coldstart pool, trending
-- [ ] Scoring blend (cos, social boost, quality, freshness, penalties) with tunable config
-- [ ] 80/20 mixer (2 of 10 cold-start slots) + MMR diversity + seen-dedupe
-- [ ] **Reason attribution** (`followed` with `via`, 2nd-degree "@x tried this", taste, coldstart, trending) in `FeedItem`
-- [ ] `GET /feed/home` (For-you) + `?mode=following`; cursor pagination, stable ordering
-- [ ] `GET /feed/global` hybrid search: FTS + vector + RRF; returns similarity & matched phrase
-- [ ] Onboarding cold-start: category picks → initial taste vector
-- [ ] `GET /feed/debug?userId=` (sources, scores) for judges
-- [ ] Offline eval on seeded personas: hit@10 vs random vs trending; document in `services/recommender/EVAL.md`
-- [ ] Unit tests: attribution correctness, 80/20 quota, no self-recommendation, seen-dedupe
+- [x] Taste vector updater with decay & weights (watch .2, try .6, review 1.0, share .4)
+- [x] Candidate generators: followed_recent, taste ANN, coldstart pool, trending
+- [x] Scoring blend (cos, social boost, quality, freshness, penalties) with tunable config
+- [x] 80/20 mixer (2 of 10 cold-start slots) + MMR diversity + seen-dedupe
+- [x] **Reason attribution** (`followed` with `via`, 2nd-degree "@x tried this", taste, coldstart, trending) in `FeedItem`
+- [x] `GET /feed/home` (For-you) + `?mode=following`; cursor pagination, stable ordering
+- [x] `GET /feed/global` hybrid search: FTS + vector + RRF; returns similarity & matched phrase
+- [x] Onboarding cold-start: category picks → initial taste vector
+- [x] `GET /feed/debug?userId=` (sources, scores) for judges
+- [x] Offline eval on seeded personas: hit@10 vs random vs trending; document in `services/recommender/EVAL.md`
+- [x] Unit tests: attribution correctness, 80/20 quota, no self-recommendation, seen-dedupe
 
 ### B4. AI indexing pipeline
-- [ ] Upload hook → audio extract (ffmpeg) → Whisper (or mock transcript)
-- [ ] LLM utility extractor prompt (problem/for whom/no buzzwords) with JSON-schema output
-- [ ] Embedding → store; status field (`pending|ready|failed`) + retry
-- [ ] Mock mode: heuristic from title/description
+- [x] Upload hook → audio extract (ffmpeg) → Whisper (or mock transcript)
+- [x] LLM utility extractor prompt (problem/for whom/no buzzwords) with JSON-schema output
+- [x] Embedding → store; status field (`pending|ready|failed`) + retry
+- [x] Mock mode: heuristic from title/description
 
 ### B5. Containerized Try-It (`services/sandbox`)
 - [ ] Orchestrator skeleton with `SANDBOX_DRIVER=docker|mock`; hello-world container run end to end

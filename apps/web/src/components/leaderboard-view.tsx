@@ -25,8 +25,8 @@ const TABS: { id: LeaderboardType; label: string; subtitle: string }[] = [
   { id: "builders", label: "Top Builders", subtitle: "Makers shipping reliable tools" },
   { id: "testers", label: "Top Scouts", subtitle: "Members testing & reviewing builds" },
   { id: "trending", label: "Trending Builds", subtitle: "Most tested projects this week" },
-  { id: "useful", label: "Most Useful", subtitle: "Highest Bayesian usability score" },
-  { id: "popular", label: "Most Popular", subtitle: "Highest community popularity score" },
+  { id: "useful", label: "Most Useful", subtitle: "Highest hands-on community rating" },
+  { id: "popular", label: "Most Popular", subtitle: "Most shared and bookmarked builds" },
 ];
 
 const PERIODS: { id: LeaderboardPeriod; label: string }[] = [
@@ -121,7 +121,7 @@ export function LeaderboardView({ initialData }: LeaderboardViewProps) {
               onClick={() => loadBoard(tab.id, period)}
               aria-pressed={active}
               className={cn(
-                "rounded-2xl border p-4 text-left transition-all",
+                "rounded-2xl border p-4 text-left transition-colors",
                 active
                   ? "border-ink bg-ink text-dune shadow-sm"
                   : "border-border bg-surface text-ink hover:border-ink/40"

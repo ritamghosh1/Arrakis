@@ -24,13 +24,11 @@ interface ReelCardProps {
 }
 
 export const MODE_LABEL: Record<string, string> = {
-  container: "Live Container",
+  container: "Live Sandbox",
   api: "Interactive API",
   web: "Web App",
   handoff: "Desktop App",
 };
-
-const MODE_LABELS = MODE_LABEL;
 
 export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
   const { post, reason } = item;
@@ -109,265 +107,267 @@ export function ReelCard({ item, isActive, onTry, onShare }: ReelCardProps) {
   return (
     <article
       aria-label={`${post.title} by @${post.author.handle}`}
-      className="relative w-full max-w-[660px] mx-auto rounded-2xl border border-border bg-surface shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+      data-post-id={post.id}
+      className="relative h-full w-full max-w-[440px] mx-auto sm:rounded-2xl bg-ink text-dune overflow-hidden shadow-md flex flex-col justify-between"
     >
-      {/* Top Attribution & Category Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-border bg-surface">
-        <ReasonChip reason={reason} />
-        <div className="flex items-center gap-2 text-xs text-muted">
-          <span className="rounded-md bg-dune px-2.5 py-0.5 font-medium text-ink border border-border">
-            {post.category}
-          </span>
-          {post.health.verifiedUtility && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-sage-soft px-2.5 py-0.5 font-semibold text-sage">
-              <span className="size-1.5 rounded-full bg-sage" />
-              Verified Demo
-            </span>
-          )}
-          <span
-            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-dune px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink tabular-nums"
-            title="Bayesian Usability Score (S_use) and Popularity Score (S_pop)"
+      {/* Full-Bleed Background Media Stage (zero internal border lines) */}
+      <div className="absolute inset-0 bg-ink">
+        <img
+          src={post.thumbUrl}
+          alt={post.title}
+          loading={isActive ? "eager" : "lazy"}
+          decoding="async"
+          className="h-full w-full object-cover opacity-85"
+        />
+
+        {ytEmbedUrl ? (
+          isActive && (
+            <iframe
+              title={post.title}
+              src={ytEmbedUrl}
+              className="absolute inset-x-0 top-14 h-[46%] w-full border-0 bg-ink"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )
+        ) : (
+          <video
+            ref={videoRef}
+            poster={post.thumbUrl}
+            src={isActive ? post.videoUrl : undefined}
+            preload={isActive ? "metadata" : "none"}
+            loop
+            muted={muted}
+            playsInline
+            onClick={handleVideoClick}
+            className="absolute inset-0 h-full w-full object-cover opacity-90 cursor-pointer"
+          />
+        )}
+
+        {/* Play indicator when paused */}
+        {!ytEmbedUrl && paused && (
+          <button
+            type="button"
+            onClick={handleVideoClick}
+            aria-label="Play pitch video"
+            className="absolute inset-0 flex items-center justify-center bg-ink/25"
           >
-            <span className="text-sage">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
-            <span className="text-muted">·</span>
-            <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
-          </span>
+            <span className="flex size-14 items-center justify-center rounded-full bg-surface/95 text-ink shadow-md">
+              <PlayIcon className="size-6 translate-x-0.5" />
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* Top Overlay Bar: Reason Attribution + Category & Sound */}
+      <div className="relative z-feed flex items-start justify-between gap-2 p-3.5">
+        <ReasonChip reason={reason} />
+
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-semibold text-dune">
+              {MODE_LABEL[post.demo.mode] ?? "Live Demo"}
+            </span>
+            {!ytEmbedUrl && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMuted((m) => !m);
+                }}
+                aria-label={muted ? "Unmute pitch video" : "Mute pitch video"}
+                className="rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-semibold text-dune hover:bg-ink transition-colors"
+              >
+                {muted ? "Muted" : "Sound"}
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {post.health.verifiedUtility && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-ink/85 px-2.5 py-0.5 text-[10px] font-semibold text-sage-soft">
+                <span className="size-1.5 rounded-full bg-sage" />
+                Verified Demo
+              </span>
+            )}
+            <span
+              className="rounded-full bg-ink/85 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-dune"
+              title="Bayesian Usability Score and Popularity Score"
+            >
+              <span className="text-sage-soft">Use {(post.usabilityScore ?? 1.45).toFixed(2)}</span>
+              <span className="text-dune/40 mx-1">·</span>
+              <span>Pop {Math.round(post.popularityScore ?? post.postScore)}</span>
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Main Reel Body */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_72px]">
-        <div className="flex flex-col">
-          {/* Video Pitch or YouTube Stage */}
-          <div className="relative aspect-[16/10] w-full bg-ink overflow-hidden group">
-            {ytEmbedUrl ? (
-              isActive ? (
-                <iframe
-                  title={post.title}
-                  src={ytEmbedUrl}
-                  className="h-full w-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="relative h-full w-full">
-                  <img
-                    src={post.thumbUrl}
-                    alt={post.title}
-                    className="h-full w-full object-cover opacity-90"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-ink/30">
-                    <span className="flex size-14 items-center justify-center rounded-full bg-surface/95 text-ink shadow-md">
-                      <PlayIcon className="size-6 translate-x-0.5" />
-                    </span>
-                  </div>
-                </div>
-              )
-            ) : (
-              <>
-                <video
-                  ref={videoRef}
-                  poster={post.thumbUrl}
-                  src={ isActive ? post.videoUrl : undefined }
-                  preload={isActive ? "metadata" : "none"}
-                  loop
-                  muted={muted}
-                  playsInline
-                  onClick={handleVideoClick}
-                  className="h-full w-full object-cover cursor-pointer"
-                />
-
-                {/* Top-right Controls */}
-                <div className="absolute top-3 right-3 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMuted((m) => !m);
-                    }}
-                    aria-label={muted ? "Unmute pitch video" : "Mute pitch video"}
-                    className="rounded-lg bg-ink/80 px-2.5 py-1 text-xs font-medium text-dune hover:bg-ink transition-colors"
-                  >
-                    {muted ? "Muted" : "Sound On"}
-                  </button>
-                </div>
-
-                {/* Play state indicator */}
-                {paused && (
-                  <button
-                    type="button"
-                    onClick={handleVideoClick}
-                    aria-label="Play pitch video"
-                    className="absolute inset-0 flex items-center justify-center bg-ink/30"
-                  >
-                    <span className="flex size-14 items-center justify-center rounded-full bg-surface/95 text-ink shadow-md">
-                      <PlayIcon className="size-6 translate-x-0.5" />
-                    </span>
-                  </button>
-                )}
-              </>
-            )}
-
-            {/* Mode Pill */}
-            <div className="absolute bottom-3 left-3 flex items-center gap-2 pointer-events-none">
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-ink/85 px-2.5 py-1 text-[11px] font-medium text-dune">
-                <span className="size-1.5 rounded-full bg-sage" />
-                {MODE_LABELS[post.demo.mode] ?? "Live Demo"}
-              </span>
-            </div>
-          </div>
-
-          {/* Problem-First Editorial Card */}
-          <div className="p-4 sm:p-5 space-y-4">
-            <div className="rounded-xl border border-border bg-dune/70 p-3.5">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
-                  Problem Solved
-                </span>
-                {item.viewerState?.tried && (
-                  <span className="rounded-md bg-sage-soft px-2 py-0.5 text-[11px] font-semibold text-sage">
-                    Tested by you
-                  </span>
-                )}
-              </div>
-              <p className="text-sm sm:text-[15px] font-medium text-ink leading-snug text-pretty">
-                {post.problemStatement}
-              </p>
-            </div>
-
-            {/* Title & Tags */}
-            <div className="space-y-2">
-              <Link
-                href={`/p/${post.id}`}
-                className="block font-display text-lg sm:text-xl font-bold tracking-tight text-ink hover:text-accent transition-colors text-balance"
-              >
-                {post.title}
-              </Link>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {post.tags.map((tag) => (
-                  <Link
-                    key={tag}
-                    href={`/explore?q=${encodeURIComponent(tag)}`}
-                    className="rounded-md bg-dune px-2 py-0.5 text-xs text-muted hover:text-ink transition-colors"
-                  >
-                    #{tag}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Author & Follow Row */}
-            <div className="flex items-center justify-between gap-3 pt-3 border-t border-border">
-              <Link href={`/u/${post.author.handle}`} className="flex items-center gap-2.5 min-w-0 group">
-                <img
-                  src={post.author.avatarUrl}
-                  alt={post.author.displayName}
-                  className="size-9 rounded-full border border-border bg-dune object-cover shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-semibold text-ink group-hover:text-accent transition-colors truncate">
-                      {post.author.displayName}
-                    </span>
-                    {post.author.verifiedUtility && (
-                      <VerifiedIcon className="size-4 text-sage shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted truncate">@{post.author.handle}</p>
-                </div>
-              </Link>
-
-              <button
-                type="button"
-                onClick={handleToggleFollow}
-                aria-pressed={following}
-                className={cn(
-                  "rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-colors",
-                  following
-                    ? "border border-border bg-dune text-ink hover:bg-border/40"
-                    : "bg-ink text-dune hover:bg-ink/90"
-                )}
-              >
-                {following ? "Following" : "Follow"}
-              </button>
-            </div>
-
-            {/* Clean Try Live Demo & View Project Dock */}
-            <div className="pt-1 flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => onTry(item)}
-                className="flex-1 flex items-center justify-between gap-3 rounded-xl bg-accent px-4 py-3 text-white font-semibold text-sm hover:bg-accent-hover active:scale-[0.99] transition-all shadow-sm"
-              >
-                <span className="flex items-center gap-2.5">
-                  <TerminalIcon className="size-4 shrink-0" />
-                  <span>Try Live Demo</span>
-                </span>
-                <span className="rounded-lg bg-ink/20 px-2.5 py-0.5 text-xs font-medium">
-                  In-App Browser →
-                </span>
-              </button>
-
-              <Link
-                href={`/p/${post.id}`}
-                className="inline-flex items-center justify-center rounded-xl border border-border bg-dune px-4 py-3 text-xs font-semibold text-ink hover:bg-border/50 transition-colors shrink-0"
-              >
-                View Project
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Action Rail */}
-        <div className="flex md:flex-col items-center justify-around md:justify-start gap-2 border-t md:border-t-0 md:border-l border-border bg-dune/40 p-2.5 md:py-4">
+      {/* Right Floating Action Rail (Instagram Reels style — no divider lines) */}
+      <div className="absolute right-3 bottom-44 z-feed flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-1">
           <button
             type="button"
             onClick={handleToggleUpvote}
             aria-label={upvoted ? "Remove upvote" : "Upvote project"}
             aria-pressed={upvoted}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-semibold transition-colors",
+              "grid size-11 place-items-center rounded-full shadow-sm transition-transform active:scale-95",
               upvoted
-                ? "bg-accent-soft text-accent"
-                : "text-muted hover:bg-surface hover:text-ink"
+                ? "bg-accent text-white"
+                : "bg-ink/85 text-dune hover:bg-ink"
             )}
           >
             <ArrowUpIcon className="size-5" />
-            <span className="tabular-nums">{compact(upvoteCount)}</span>
           </button>
+          <span className="rounded-full bg-ink/85 px-2 py-0.5 text-[10px] font-semibold text-dune tabular-nums">
+            {compact(upvoteCount)}
+          </span>
+        </div>
 
+        <div className="flex flex-col items-center gap-1">
           <Link
             href={`/p/${post.id}`}
             aria-label="View project details and discussion"
-            className="flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-medium text-muted hover:bg-surface hover:text-ink transition-colors"
+            className="grid size-11 place-items-center rounded-full bg-ink/85 text-dune shadow-sm hover:bg-ink transition-transform active:scale-95"
           >
             <MessageIcon className="size-5" />
-            <span className="tabular-nums">{compact(post.stats.comments)}</span>
           </Link>
+          <span className="rounded-full bg-ink/85 px-2 py-0.5 text-[10px] font-semibold text-dune tabular-nums">
+            {compact(post.stats.comments)}
+          </span>
+        </div>
 
+        <div className="flex flex-col items-center gap-1">
           <button
             type="button"
             onClick={() => setSaved((s) => !s)}
             aria-label={saved ? "Remove bookmark" : "Bookmark project"}
             aria-pressed={saved}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-medium transition-colors",
-              saved ? "bg-amber-soft text-amber" : "text-muted hover:bg-surface hover:text-ink"
+              "grid size-11 place-items-center rounded-full shadow-sm transition-transform active:scale-95",
+              saved
+                ? "bg-amber text-white"
+                : "bg-ink/85 text-dune hover:bg-ink"
             )}
           >
             <BookmarkIcon className="size-5" />
-            <span>{saved ? "Saved" : "Save"}</span>
           </button>
+          <span className="rounded-full bg-ink/85 px-2 py-0.5 text-[10px] font-semibold text-dune">
+            {saved ? "Saved" : "Save"}
+          </span>
+        </div>
 
+        <div className="flex flex-col items-center gap-1">
           <button
             type="button"
             onClick={() => onShare(item)}
             aria-label="Share project"
-            className="flex flex-col items-center gap-1 rounded-xl p-2 w-14 text-xs font-medium text-muted hover:bg-surface hover:text-ink transition-colors"
+            className="grid size-11 place-items-center rounded-full bg-ink/85 text-dune shadow-sm hover:bg-ink transition-transform active:scale-95"
           >
             <ShareIcon className="size-5" />
-            <span>Share</span>
           </button>
+          <span className="rounded-full bg-ink/85 px-2 py-0.5 text-[10px] font-semibold text-dune">
+            Share
+          </span>
+        </div>
+      </div>
+
+      {/* Bottom Overlay: Builder Pill + Problem Card + 1-Tap Try Live Demo Dock */}
+      <div className="relative z-feed mt-auto flex flex-col gap-2.5 p-3.5 pr-16">
+        {/* Author & Follow Pill */}
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/u/${post.author.handle}`}
+            className="flex min-w-0 items-center gap-2 rounded-full bg-ink/85 py-1 pl-1 pr-3 text-dune hover:bg-ink transition-colors"
+          >
+            <img
+              src={post.author.avatarUrl}
+              alt={post.author.displayName}
+              width={28}
+              height={28}
+              className="size-7 rounded-full bg-dune object-cover shrink-0"
+            />
+            <span className="truncate text-xs font-bold">@{post.author.handle}</span>
+            {post.author.verifiedUtility && (
+              <VerifiedIcon className="size-3.5 text-sage shrink-0" />
+            )}
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleToggleFollow}
+            aria-pressed={following}
+            className={cn(
+              "ml-auto shrink-0 rounded-full px-3.5 py-1 text-xs font-bold transition-transform active:scale-95",
+              following
+                ? "bg-ink/85 text-dune"
+                : "bg-dune text-ink hover:bg-surface"
+            )}
+          >
+            {following ? "Following" : "+ Follow"}
+          </button>
+        </div>
+
+        {/* Problem-First Overlay Card */}
+        <div className="rounded-2xl bg-ink/90 p-3.5 text-dune shadow-sm space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-accent-soft">
+              {post.category} · Problem Solved
+            </span>
+            {item.viewerState?.tried && (
+              <span className="rounded-full bg-sage/30 px-2 py-0.5 text-[10px] font-semibold text-sage-soft">
+                Tested by you
+              </span>
+            )}
+          </div>
+
+          <Link
+            href={`/p/${post.id}`}
+            className="block font-display text-base sm:text-[17px] leading-snug font-bold text-dune hover:text-accent-soft transition-colors text-balance line-clamp-2"
+          >
+            {post.title}
+          </Link>
+
+          <p className="text-xs sm:text-[13px] leading-relaxed text-dune/90 line-clamp-2 text-pretty">
+            {post.problemStatement}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            {post.tags.slice(0, 3).map((tag) => (
+              <Link
+                key={tag}
+                href={`/explore?q=${encodeURIComponent(tag)}`}
+                className="rounded-md bg-dune/15 px-2 py-0.5 text-[11px] font-medium text-dune/90 hover:bg-dune/25 transition-colors"
+              >
+                #{tag}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Primary 1-Tap Try Live Demo Button + View Project Page Link */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onTry(item)}
+            className="flex-1 flex h-11 sm:h-12 items-center justify-between gap-3 rounded-full bg-accent px-5 text-white font-bold text-sm hover:bg-accent-hover active:scale-[0.98] transition-transform shadow-md"
+          >
+            <span className="flex items-center gap-2">
+              <TerminalIcon className="size-4 shrink-0" />
+              <span>Try Live Demo</span>
+            </span>
+            <span className="rounded-full bg-ink/25 px-3 py-0.5 text-xs font-semibold">
+              In-App Browser →
+            </span>
+          </button>
+
+          <Link
+            href={`/p/${post.id}`}
+            aria-label="View project page and in-tab browser"
+            className="grid size-11 sm:size-12 place-items-center rounded-full bg-ink/85 text-dune shadow-md hover:bg-ink transition-transform active:scale-95 shrink-0 text-sm font-bold"
+          >
+            ↗
+          </Link>
         </div>
       </div>
     </article>

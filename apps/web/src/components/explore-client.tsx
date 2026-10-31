@@ -17,7 +17,7 @@ export function ExploreClient({ items }: { items: FeedItem[] }) {
         {items.map(({ post }) => (
           <article
             key={post.id}
-            className="rounded-2xl border border-border bg-surface overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+            className="cv-auto rounded-2xl border border-border bg-surface overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
           >
             <div>
               <Link href={`/p/${post.id}`} className="block relative aspect-[16/9] bg-ink">

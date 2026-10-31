@@ -77,6 +77,78 @@ const CATEGORIES = [
   "Security & Privacy",
 ] as const;
 
+const CATEGORY_KEYWORDS: ReadonlyArray<readonly string[]> = [
+  ["cli", "docker", "api", "rust", "dev", "sdk", "json", "webhook", "git", "terminal", "lint", "test"],
+  ["pdf", "resume", "document", "markdown", "invoice", "ocr", "contract", "parse", "extract", "latex"],
+  ["csv", "sql", "parquet", "table", "data", "spreadsheet", "duckdb", "sqlite", "etl", "schema", "clean"],
+  ["cron", "workflow", "calendar", "email", "automate", "productivity", "triage", "digest", "note", "task"],
+  ["svg", "image", "video", "color", "font", "design", "canvas", "audio", "sprite", "og", "media"],
+  ["jwt", "secret", "redact", "pii", "security", "auth", "encrypt", "env", "audit", "privacy", "token"],
+];
+
+/**
+ * Deterministic 16-d semantic intent embedding generator aligned with SEED_POST_VECTORS & pgvector(16).
+ * Used for newly uploaded builds (B4) and hybrid semantic search queries (B3).
+ */
+export function computeIntentEmbedding(input: {
+  title: string;
+  problemStatement?: string;
+  category?: string;
+  tags?: string[];
+}): number[] {
+  const corpus = [
+    input.title,
+    input.problemStatement ?? "",
+    input.category ?? "",
+    ...(input.tags ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  let dominantDim = input.category
+    ? CATEGORIES.findIndex((c) => c.toLowerCase() === input.category!.toLowerCase())
+    : -1;
+
+  const catScores = CATEGORY_KEYWORDS.map((words) =>
+    words.reduce((acc, w) => (corpus.includes(w) ? acc + 1 : acc), 0)
+  );
+
+  if (dominantDim < 0) {
+    let bestScore = 0;
+    catScores.forEach((score, idx) => {
+      if (score > bestScore) {
+        bestScore = score;
+        dominantDim = idx;
+      }
+    });
+    if (dominantDim < 0) dominantDim = 0;
+  }
+
+  // Deterministic hash seed from corpus text
+  let textHash = 17;
+  for (let i = 0; i < corpus.length; i++) {
+    textHash = (textHash * 31 + corpus.charCodeAt(i)) % 9973;
+  }
+
+  const raw: number[] = [];
+  let norm = 0;
+  for (let i = 0; i < 16; i++) {
+    let val: number;
+    if (i === dominantDim % 16) {
+      val = 0.85;
+    } else if (i < 6 && catScores[i]! > 0) {
+      val = Math.min(0.45, 0.15 * catScores[i]!);
+    } else {
+      val = ((textHash * 13 + i * 7) % 19) / 40 - 0.2;
+    }
+    raw.push(val);
+    norm += val * val;
+  }
+
+  const mag = Math.sqrt(norm) || 1;
+  return raw.map((v) => Number((v / mag).toFixed(4)));
+}
+
 const SEED_USER_SPECS: Array<{
   id: string;
   handle: string;
@@ -419,6 +491,132 @@ const EXTRA_PROBLEMS: Array<{
     category: "Security & Privacy",
     mode: "container",
     tags: ["privacy", "redaction", "security"],
+  },
+  {
+    title: "PortHound — Inspect and free stuck localhost development ports in one command",
+    problem: "Identify which zombie Node, Docker, or Python process is holding port 3000/5432 and terminate it cleanly.",
+    category: "Developer Tools",
+    mode: "container",
+    tags: ["ports", "cli", "localhost", "devops"],
+  },
+  {
+    title: "SchemaDiff — Zero-downtime Postgres migration linter for risky ALTER TABLE locks",
+    problem: "Catch table-locking Postgres DDL statements in pull requests before they cause production downtime.",
+    category: "Data & CSV",
+    mode: "api",
+    tags: ["postgres", "migrations", "sql", "lint"],
+  },
+  {
+    title: "CiteCheck — Verify BibTeX & DOI references in LaTeX manuscripts against Crossref",
+    problem: "Detect hallucinated or broken academic citations and auto-fill missing volume, page, and DOI metadata.",
+    category: "Document & PDF",
+    mode: "api",
+    tags: ["latex", "bibtex", "research", "pdf"],
+  },
+  {
+    title: "JWTSurgeon — Decode, verify, and fuzz-test OAuth2 & OIDC tokens locally",
+    problem: "Inspect JWT claims, clock-skew expiration bugs, and signature algorithms without pasting tokens into public sites.",
+    category: "Security & Privacy",
+    mode: "web",
+    tags: ["jwt", "oauth", "security", "auth"],
+  },
+  {
+    title: "ParquetPeek — Stream and query multi-gigabyte Parquet files in the browser via DuckDB",
+    problem: "Run instant SQL aggregations over S3 or local Parquet datasets without spinning up a Spark cluster.",
+    category: "Data & CSV",
+    mode: "web",
+    tags: ["parquet", "duckdb", "sql", "analytics"],
+  },
+  {
+    title: "PR-Slice — Split oversized 1,500-line pull requests into reviewable stacked branches",
+    problem: "Automatically group independent file changes by dependency graph into clean, atomic git branches.",
+    category: "Productivity & Automation",
+    mode: "container",
+    tags: ["git", "pull-requests", "workflow", "cli"],
+  },
+  {
+    title: "FontSubsetter — Strip unused Unicode glyphs from WOFF2 fonts for <15KB loads",
+    problem: "Generate minimal Latin/Devanagari WOFF2 font subsets with CSS unicode-range rules in seconds.",
+    category: "Design & Media",
+    mode: "web",
+    tags: ["fonts", "performance", "woff2", "css"],
+  },
+  {
+    title: "WebhookReplay — Capture, inspect, and replay Stripe & GitHub webhooks locally",
+    problem: "Test idempotent webhook handlers with realistic signed payloads and simulated retry backoffs.",
+    category: "Developer Tools",
+    mode: "api",
+    tags: ["webhooks", "testing", "api", "stripe"],
+  },
+  {
+    title: "ClauseGuard — Highlight non-standard IP assignment & indemnity traps in NDAs",
+    problem: "Scan freelance and internship contracts for aggressive IP transfer or non-compete clauses in plain English.",
+    category: "Document & PDF",
+    mode: "api",
+    tags: ["contracts", "pdf", "legal", "freelance"],
+  },
+  {
+    title: "LockfileAudit — Detect typosquatted npm & PyPI transitive dependencies",
+    problem: "Compare package-lock.json and poetry.lock additions against known maintainer signatures and levenshtein traps.",
+    category: "Security & Privacy",
+    mode: "container",
+    tags: ["supply-chain", "security", "npm", "pypi"],
+  },
+  {
+    title: "CalendarTetris — Consolidate fragmented 15-minute meetings into 3-hour maker blocks",
+    problem: "Propose optimal reschedule slots across Google Calendar invites to reclaim uninterrupted deep-work time.",
+    category: "Productivity & Automation",
+    mode: "web",
+    tags: ["calendar", "productivity", "scheduling"],
+  },
+  {
+    title: "OG-Forge — Live social card previewer & deterministic Satori PNG generator",
+    problem: "Design and test OpenGraph images across Twitter, LinkedIn, and Discord dark/light embeds simultaneously.",
+    category: "Design & Media",
+    mode: "web",
+    tags: ["opengraph", "satori", "design", "seo"],
+  },
+  {
+    title: "SQL-ExplainViz — Turn raw Postgres EXPLAIN ANALYZE JSON into flamegraphs",
+    problem: "Spot sequential scans, nested loop blowups, and disk spills in slow SQL queries visually.",
+    category: "Data & CSV",
+    mode: "web",
+    tags: ["postgres", "sql", "performance", "flamegraph"],
+  },
+  {
+    title: "DockerfileSlim — Rewrite bloated Node & Python Dockerfiles into multi-stage distroless builds",
+    problem: "Cut container image sizes from 1.2GB to under 90MB while pinning SHA256 base digests.",
+    category: "Developer Tools",
+    mode: "container",
+    tags: ["docker", "containers", "devops", "security"],
+  },
+  {
+    title: "ReceiptLedger — Batch-extract GST/VAT tax totals from crumpled phone photos",
+    problem: "Convert folder dumps of travel and hardware receipts into a reconciled CSV expense sheet.",
+    category: "Document & PDF",
+    mode: "api",
+    tags: ["ocr", "receipts", "csv", "finance"],
+  },
+  {
+    title: "SecretCanary — Generate zero-cost honey-tokens that alert on unauthorized repo clones",
+    problem: "Embed harmless canary credentials in private repos to detect leaked environments within 30 seconds.",
+    category: "Security & Privacy",
+    mode: "api",
+    tags: ["honeytoken", "security", "devsecops"],
+  },
+  {
+    title: "StandupDigest — Summarize yesterday's merged PRs, Linear tickets & commits into 3 bullets",
+    problem: "Generate factual daily engineering standup notes directly from git activity without status-meeting fluff.",
+    category: "Productivity & Automation",
+    mode: "api",
+    tags: ["git", "standup", "automation", "teams"],
+  },
+  {
+    title: "LottieDiet — Compress and tree-shake unused keyframes from AfterEffects Lottie JSONs",
+    problem: "Reduce mobile animation payload sizes by 70% and preview frame-rate drops on low-end devices.",
+    category: "Design & Media",
+    mode: "web",
+    tags: ["lottie", "animation", "mobile", "frontend"],
   },
 ];
 

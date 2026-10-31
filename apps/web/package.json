@@ -7,6 +7,7 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
+    "test:e2e": "node --test --experimental-strip-types src/e2e-a10.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit"
   },
