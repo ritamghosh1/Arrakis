@@ -1,14 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { recordFollowState } from "@/lib/data";
+import { toggleFollow } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ userId: string }> };
 
 async function forward(method: "POST" | "DELETE", userId: string, followerId: string) {
-  recordFollowState(followerId, userId, method === "POST");
+  const result = await toggleFollow(followerId, userId, method === "POST");
   if (process.env.MOCK !== "0") {
-    return NextResponse.json({ ok: true, followerId, followeeId: userId, following: method === "POST" });
+    return NextResponse.json(result);
   }
   const url = process.env.NEXT_PUBLIC_RECOMMENDER_URL ?? "http://localhost:4001";
   const res = await fetch(`${url}/follow/${encodeURIComponent(userId)}?followerId=${encodeURIComponent(followerId)}`, {

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
+import { computeIntentEmbedding, cosineSim } from "@arrakis/contracts";
 
 const BASE_URL = process.env.TEST_BASE_URL ?? "http://localhost:3000";
 const WEB_ROOT = path.resolve(import.meta.dirname, "..");
@@ -196,5 +197,77 @@ describe("A10 — Quality, Accessibility, Motion Performance & E2E Judge Loop", 
     assert.ok(detailHtml.includes("EnvGuard CLI"));
     assert.ok(detailHtml.includes("youtube-nocookie.com/embed/M7lc1UVf-VE"));
     assert.ok(detailHtml.includes('"@type":"SoftwareApplication"'));
+  });
+
+  it("5. Recommender System E2E: Auto-Embedding (16-d pgvector), Following Feed, Follow Toggle, 80/20 Cold-Start Quota, and Hybrid Global Search", async () => {
+    // Step A: Verify deterministic 16-d unit vector generation & category clustering
+    const pdfVec1 = computeIntentEmbedding({
+      title: "Resume PDF to JSON Parser",
+      problemStatement: "Extract structured JSON from multi-column resume PDFs",
+      category: "Document & PDF",
+      tags: ["pdf", "resume", "ocr"],
+    });
+    const pdfVec2 = computeIntentEmbedding({
+      title: "Invoice OCR Extractor",
+      problemStatement: "Parse PDF invoices into line-item JSON",
+      category: "Document & PDF",
+      tags: ["pdf", "invoice"],
+    });
+    const cliVec = computeIntentEmbedding({
+      title: "Docker Port Guard",
+      problemStatement: "Find and kill zombie local container ports from terminal",
+      category: "Developer Tools",
+      tags: ["cli", "docker"],
+    });
+    assert.equal(pdfVec1.length, 16);
+    assert.ok(cosineSim(pdfVec1, pdfVec2) > 0.8, "Same-category vectors should have cosineSim > 0.8");
+    assert.ok(
+      cosineSim(pdfVec1, pdfVec2) > cosineSim(pdfVec1, cliVec),
+      "Same-category similarity must exceed cross-category similarity"
+    );
+
+    // Step B: Verify 80/20 Cold-Start Spotlight quota on For-You feed
+    const forYouRes = await fetch(`${BASE_URL}/api/feed?userId=usr_ritam&mode=for_you&limit=10`);
+    assert.equal(forYouRes.status, 200);
+    const forYou = (await forYouRes.json()) as {
+      items: Array<{ post: { id: string }; reason: { kind: string; text: string } }>;
+    };
+    assert.equal(forYou.items.length, 10);
+    const coldCount = forYou.items.filter((i) => i.reason.kind === "coldstart").length;
+    assert.ok(coldCount >= 2, `Expected at least 2 cold-start slots in 10 items, got ${coldCount}`);
+
+    // Step C: Toggle follow in Postgres and verify Following feed reflects followed builders
+    const followRes = await fetch(`${BASE_URL}/api/follow/usr_kabir?followerId=usr_ritam`, {
+      method: "POST",
+    });
+    assert.equal(followRes.status, 200);
+    const followData = (await followRes.json()) as { ok: boolean; following: boolean };
+    assert.equal(followData.ok, true);
+    assert.equal(followData.following, true);
+
+    const followingFeedRes = await fetch(`${BASE_URL}/api/feed?userId=usr_ritam&mode=following`);
+    assert.equal(followingFeedRes.status, 200);
+    const followingFeed = (await followingFeedRes.json()) as {
+      mode: string;
+      items: Array<{ post: { authorId: string }; reason: { kind: string } }>;
+    };
+    assert.equal(followingFeed.mode, "following");
+    assert.ok(followingFeed.items.length > 0, "Following feed should return posts from followed builders");
+    assert.ok(
+      followingFeed.items.every((item) => item.reason.kind === "followed"),
+      "Every item in Following feed should have reason.kind === 'followed'"
+    );
+
+    // Step D: Verify Postgres Hybrid Global Search (FTS + pgvector cosine similarity + semantic fallback)
+    const searchRes = await fetch(`${BASE_URL}/api/feed?mode=global&q=resume%20pdf`);
+    assert.equal(searchRes.status, 200);
+    const searchFeed = (await searchRes.json()) as {
+      mode: string;
+      items: Array<{ post: { id: string; title: string }; reason: { kind: string; similarity?: number } }>;
+    };
+    assert.equal(searchFeed.mode, "global");
+    assert.ok(searchFeed.items.length > 0, "Hybrid search should return matching builds");
+    assert.equal(searchFeed.items[0]!.reason.kind, "search");
+    assert.ok((searchFeed.items[0]!.reason.similarity ?? 0) >= 0.7);
   });
 });

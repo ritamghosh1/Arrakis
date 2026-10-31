@@ -1,9 +1,12 @@
 import pg from "pg";
 import {
   SEED_POSTS,
+  SEED_POST_VECTORS,
   classifyTelemetryRunTier,
+  computeIntentEmbedding,
   getQuickFeedbackTagDelta,
   updateEmaVector,
+  type DemoMode,
   type LeaderboardPeriod,
   type LeaderboardResponse,
   type LeaderboardRow,
@@ -43,6 +46,10 @@ type Row = Record<string, any>;
 
 function rowToPost(r: Row): Post {
   const seed = SEED_POSTS.find((s) => s.id === r.id);
+  if (r.intent_text && !SEED_POST_VECTORS[r.id]) {
+    const parsed = parseVec(r.intent_text);
+    if (parsed) SEED_POST_VECTORS[r.id] = parsed;
+  }
   const uptime = Number(r.uptime_pct);
   return {
     id: r.id,
@@ -118,20 +125,32 @@ export async function dbPostById(id: string): Promise<Post | null> {
 }
 
 export async function dbInsertPost(post: Post): Promise<void> {
+  const embedding = computeIntentEmbedding({
+    title: post.title,
+    problemStatement: post.problemStatement,
+    category: post.category,
+    tags: post.tags,
+  });
+  SEED_POST_VECTORS[post.id] = embedding;
+  const vecStr = toVec(embedding);
+
   await pool().query(
     `INSERT INTO posts (
       id, author_id, title, problem_statement, category, video_url, thumb_url,
       duration_sec, demo_mode, demo_target, form_schema, tags, indexing_status,
       impressions, tries_count, upvotes_count, trial_upvotes_count, comments_count,
       uptime_pct, p50_latency_ms, p95_latency_ms, crash_rate, post_score,
-      project_type, proxy_success_rate, popularity_score, usability_score, daily_leaderboard_score
+      project_type, proxy_success_rate, popularity_score, usability_score, daily_leaderboard_score,
+      intent_embedding
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7,
-      $8, $9, $10, $11::jsonb, $12, $13,
+      $8, $9, $10, $11::jsonb, $12::jsonb, $13,
       $14, $15, $16, $17, $18,
       $19, $20, $21, $22, $23,
-      $24, $25, $26, $27, $28
-    ) ON CONFLICT (id) DO NOTHING`,
+      $24, $25, $26, $27, $28,
+      $29::vector
+    ) ON CONFLICT (id) DO UPDATE SET
+      intent_embedding = EXCLUDED.intent_embedding`,
     [
       post.id,
       post.authorId,
@@ -144,7 +163,7 @@ export async function dbInsertPost(post: Post): Promise<void> {
       post.demo.mode,
       post.demo.target,
       JSON.stringify(post.demo.formSchema ?? []),
-      post.tags,
+      JSON.stringify(post.tags ?? []),
       post.indexingStatus,
       post.stats.views,
       post.stats.tries,
@@ -161,11 +180,18 @@ export async function dbInsertPost(post: Post): Promise<void> {
       post.postScore,
       2.15,
       0.065,
+      vecStr,
     ]
+  );
+
+  await pool().query(
+    `INSERT INTO post_embeddings (post_id, embedding) VALUES ($1, $2::vector)
+     ON CONFLICT (post_id) DO UPDATE SET embedding = EXCLUDED.embedding, updated_at = NOW()`,
+    [post.id, vecStr]
   );
 }
 
-/** Ranked feed via get_personalized_feed RPC; tops up with unseen-agnostic ranking when exhausted. */
+/** Ranked feed via get_personalized_feed RPC with 80/20 Cold-Start Spotlight mixer (2 of 10 slots). */
 export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Post[]> {
   const userVec = await dbGetUserVector(userId);
   const { rows: ranked } = await pool().query(
@@ -184,12 +210,245 @@ export async function dbPersonalizedFeed(userId: string, limit = 10): Promise<Po
   }
   if (ids.length === 0) return [];
 
+  // Enforce 80/20 Cold-Start Spotlight quota (slots 2 and 7 in a 10-post page)
+  if (limit >= 8) {
+    const { rows: coldRows } = await pool().query(
+      `SELECT p.id FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE (u.followers_count = 0 OR p.impressions < 100)
+         AND p.proxy_success_rate > 0.3
+         AND p.author_id <> $1
+       ORDER BY p.usability_score DESC, p.created_at DESC
+       LIMIT 4`,
+      [userId],
+    );
+    const coldIds = coldRows.map((r) => r.id as string);
+    const slotPositions = [2, 7];
+    let coldCursor = 0;
+    for (const slot of slotPositions) {
+      if (slot < ids.length && coldCursor < coldIds.length) {
+        const candidate = coldIds[coldCursor++]!;
+        if (!ids.includes(candidate)) {
+          ids[slot] = candidate;
+        }
+      }
+    }
+  }
+
   const { rows } = await pool().query(
     `SELECT ${POST_SELECT} FROM posts p JOIN users u ON u.id = p.author_id WHERE p.id = ANY($1::text[])`,
     [ids],
   );
   const byId = new Map(rows.map((r) => [r.id, rowToPost(r)]));
   return ids.map((id) => byId.get(id)!).filter(Boolean);
+}
+
+export async function dbGetFollowingIds(userId: string): Promise<string[]> {
+  const { rows } = await pool().query(
+    "SELECT followee_id FROM follows WHERE follower_id = $1 ORDER BY created_at DESC",
+    [userId],
+  );
+  return rows.map((r) => r.followee_id as string);
+}
+
+export async function dbGetFollowersIds(userId: string): Promise<string[]> {
+  const { rows } = await pool().query(
+    "SELECT follower_id FROM follows WHERE followee_id = $1 ORDER BY created_at DESC",
+    [userId],
+  );
+  return rows.map((r) => r.follower_id as string);
+}
+
+export async function dbToggleFollow(
+  followerId: string,
+  followeeId: string,
+  following: boolean,
+): Promise<{ ok: boolean; following: boolean }> {
+  if (followerId === followeeId) {
+    return { ok: false, following: false };
+  }
+  const client = await pool().connect();
+  try {
+    await client.query("BEGIN");
+    if (following) {
+      await client.query(
+        `INSERT INTO follows (follower_id, followee_id, created_at)
+         VALUES ($1, $2, NOW()) ON CONFLICT DO NOTHING`,
+        [followerId, followeeId],
+      );
+      await client.query(
+        `INSERT INTO events (id, user_id, target_user_id, type, value, created_at)
+         VALUES ($1, $2, $3, 'follow', 0.4, NOW()) ON CONFLICT DO NOTHING`,
+        [`evt_follow_${Date.now().toString(36)}`, followerId, followeeId],
+      );
+      // Taste-vector nudge toward followed builder's intent embedding
+      const { rows: vecRows } = await client.query(
+        `SELECT
+           (SELECT intent_embedding::text FROM users WHERE id = $1) AS follower_vec,
+           (SELECT intent_embedding::text FROM users WHERE id = $2) AS followee_vec`,
+        [followerId, followeeId],
+      );
+      const fv = parseVec(vecRows[0]?.follower_vec);
+      const tv = parseVec(vecRows[0]?.followee_vec);
+      if (tv) {
+        const nudged = updateEmaVector(fv, tv, "SINGLE");
+        await client.query(
+          "UPDATE users SET intent_embedding = $1::vector WHERE id = $2",
+          [toVec(nudged), followerId],
+        );
+      }
+    } else {
+      await client.query(
+        "DELETE FROM follows WHERE follower_id = $1 AND followee_id = $2",
+        [followerId, followeeId],
+      );
+    }
+
+    await client.query(
+      `UPDATE users SET following_count = (SELECT COUNT(*) FROM follows WHERE follower_id = $1) WHERE id = $1`,
+      [followerId],
+    );
+    await client.query(
+      `UPDATE users SET followers_count = (SELECT COUNT(*) FROM follows WHERE followee_id = $1) WHERE id = $1`,
+      [followeeId],
+    );
+    await client.query("COMMIT");
+    return { ok: true, following };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export async function dbFollowingFeed(userId: string, limit = 10, offset = 0): Promise<Post[]> {
+  const { rows } = await pool().query(
+    `SELECT ${POST_SELECT}
+     FROM posts p
+     JOIN users u ON u.id = p.author_id
+     WHERE p.author_id IN (SELECT followee_id FROM follows WHERE follower_id = $1)
+       AND p.proxy_success_rate > 0.3
+     ORDER BY p.created_at DESC, p.daily_leaderboard_score DESC
+     LIMIT $2 OFFSET $3`,
+    [userId, limit, offset],
+  );
+  return rows.map(rowToPost);
+}
+
+/** Hybrid Global Search combining Postgres Full-Text Search (tsvector), lexical phrase matching, and pgvector cosine similarity. */
+export async function dbSearchGlobalFeed(params: {
+  q?: string;
+  mode?: DemoMode;
+  category?: string;
+  verifiedOnly?: boolean;
+  limit?: number;
+}): Promise<Array<{ post: Post; similarity: number }>> {
+  const q = params.q?.trim() ?? "";
+  const limit = params.limit ?? 20;
+
+  if (!q) {
+    const conds: string[] = ["p.proxy_success_rate > 0.3"];
+    const args: unknown[] = [];
+    if (params.mode) {
+      args.push(params.mode);
+      conds.push(`p.demo_mode = $${args.length}`);
+    }
+    if (params.category) {
+      args.push(params.category.toLowerCase());
+      conds.push(`LOWER(p.category) = $${args.length}`);
+    }
+    if (params.verifiedOnly) {
+      conds.push(`p.uptime_pct >= 85 AND p.tries_count >= 20`);
+    }
+    args.push(limit);
+    const { rows } = await pool().query(
+      `SELECT ${POST_SELECT}
+       FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE ${conds.join(" AND ")}
+       ORDER BY p.daily_leaderboard_score DESC, p.post_score DESC
+       LIMIT $${args.length}`,
+      args,
+    );
+    return rows.map((r) => ({ post: rowToPost(r), similarity: 0.9 }));
+  }
+
+  const qVec = toVec(
+    computeIntentEmbedding({
+      title: q,
+      problemStatement: q,
+      category: params.category,
+    }),
+  );
+
+  const conds: string[] = ["p.proxy_success_rate > 0.3"];
+  const args: unknown[] = [q, qVec]; // $1 = q, $2 = qVec
+  if (params.mode) {
+    args.push(params.mode);
+    conds.push(`p.demo_mode = $${args.length}`);
+  }
+  if (params.category) {
+    args.push(params.category.toLowerCase());
+    conds.push(`LOWER(p.category) = $${args.length}`);
+  }
+  if (params.verifiedOnly) {
+    conds.push(`p.uptime_pct >= 85 AND p.tries_count >= 20`);
+  }
+  args.push(limit);
+
+  const { rows } = await pool().query(
+    `WITH scored AS (
+       SELECT ${POST_SELECT},
+         CASE
+           WHEN p.title ILIKE '%' || $1 || '%'
+             OR p.problem_statement ILIKE '%' || $1 || '%'
+             OR p.category ILIKE '%' || $1 || '%'
+             OR p.tags::text ILIKE '%' || $1 || '%'
+           THEN 1.0
+           ELSE 0.0
+         END AS kw_match,
+         LEAST(ts_rank_cd(p.search_tsv, websearch_to_tsquery('english', $1)) * 2.5, 1.0) AS fts_score,
+         CASE
+           WHEN p.intent_embedding IS NOT NULL
+           THEN GREATEST(0.0, 1.0 - (p.intent_embedding <=> $2::vector))
+           ELSE 0.5
+         END AS vec_sim
+       FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE ${conds.join(" AND ")}
+     )
+     SELECT *,
+       (0.45 * kw_match + 0.25 * fts_score + 0.30 * vec_sim) AS hybrid_score
+     FROM scored
+     WHERE kw_match > 0 OR fts_score > 0
+     ORDER BY hybrid_score DESC, post_score DESC
+     LIMIT $${args.length}`,
+    args,
+  );
+
+  if (rows.length > 0) {
+    return rows.map((r) => ({
+      post: rowToPost(r),
+      similarity: Number(Math.min(0.99, Math.max(0.72, Number(r.hybrid_score) || Number(r.vec_sim) || 0.85)).toFixed(2)),
+    }));
+  }
+
+  // Semantic pgvector fallback when exact lexical match returns 0 rows
+  const { rows: fallbackRows } = await pool().query(
+    `SELECT ${POST_SELECT},
+       CASE
+         WHEN p.intent_embedding IS NOT NULL
+         THEN GREATEST(0.0, 1.0 - (p.intent_embedding <=> $1::vector))
+         ELSE 0.5
+       END AS vec_sim
+     FROM posts p JOIN users u ON u.id = p.author_id
+     WHERE p.proxy_success_rate > 0.3
+     ORDER BY vec_sim DESC, p.daily_leaderboard_score DESC
+     LIMIT 5`,
+    [qVec],
+  );
+  return fallbackRows.map((r) => ({
+    post: rowToPost(r),
+    similarity: Number(Math.min(0.95, Math.max(0.7, Number(r.vec_sim) || 0.78)).toFixed(2)),
+  }));
 }
 
 export async function dbRecordTelemetry(payload: TelemetryPayload): Promise<{

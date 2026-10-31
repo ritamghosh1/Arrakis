@@ -77,6 +77,78 @@ const CATEGORIES = [
   "Security & Privacy",
 ] as const;
 
+const CATEGORY_KEYWORDS: ReadonlyArray<readonly string[]> = [
+  ["cli", "docker", "api", "rust", "dev", "sdk", "json", "webhook", "git", "terminal", "lint", "test"],
+  ["pdf", "resume", "document", "markdown", "invoice", "ocr", "contract", "parse", "extract", "latex"],
+  ["csv", "sql", "parquet", "table", "data", "spreadsheet", "duckdb", "sqlite", "etl", "schema", "clean"],
+  ["cron", "workflow", "calendar", "email", "automate", "productivity", "triage", "digest", "note", "task"],
+  ["svg", "image", "video", "color", "font", "design", "canvas", "audio", "sprite", "og", "media"],
+  ["jwt", "secret", "redact", "pii", "security", "auth", "encrypt", "env", "audit", "privacy", "token"],
+];
+
+/**
+ * Deterministic 16-d semantic intent embedding generator aligned with SEED_POST_VECTORS & pgvector(16).
+ * Used for newly uploaded builds (B4) and hybrid semantic search queries (B3).
+ */
+export function computeIntentEmbedding(input: {
+  title: string;
+  problemStatement?: string;
+  category?: string;
+  tags?: string[];
+}): number[] {
+  const corpus = [
+    input.title,
+    input.problemStatement ?? "",
+    input.category ?? "",
+    ...(input.tags ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  let dominantDim = input.category
+    ? CATEGORIES.findIndex((c) => c.toLowerCase() === input.category!.toLowerCase())
+    : -1;
+
+  const catScores = CATEGORY_KEYWORDS.map((words) =>
+    words.reduce((acc, w) => (corpus.includes(w) ? acc + 1 : acc), 0)
+  );
+
+  if (dominantDim < 0) {
+    let bestScore = 0;
+    catScores.forEach((score, idx) => {
+      if (score > bestScore) {
+        bestScore = score;
+        dominantDim = idx;
+      }
+    });
+    if (dominantDim < 0) dominantDim = 0;
+  }
+
+  // Deterministic hash seed from corpus text
+  let textHash = 17;
+  for (let i = 0; i < corpus.length; i++) {
+    textHash = (textHash * 31 + corpus.charCodeAt(i)) % 9973;
+  }
+
+  const raw: number[] = [];
+  let norm = 0;
+  for (let i = 0; i < 16; i++) {
+    let val: number;
+    if (i === dominantDim % 16) {
+      val = 0.85;
+    } else if (i < 6 && catScores[i]! > 0) {
+      val = Math.min(0.45, 0.15 * catScores[i]!);
+    } else {
+      val = ((textHash * 13 + i * 7) % 19) / 40 - 0.2;
+    }
+    raw.push(val);
+    norm += val * val;
+  }
+
+  const mag = Math.sqrt(norm) || 1;
+  return raw.map((v) => Number((v / mag).toFixed(4)));
+}
+
 const SEED_USER_SPECS: Array<{
   id: string;
   handle: string;
